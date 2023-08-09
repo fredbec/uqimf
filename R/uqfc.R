@@ -39,12 +39,7 @@ empqu <- function(weodat,
         setNames(quantile_vals, paste0("quant", quantiles)))
     }, by = country) |>
     setnames("V2", "value")
-    #dplyr::group_by(country) |>
-    #dplyr::summarise(quantile = paste0("quant", quantiles),
-    #                 myval = quantile(error,
-    #                           quantiles))
-    #.d(, .(myval = quantile(error, quantiles)), by = c("country"))
-    #.d(, `q0.5` := quantile(error, 0.5), by = c("country"))
+
 
   return(quants)
 }
