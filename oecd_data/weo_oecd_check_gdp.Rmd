@@ -1,0 +1,130 @@
+---
+title: "WEO against OECD - GDP Growth"
+author: "Rike"
+date: "2023-08-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.dim = c(11, 8))
+library(here)
+library(ggplot2)
+library(data.table)
+library(dplyr)
+```
+
+## WEO Truth data against OECD
+
+```{r oecd, warning = FALSE}
+oecd <- read.csv(here("oecd_data", "oecd_gdp.csv"))
+
+oecd_q <- oecd |> 
+  filter(FREQUENCY == "Q",
+         SUBJECT == "TOT") |>
+  filter(LOCATION %in% c("CAN", "FRA", "DEU", "ITA", "JPN", "GBR", "USA")) |>
+  select(-c(INDICATOR, SUBJECT, FREQUENCY, Flag.Codes)) |>
+  rename(country = LOCATION,
+         measure = MEASURE,
+         yrq = TIME,
+         value = Value) |>
+  mutate(target_year = substr(yrq, 1, 4) |> as.numeric(),
+         quarter = substr(yrq, 7, 7) |> as.numeric()) |>
+  filter(target_year >= 1989,
+         quarter == 4,
+         measure == "PC_CHGPY") |> #PC_CHGPP refers to previous period, PC_CHGPY refers to same period previous year
+  select(-c(yrq, quarter)) |>
+  rename(q4val = value,
+         ccode = country) |>
+  select(-measure)
+
+
+
+oecd_y <- oecd |> 
+  filter(FREQUENCY == "A",
+         SUBJECT == "TOT") |>
+  filter(LOCATION %in% c("CAN", "FRA", "DEU", "ITA", "JPN", "GBR", "USA")) |>
+  select(-c(INDICATOR, SUBJECT, FREQUENCY, Flag.Codes)) |>
+  rename(country = LOCATION,
+         measure = MEASURE,
+         target_year = TIME,
+         value = Value) |>
+  mutate(target_year = as.numeric(target_year)) |>
+  filter(target_year >= 1990) |>
+  group_by(country) |>
+  arrange(target_year,  .by_group = TRUE) |>
+  rename(yearval = value,
+         ccode = country) |>
+  select(-measure)
+
+weodat <- fread(here("WEOforecasts_tidy.csv"))
+
+
+weodat_g7 <- weodat |>
+  filter(horizon == 0.5, #arbitrary choice, as true values simply duplicate for each horizon
+         !is.na(tv_1),
+         g7 == "G7",
+         target == "ngdp_rpch") |>
+  rename(ccode = ISOAlpha_3Code) |>
+  select(ccode, country, target_year, tv_1, tv_2) |>
+  distinct() |>
+  left_join(oecd_y, by = c("ccode", "target_year")) |>
+  left_join(oecd_q, by = c("ccode", "target_year")) |>
+  setDT() |>
+  melt(id.vars = c("ccode", "country", "target_year"), 
+       variable.name = "truth_type", 
+       value.name = "truth_value") |>
+  filter(truth_type != "q4val") |>
+  mutate(truth_type = factor(truth_type, 
+                             levels = c("tv_1", "tv_2", "yearval", "q4val"),
+                             labels = c("WEO_1yr", "WEO_2yr", "OECD_annual", "OECD_q4q4")))
+
+ltdict <- c("dashed", "solid", "solid", "dashed")
+coldict <- RColorBrewer::brewer.pal(3, "Set2")[2:3] |> rep(each = 2)
+names(ltdict) <- unique(weodat_g7$truth_type)
+names(coldict) <- unique(weodat_g7$truth_type)
+
+
+
+
+ggplot(weodat_g7, aes(x = target_year, y = truth_value)) +
+  geom_line(aes(linetype = truth_type, color = truth_type)) +
+  scale_color_manual(values = coldict) +
+  scale_linetype_manual(values = ltdict) +
+  facet_wrap(~country, ncol = 2) +
+  theme_minimal() %+replace%
+  theme(legend.title = element_blank(),
+        legend.position = "bottom") +
+  ylab("CPI Inflation") +
+  xlab("Target Year")
+```
+
+### Deviations
+```{r pressure, echo=FALSE}
+absval <- 0.3
+devtab <- weodat_g7 |>
+  dcast(ccode + country + target_year ~ truth_type,
+        value.var = "truth_value") |>
+  select(country, target_year, WEO_2yr, OECD_annual) |>
+  mutate(dev = WEO_2yr - OECD_annual,
+         dev_pch = 100*(WEO_2yr - OECD_annual)/OECD_annual) |>
+    filter(dev_pch > 10 | dev_pch < -10) |>
+  filter(dev > absval | dev < -absval) |>
+  mutate(dev = round(dev, 2),
+         WEO_2yr = round(WEO_2yr, 2),
+         OECD_annual = round(OECD_annual, 2),
+         dev_pch = round(dev_pch, 2))
+``` 
+Below we list all deviations that are larger than 10% and have absolute deviations of at least 0.3 (to not give "undue attention" to large relative deviations around zero).
+
+Some points:
+
+* `r round(100*nrow(devtab)/(nrow(weodat_g7)/3), 2)` % of country-year combinations are affected by 'large' deviations (as defined above) in the two truth data sources
+* Deviations affect all countries similarly
+* Truth data seems to be visually similar, but are rarely actually the same
+
+
+
+```{r ctdevs, echo=FALSE}
+devtab|> print(n = 120)
+```
+
