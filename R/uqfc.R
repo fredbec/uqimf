@@ -184,3 +184,20 @@ score_quants <- function(empquants,
   sapply(weodat, function(dp) sRule(dp, empquants))
 
 }
+
+
+scoreempQu <- function(fcdat,
+                             by = c("country", "target", "horizon")){
+
+  .d <- `[`
+
+  scores <- fcdat |>
+    copy() |>
+    setnames("error", "true_value") |>
+    scoringutils::score() |>
+    scoringutils::summarise_scores(by = by)
+
+  return(scores)
+
+}
+
