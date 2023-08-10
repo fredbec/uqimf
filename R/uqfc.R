@@ -173,7 +173,9 @@ year_set <- function(target_year,
 
 #' Score quantile forecasts
 #'
-#' @param empquants
+#' @param empquants data containing empirical quantiles
+#' @param weodat (subset of) WEO data containing relevant truth data
+#'
 #' @return nothing, saves tidied data in directory
 #' @export
 #'
@@ -185,9 +187,16 @@ score_quants <- function(empquants,
 
 }
 
-
+#' Score quantile forecasts
+#'
+#' @param fcdat forecast data, containing both true values and quantile predictions
+#' @importFrom scoringutils score
+#' @importFrom scoringutils summarise_scores
+#' @return nothing, saves tidied data in directory
+#' @export
+#'
 scoreempQu <- function(fcdat,
-                             by = c("country", "target", "horizon")){
+                       by = c("country", "target", "horizon")){
 
   .d <- `[`
 
