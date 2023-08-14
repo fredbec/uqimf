@@ -2,7 +2,7 @@
 #'
 #' @param weodat (subset of) WEO data as returned by download.process.weo()
 #' function in package imfpp
-#' @param horizon horizon for which quantiles should be extracted
+#' @param error_fct function to feed error through
 #' @param tv_release which release of the true value in the WEO data shall be
 #' used. Must be one of c(0.5, 1, 1.5, 2)
 #'
@@ -12,6 +12,7 @@
 
 empQU <- function(weodat,
                   #horizon = 1,
+                  error_fct = identity,
                   tv_release = 0.5,
                   quantiles = c(0.1, 0.25, 0.5, 0.75, 0.9)){
 
@@ -23,28 +24,22 @@ empQU <- function(weodat,
     stop("tv_release must be one of c(0.5, 1, 1.5, 2)")
   }
 
-  #if(!(horizon %in% seq(0, 5, by = 0.5))){
-#
- #   stop("invalid value for horizon")
-#  }
-
-
   #small helper function for calculating quantiles
-  calculate_quantiles <- function(x) {
+  calculate_quantiles <- function(x, quantiles) {
     quantile(x, probs = quantiles)
   }
 
   quants <-
     weodat |>
     #.d(horizon == horizon) |>
-    .d(, error := prediction - get(paste0("tv_", tv_release))) |>
+    .d(, error := error_fct(prediction - get(paste0("tv_", tv_release)))) |>
     .d(!is.na(error)) |>
     .d(, {
-      quantile_vals <- calculate_quantiles(error)
+      quantile_vals <- calculate_quantiles(error, quantiles)
       .(quantile = quantiles,
         setNames(quantile_vals, paste0("quant", quantiles)))
     }, by = c("country", "target", "horizon")) |>
-    setnames("V2", "prediction")
+    data.table::setnames("V2", "prediction")
 
 
   return(quants)
@@ -54,6 +49,7 @@ empQU <- function(weodat,
 empFC <- function(weodat,
                   target_years,
                   tv_release,
+                  error_method = c("directional", "absolute"),
                   method = c("leave-one-out", "rolling window", "expanding window"),
                   quantiles = c(0.1, 0.25, 0.5, 0.75, 0.9),
                   window_length = NULL,
@@ -73,11 +69,28 @@ empFC <- function(weodat,
     stop("need to specify method. Available options: 'leave-one-out', 'rolling window', 'expanding window'")
   }
 
+  if(length(error_method) != 1L){
+    stop("need to specify error method. Available options: 'directional', 'absolute'")
+  }
+
   if(is.null(window_length)){
 
     if(method == "rolling window"){
       stop("have to specify window length when using a rolling window")
     }
+  }
+
+
+  ###Assign error function
+  if(error_method == "directional"){
+
+    error_fct <- identity
+  } else if (error_method == "absolute"){
+
+    error_fct <- abs
+  } else {
+
+    stop("error_method must be either 'directional' or 'absolute'")
   }
 
   target_years_list <- as.list(target_years)
@@ -88,9 +101,9 @@ empFC <- function(weodat,
 
     truevals <- weodat |>
       .d(, .(country, target, target_year, prediction, horizon, get(paste0("tv_", tv_release)))) |>
-      setnames("V6", paste0("tv_", tv_release)) |>
+      data.table::setnames("V6", paste0("tv_", tv_release)) |>
       .d(, error := prediction - get(paste0("tv_", tv_release))) |>
-      setnames("prediction", "imf_pp")
+      data.table::setnames("prediction", "imf_pp")
   }
 
 
@@ -106,13 +119,32 @@ empFC <- function(weodat,
     #get empirical quantiles
     quSet <- weodat |>
       .d(target_year %in% yearset) |>
-      empQU() |>
+      empQU(error_fct = error_fct,
+            quantiles = quantiles) |>
       .d(, target_year := target_year)
+
+    if(error_method == "absolute"){
+
+      quSet_pos <- quSet |>
+        data.table::copy() |>
+        .d(, quantile := 0.5 + quantile / 2)
+
+      quSet_neg <- quSet |>
+        data.table::copy() |>
+        .d(, quantile := 0.5 - quantile / 2) |>
+        .d(, prediction := - prediction)
+
+      quSet <- rbind(quSet_neg,
+                     quSet_pos) |>
+        .d(order(target, country, target_year, horizon, quantile))
+
+    }
 
     return(quSet)
 
   }) |>
     data.table::rbindlist()
+
 
   if(include_truevals){
 
@@ -201,8 +233,8 @@ scoreempQu <- function(fcdat,
   .d <- `[`
 
   scores <- fcdat |>
-    copy() |>
-    setnames("error", "true_value") |>
+    data.table::copy() |>
+    data.table::setnames("error", "true_value") |>
     scoringutils::score() |>
     scoringutils::summarise_scores(by = by)
 
