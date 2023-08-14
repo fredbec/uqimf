@@ -51,7 +51,8 @@ empFC <- function(weodat,
                   tv_release,
                   error_method = c("directional", "absolute"),
                   method = c("leave-one-out", "rolling window", "expanding window"),
-                  quantiles = c(0.1, 0.25, 0.5, 0.75, 0.9),
+                  ci_levels = c(0.5, 0.8),
+                  quantiles = NULL,
                   window_length = NULL,
                   include_truevals = TRUE){
 
@@ -77,6 +78,20 @@ empFC <- function(weodat,
 
     if(method == "rolling window"){
       stop("have to specify window length when using a rolling window")
+    }
+  }
+
+  if(!is.null(ci_levels)){
+
+    if(!is.null(quantiles)){
+      stop("must supply either exclusively ci_levels OR exclusively quantiles")
+    } else {
+
+      quantiles <- ci_to_quantiles(ci_levels, error_method = error_method)
+    }
+  } else {
+    if(is.null(quantiles)){
+      stop("must supply one of ci_levels or quantiles")
     }
   }
 
