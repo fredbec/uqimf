@@ -84,7 +84,10 @@ empFC <- function(weodat,
   if(!is.null(ci_levels)){
 
     if(!is.null(quantiles)){
-      stop("must supply either exclusively ci_levels OR exclusively quantiles")
+      warning("quantiles supplied, but ci_levels not set to NULL. Dropping ci_levels")
+
+      ci_levels <- NULL
+
     } else {
 
       quantiles <- ci_to_quantiles(ci_levels, error_method = error_method)
@@ -168,53 +171,6 @@ empFC <- function(weodat,
   }
 
   return(quantileFC)
-}
-
-
-#' Produce year sets depending on respective estimation method
-#'
-#' @param target_year year for which estimation set should be produced
-#' @param avail_years all available years
-#' @param method estimation method, one of 'leave-one-out', 'rolling window',
-#' 'expanding window'
-#' @return vector with years that should enter estimation set for given target_year
-#' @export
-#'
-year_set <- function(target_year,
-                     avail_years,
-                     method = c("leave-one-out", "rolling window", "expanding window"),
-                     window_length = NULL){
-
-  if(length(method) != 1L){
-    stop("need to specify method. Available options: 'leave-one-out', 'rolling window', 'expanding window'")
-  }
-
-  if( !all(order(avail_years) == 1:length(avail_years))){
-
-    message("avail_years will be put in order")
-    avail_years <- sort(avail_years)
-  }
-
-  idx_target = which(avail_years == target_year)
-
-  if(method == "rolling window"){
-
-    if(idx_target < (window_length + 1)){
-
-      stop("not enough available years for given window_length")
-    }
-  }
-
-  if(method == "leave-one-out"){
-
-    avail_years[-idx_target]
-  } else if(method == "rolling window"){
-
-    avail_years[(idx_target-window_length):(idx_target-1)]
-  } else if(method == "expanding window"){
-
-    avail_years[1:(idx_target-1)]
-  }
 }
 
 
