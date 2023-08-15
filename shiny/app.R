@@ -1,0 +1,266 @@
+library(shiny)
+library(ggplot2)
+library(here)
+library(data.table)
+library(patchwork)
+library(MetBrewer)
+
+devtools::load_all()
+
+.d <- `[`
+
+# Define UI for app that draws a histogram ----
+ui <- fluidPage(
+
+  # App title ----
+  titlePanel("IMF Empirical Quantile Forecasts"),
+
+  # Sidebar layout with input and output definitions ----
+  sidebarLayout(
+
+    position = "left",
+
+    # Sidebar panel for inputs ----
+    sidebarPanel(
+
+
+      # Input: Slider for the number of bins ----
+      radioButtons(inputId = "target",
+                   choices = setNames(c("ngdp_rpch", "pcpi_pch"),
+                                      c("GDP Growth", "Inflation")),
+                   selected = "pcpi_pch",
+                   label = "Forecast Target"),
+
+      radioButtons(inputId = "error_method",
+                   choices = c("directional", "absolute"),
+                   selected = "absolute",
+                   label = "Error Method"),
+
+      radioButtons(inputId = "method",
+                   label = "Estimation Method",
+                   choices = c("leave-one-out", "rolling window", "expanding window"),
+                   selected = "rolling window"),
+
+      numericInput(inputId = "window",
+                   label = "Window length (for rolling window)",
+                   value = 5,
+                   min = 4,
+                   max = 10),
+
+      numericInput(inputId = "target_year",
+                   label = "Target Year",
+                   value = 2000,
+                   min = 1990,
+                   max = 2009),
+
+      selectInput(inputId = "country",
+                  label = "Country to highlight",
+                  choices = c("Germany", "Canada", "Japan"))
+
+    ),
+
+    # Main panel for displaying outputs ----
+    mainPanel(
+      h2("Visualisation of quantile forecasts"),
+      # Output: Histogram ----
+      plotOutput(outputId = "series_visual"),
+
+      tableOutput(outputId = "tabtab"),
+      #textOutput(outputId = "hey"),
+      h2("Scores of quantile forecasts")
+    )
+  )
+)
+
+
+server <- function(input, output) {
+  #########PARAMS TO MOVE TO INPUT##################
+  tv_release <- 0.5
+  ci_lvls <- c(0.5, 0.8)
+
+  qu_lvls <- reactive({
+
+    qus <- ci_to_quantiles(ci_lvls, "directional")
+
+    no_pairs <- length(qus)/2
+
+
+
+  })
+
+
+
+
+  # some non-reactive stuff
+  plot_horizon_label <- c(`0.5` = "Spring forecast, same year",
+                          `0` = "Fall forecast, same year")
+
+
+
+
+
+  #create subset of weodat
+  #countries, target, horizon, calculate error
+  sub_weodat <- reactive({
+
+    data.table::fread(here("WEOforecasts_tidy.csv")) |>
+      .d(g7 == 1,) |>
+      .d(target == input$target) |>
+      .d(horizon <=0.5) |> ######################this shall be extended sometime##############
+      .d(, error := prediction - get(paste0("tv_", tv_release))) |>
+      .d(target_year < 2010) |>
+      .d(, .(country, prediction, target, error,
+             horizon, target_year, forecast_year, tv_0.5))
+  })
+
+  #years that enter calculation
+  yearset <- reactive({
+    years <- year_set(input$target_year,
+                      unique(sub_weodat()$target_year),
+                      input$method,
+                      window_length = input$window)
+
+    #check if there is a split
+    splitind <- which(diff(years) > 1)
+
+    if(length(splitind) > 0){
+
+      years <- list(years[1:(splitind-1)],
+                    years[splitind:length(years)])
+
+    } else {
+
+      years <- list(years)
+    }
+
+    return(years)
+  })
+
+
+
+  #create forecasts
+  weodat_qu <- reactive({
+    sub_weodat() |>
+    empFC(target_years = input$target_year,
+          tv_release = tv_release,
+          error_method = input$error_method,
+          method = input$method,
+          window_length = input$window,
+          ci_levels = ci_lvls) #|>
+      #.d(, horizon := factor(horizon, levels = c(0, 0.5), labels = c("Fall", "Spring")))
+  })
+
+
+  #make wide quantile data for displaying CI's in plot
+  linerange_dat <- reactive({
+
+
+    pldat <- weodat_qu() |>
+      .d(country == input$country) |>
+      .d(target_year == input$target_year) |>
+      .d(, prediction := imf_pp + prediction) |>
+      .d(,.(country, target, horizon, quantile,prediction, target_year)) |>
+      .d(, quantile := paste0("quant", quantile)) |>
+      data.table::dcast(country + target + horizon + target_year ~ quantile,
+                        value.var = "prediction")
+
+    return(pldat)
+  })
+
+
+
+  errorplot <- reactive({
+
+    ggplot() +
+      geom_line(
+        aes(x = target_year, y = error,
+            group = country, color = country),
+        data = sub_weodat() |>
+          .d(country == input$country)) +
+      ggtitle("Forecast Errors") +
+      ylab("Error") +
+
+      #Highlight years depending on method and window
+      lapply(yearset(), function(yrs) {
+        list(annotate("rect", xmin = min(yrs),
+                      xmax = max(yrs), ymin = -Inf, ymax = Inf,
+                      alpha = .2))
+        }
+      ) +
+
+
+      scale_color_met_d("OKeeffe1") +
+
+      facet_wrap(~horizon,
+                 labeller = as_labeller(plot_horizon_label)) +
+
+      xlab("Target Year") +
+
+      theme_uqimf()
+  })
+
+  seriesplot <- reactive({
+
+    fctodis <- weodat_qu() |>
+      .d(target_year == input$target_year) |>
+      .d(country == input$country) |>
+      .d(, prediction := imf_pp + prediction)
+
+    ggplot() +
+      geom_line(
+        aes(x = target_year, y = tv_0.5,
+            group = country, color = country),
+        data = sub_weodat() |>
+          .d(country == input$country)) +
+      ggtitle(paste0("Actual Series, with forecast for year ", input$target_year)) +
+      ylab("True value") +
+
+      geom_linerange(
+        aes(x = target_year,
+            ymin = quant0.1, ymax = quant0.9, ##############################GENERALIZE##### with lapply for different
+            color = country),
+        data = linerange_dat(),
+        lwd = 5, alpha = 0.45) +
+
+      geom_point(
+        aes(x = target_year, y = imf_pp, color = country),
+        data = fctodis
+      ) +
+
+      scale_color_met_d("OKeeffe1") +
+
+      facet_wrap(~horizon,
+                 labeller = as_labeller(plot_horizon_label)) +
+
+      xlab("Target Year") +
+
+      theme_uqimf()
+  })
+
+  overallplot <- reactive({
+      (errorplot()) /
+      (seriesplot()) +
+      plot_layout(guides = "collect",
+                  heights = c(1, 1)) &
+      plot_annotation(tag_levels = 'I')  &
+      theme(legend.position = 'bottom',
+            legend.box="vertical", legend.margin=margin())
+
+  })
+
+  output$series_visual <- renderPlot(
+
+
+    overallplot()
+ )
+
+  output$tabtab <- renderTable(
+    linerange_dat()
+  )
+
+
+
+}
+
+# Create Shiny app ----
+shinyApp(ui = ui, server = server)
