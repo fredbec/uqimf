@@ -61,6 +61,12 @@ ui <- fluidPage(
                   label = "Country to highlight",
                   choices = c("Germany", "Canada", "Japan")),
 
+      radioButtons(inputId = "zoomin",
+                   label = "Zoom in?",
+                   choices = c("TRUE", "FALSE"),
+                   selected = "TRUE"),
+
+
       radioButtons(inputId = "colorscale",
                    choices = setNames(c("OKeeffe1", "Hokusai1", "VanGogh1", "Monet"),
                                       c("Georgia O'Keeffe", "Katsushika Hokusai", "Vincent van Gogh", "Claude Monet")),
@@ -241,12 +247,19 @@ server <- function(input, output) {
       .d(country == input$country) |>
       .d(, prediction := imf_pp + prediction)
 
+    if(input$zoomin){
+      year_range <- (input$target_year-5):input$target_year
+    } else {
+      year_range <- unique(sub_weodat()$target_year)
+    }
+
     ggplot() +
       geom_line(
         aes(x = target_year, y = get(paste0("tv_", tv_release)),
             group = country, color = country),
         data = sub_weodat() |>
-          .d(country == input$country)) +
+          .d(country == input$country) |>
+          .d(target_year %in% year_range)) +
       ggtitle(paste0("Actual Series, with forecast for year ", input$target_year)) +
       ylab("True value") +
 
