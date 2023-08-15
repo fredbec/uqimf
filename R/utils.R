@@ -57,6 +57,10 @@ year_set <- function(target_year,
 
   if(method == "rolling window"){
 
+    if(is.null(window_length)){
+      stop("no value for window_length")
+    }
+
     if(idx_target < (window_length + 1)){
 
       stop("not enough available years for given window_length")
@@ -73,4 +77,34 @@ year_set <- function(target_year,
 
     avail_years[1:(idx_target-1)]
   }
+}
+
+
+#' @title ugimf ggplot2 theme
+#'
+#' @description
+#' A theme for ggplot2 plotss
+#' @return A ggplot2 theme
+#' @importFrom ggplot2 theme theme_minimal element_line `%+replace%`
+#' @export
+#'
+theme_uqimf <- function() {
+  theme_minimal() %+replace%
+    theme(axis.line = element_line(colour = "grey80"),
+          axis.ticks = element_line(colour = "grey80"),
+          panel.border = element_blank(),
+          panel.background = element_blank(),
+          legend.position = "bottom")
+}
+
+
+custom_labeller <- function(variable, value) {
+  if (variable == "season") {
+    if (value == 0) {
+      return("Fall forecast, same year")
+    } else if (value == 0.5) {
+      return("Spring forecast, same year")
+    }
+  }
+  return(as.character(value))  # Default labelling for other variables
 }
