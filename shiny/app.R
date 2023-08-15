@@ -53,6 +53,10 @@ ui <- fluidPage(
                    min = 1990,
                    max = 2009),
 
+      checkboxGroupInput("ci_lvls", label = "Prediction Intervals",
+                         choices = list("50%" = 0.5, "80%" = 0.8, "90%" = 0.9),
+                         selected = c(0.5,0.8)),
+
       selectInput(inputId = "country",
                   label = "Country to highlight",
                   choices = c("Germany", "Canada", "Japan"))
@@ -76,18 +80,24 @@ ui <- fluidPage(
 server <- function(input, output) {
   #########PARAMS TO MOVE TO INPUT##################
   tv_release <- 0.5
-  ci_lvls <- c(0.5, 0.8)
 
   qu_lvls <- reactive({
 
-    qus <- ci_to_quantiles(ci_lvls, "directional")
+    qus <- ci_to_quantiles(as.numeric(input$ci_lvls), "directional") #always directional
 
-    no_pairs <- length(qus)/2
+    n_qus <- length(qus)
 
+    no_pairs <- floor(n_qus/2)
+
+
+    alpha_vals <- seq(0.3, 0.65, length.out = no_pairs)
+
+    #inner and outer quantile levels
+    lapply(seq_along(1:no_pairs),
+           function(ind) c(qus[ind], qus[(n_qus)-(ind-1)], alpha_vals[ind]))
 
 
   })
-
 
 
 
@@ -146,7 +156,7 @@ server <- function(input, output) {
           error_method = input$error_method,
           method = input$method,
           window_length = input$window,
-          ci_levels = ci_lvls) #|>
+          ci_levels = as.numeric(input$ci_lvls)) #|>
       #.d(, horizon := factor(horizon, levels = c(0, 0.5), labels = c("Fall", "Spring")))
   })
 
@@ -167,8 +177,9 @@ server <- function(input, output) {
     return(pldat)
   })
 
-
-
+  ##############################################################################
+  #plot showing the errors series
+  ##############################################################################
   errorplot <- reactive({
 
     ggplot() +
@@ -199,6 +210,10 @@ server <- function(input, output) {
       theme_uqimf()
   })
 
+
+  ##############################################################################
+  #plot showing the realized series
+  ##############################################################################
   seriesplot <- reactive({
 
     fctodis <- weodat_qu() |>
@@ -215,12 +230,12 @@ server <- function(input, output) {
       ggtitle(paste0("Actual Series, with forecast for year ", input$target_year)) +
       ylab("True value") +
 
-      geom_linerange(
-        aes(x = target_year,
-            ymin = quant0.1, ymax = quant0.9, ##############################GENERALIZE##### with lapply for different
-            color = country),
-        data = linerange_dat(),
-        lwd = 5, alpha = 0.45) +
+      lapply(qu_lvls(), function(qupr){
+        geom_linerange(aes(x = target_year, ymin = get(paste0("quant", qupr[1])), ymax = get(paste0("quant", qupr[2])), color = country),
+                      data = linerange_dat(),
+                      lwd = 2, alpha = qupr[3],
+                      show.legend = TRUE)
+      }) +
 
       geom_point(
         aes(x = target_year, y = imf_pp, color = country),
@@ -249,7 +264,6 @@ server <- function(input, output) {
   })
 
   output$series_visual <- renderPlot(
-
 
     overallplot()
  )
