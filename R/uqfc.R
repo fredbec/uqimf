@@ -54,6 +54,7 @@ empFC <- function(weodat,
                   ci_levels = c(0.5, 0.8),
                   quantiles = NULL,
                   window_length = NULL,
+                  only_errorquants = FALSE,
                   include_truevals = TRUE){
 
   .d <- `[`
@@ -124,7 +125,7 @@ empFC <- function(weodat,
       data.table::setnames("prediction", "imf_pp")
   }
 
-
+  #return(weo_years)
   quantileFC <- lapply(target_years_list, function(target_year){
 
     #get set of years for current estimation
@@ -163,12 +164,28 @@ empFC <- function(weodat,
   }) |>
     data.table::rbindlist()
 
+  if(!only_errorquants){
+
+    #return(quantileFC)
+    imfpp <- truevals |>
+      data.table::copy() |>
+      .d(, .(country, target, target_year, horizon, imf_pp))
+
+
+    quantileFC <- imfpp[quantileFC,  on = c("country", "target", "target_year", "horizon")] |>
+      .d(, error_prediction := prediction) |>
+      .d(, prediction := imf_pp + error_prediction) |>
+      .d(, imf_pp := NULL)
+
+  }
 
   if(include_truevals){
 
     #return(list(quantileFC, truevals))
     quantileFC <- truevals[quantileFC, on = c("country", "target", "target_year", "horizon")]
   }
+
+
 
   return(quantileFC)
 }

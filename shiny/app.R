@@ -194,7 +194,6 @@ server <- function(input, output) {
 
 
     pldat <- weodat_qu() |>
-      .d(, prediction := imf_pp + prediction) |>
       .d(,.(country, target, horizon, quantile,prediction, target_year)) |>
       .d(, quantile := paste0("quant", quantile)) |>
       data.table::dcast(country + target + horizon + target_year ~ quantile,
@@ -244,8 +243,7 @@ server <- function(input, output) {
 
     fctodis <- weodat_qu() |>
       .d(target_year == input$target_year) |>
-      .d(country == input$country) |>
-      .d(, prediction := imf_pp + prediction)
+      .d(country == input$country)
 
     if(input$zoomin){
       year_range <- (input$target_year-5):input$target_year
