@@ -69,7 +69,6 @@ ui <- fluidPage(
       # Output: Histogram ----
       plotOutput(outputId = "series_visual"),
 
-      tableOutput(outputId = "tabtab"),
       #textOutput(outputId = "hey"),
       h2("Scores of quantile forecasts")
     )
@@ -107,8 +106,6 @@ server <- function(input, output) {
 
 
 
-
-
   #create subset of weodat
   #countries, target, horizon, calculate error
   sub_weodat <- reactive({
@@ -135,8 +132,8 @@ server <- function(input, output) {
 
     if(length(splitind) > 0){
 
-      years <- list(years[1:(splitind-1)],
-                    years[splitind:length(years)])
+      years <- list(years[1:(splitind)],
+                    years[(splitind+1):length(years)])
 
     } else {
 
@@ -156,8 +153,7 @@ server <- function(input, output) {
           error_method = input$error_method,
           method = input$method,
           window_length = input$window,
-          ci_levels = as.numeric(input$ci_lvls)) #|>
-      #.d(, horizon := factor(horizon, levels = c(0, 0.5), labels = c("Fall", "Spring")))
+          ci_levels = as.numeric(input$ci_lvls))
   })
 
 
@@ -166,8 +162,6 @@ server <- function(input, output) {
 
 
     pldat <- weodat_qu() |>
-      .d(country == input$country) |>
-      .d(target_year == input$target_year) |>
       .d(, prediction := imf_pp + prediction) |>
       .d(,.(country, target, horizon, quantile,prediction, target_year)) |>
       .d(, quantile := paste0("quant", quantile)) |>
@@ -193,8 +187,8 @@ server <- function(input, output) {
 
       #Highlight years depending on method and window
       lapply(yearset(), function(yrs) {
-        list(annotate("rect", xmin = min(yrs),
-                      xmax = max(yrs), ymin = -Inf, ymax = Inf,
+        list(annotate("rect", xmin = min(yrs)-0.5,
+                      xmax = max(yrs)+0.5, ymin = -Inf, ymax = Inf,
                       alpha = .2))
         }
       ) +
@@ -231,10 +225,15 @@ server <- function(input, output) {
       ylab("True value") +
 
       lapply(qu_lvls(), function(qupr){
-        geom_linerange(aes(x = target_year, ymin = get(paste0("quant", qupr[1])), ymax = get(paste0("quant", qupr[2])), color = country),
-                      data = linerange_dat(),
-                      lwd = 2, alpha = qupr[3],
-                      show.legend = TRUE)
+        geom_linerange(
+          aes(x = target_year,
+              ymin = get(paste0("quant", qupr[1])),
+              ymax = get(paste0("quant", qupr[2])),
+              color = country),
+          data = linerange_dat() |>
+            .d(country == input$country) |>
+            .d(target_year == input$target_year),
+          lwd = 2, alpha = qupr[3], show.legend = TRUE)
       }) +
 
       geom_point(
@@ -268,9 +267,6 @@ server <- function(input, output) {
     overallplot()
  )
 
-  output$tabtab <- renderTable(
-    linerange_dat()
-  )
 
 
 
