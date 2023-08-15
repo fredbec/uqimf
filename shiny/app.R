@@ -59,14 +59,22 @@ ui <- fluidPage(
 
       selectInput(inputId = "country",
                   label = "Country to highlight",
-                  choices = c("Germany", "Canada", "Japan"))
+                  choices = c("Germany", "Canada", "Japan")),
+
+      radioButtons(inputId = "colorscale",
+                   choices = setNames(c("OKeeffe1", "Hokusai1", "VanGogh1", "Monet"),
+                                      c("Georgia O'Keeffe", "Katsushika Hokusai", "Vincent van Gogh", "Claude Monet")),
+                   selected = "Hokusai1",
+                   label = "Your favorite artist?"),
 
     ),
 
     # Main panel for displaying outputs ----
     mainPanel(
       h2("Visualisation of quantile forecasts"),
-      # Output: Histogram ----
+
+      plotOutput(outputId = "allcplot"),
+
       plotOutput(outputId = "series_visual"),
 
       #textOutput(outputId = "hey"),
@@ -89,7 +97,7 @@ server <- function(input, output) {
     no_pairs <- floor(n_qus/2)
 
 
-    alpha_vals <- seq(0.3, 0.65, length.out = no_pairs)
+    alpha_vals <- seq(0.5, 0.75, length.out = no_pairs)
 
     #inner and outer quantile levels
     lapply(seq_along(1:no_pairs),
@@ -103,6 +111,13 @@ server <- function(input, output) {
   # some non-reactive stuff
   plot_horizon_label <- c(`0.5` = "Spring forecast, same year",
                           `0` = "Fall forecast, same year")
+  plot_country_label <- c("Germany" = "DE",
+                          "France" = "FR",
+                          "Japan" = "JP",
+                          "Canada" = "CA",
+                          "United States" = "USA",
+                          "United Kingdom" = "UK",
+                          "Italy" = "IT")
 
 
 
@@ -144,17 +159,28 @@ server <- function(input, output) {
   })
 
 
+  min_viable_year <- reactive({
+
+    if(input$method %in% c("leave-one-out")){
+      return(min(sub_weodat()$target_year))
+    } else {
+
+      return(min(sub_weodat()$target_year) + input$window)
+    }
+  })
+
 
   #create forecasts
   weodat_qu <- reactive({
     sub_weodat() |>
-    empFC(target_years = input$target_year,
+    empFC(target_years = min_viable_year():max(sub_weodat()$target_year),
           tv_release = tv_release,
           error_method = input$error_method,
           method = input$method,
           window_length = input$window,
           ci_levels = as.numeric(input$ci_lvls))
   })
+
 
 
   #make wide quantile data for displaying CI's in plot
@@ -194,7 +220,7 @@ server <- function(input, output) {
       ) +
 
 
-      scale_color_met_d("OKeeffe1") +
+      scale_color_met_d(input$colorscale) +
 
       facet_wrap(~horizon,
                  labeller = as_labeller(plot_horizon_label)) +
@@ -217,7 +243,7 @@ server <- function(input, output) {
 
     ggplot() +
       geom_line(
-        aes(x = target_year, y = tv_0.5,
+        aes(x = target_year, y = get(paste0("tv_", tv_release)),
             group = country, color = country),
         data = sub_weodat() |>
           .d(country == input$country)) +
@@ -233,7 +259,7 @@ server <- function(input, output) {
           data = linerange_dat() |>
             .d(country == input$country) |>
             .d(target_year == input$target_year),
-          lwd = 2, alpha = qupr[3], show.legend = TRUE)
+          lwd = 1, alpha = qupr[3], show.legend = TRUE)
       }) +
 
       geom_point(
@@ -241,7 +267,7 @@ server <- function(input, output) {
         data = fctodis
       ) +
 
-      scale_color_met_d("OKeeffe1") +
+      scale_color_met_d(input$colorscale) +
 
       facet_wrap(~horizon,
                  labeller = as_labeller(plot_horizon_label)) +
@@ -251,8 +277,12 @@ server <- function(input, output) {
       theme_uqimf()
   })
 
+
+  ##############################################################################
+  #Single Country Zoom-in plot
+  ##############################################################################
   overallplot <- reactive({
-      (errorplot()) /
+    (errorplot()) /
       (seriesplot()) +
       plot_layout(guides = "collect",
                   heights = c(1, 1)) &
@@ -261,6 +291,46 @@ server <- function(input, output) {
             legend.box="vertical", legend.margin=margin())
 
   })
+
+  ##############################################################################
+  #plot showing all series
+  ##############################################################################
+
+  allcplot <- reactive({
+
+    ggplot() +
+      geom_line(
+        aes(x = target_year, y = get(paste0("tv_", tv_release)),
+            group = country, color = country),
+        data = sub_weodat()) +
+      ylab("Value") +
+      lapply(qu_lvls(), function(qupr){
+        geom_linerange(
+          aes(x = target_year,
+              ymin = get(paste0("quant", qupr[1])),
+              ymax = get(paste0("quant", qupr[2])),
+              color = country),
+          data = linerange_dat() ,
+          lwd = 1, alpha = qupr[3], show.legend = TRUE)
+      }) +
+
+      scale_color_met_d(input$colorscale) +
+
+      facet_grid(horizon ~ country,
+                 labeller = as_labeller(c(plot_horizon_label,
+                                          plot_country_label))) +
+
+      xlab("Target Year") +
+
+      theme_uqimf()
+
+  })
+
+
+  output$allcplot <- renderPlot(
+
+    allcplot()
+  )
 
   output$series_visual <- renderPlot(
 
