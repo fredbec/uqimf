@@ -53,7 +53,7 @@ ui <- fluidPage(
     column(6,
 
       checkboxGroupInput("ci_lvls", label = "Prediction Intervals",
-                         choices = list("50%" = 0.5, "80%" = 0.8, "90%" = 0.9),
+                         choices = list("30%" = 0.3, "50%" = 0.5, "80%" = 0.8, "90%" = 0.9),
                          selected = c(0.5,0.8)),
 
       selectInput(inputId = "country",
@@ -90,6 +90,18 @@ ui <- fluidPage(
       plotOutput(outputId = "series_visual"),
 
       h2("Scores of quantile forecasts")
+    ),
+
+    column(6,
+           plotOutput(outputId = "cvgplot")
+    )
+  ),
+
+  fluidRow(
+    column(6,
+           tableOutput(outputId = "tabtab"),
+
+           h2("Scores of quantile forecasts")
     )
   )
 )
@@ -360,6 +372,102 @@ server <- function(input, output) {
   })
 
 
+  ##############################################################################
+  #Scores
+  ##############################################################################
+  score_qu <- reactive({
+    scoreempQu(weodat_qu() |>
+                 .d(,.(country, horizon, target_year, get(paste0("tv_", tv_release)), prediction, quantile)) |>
+                 setnames("V4", paste0("tv_", tv_release), skip_absent = TRUE),
+               tv_release = tv_release,
+               by = c("country", "horizon"))
+  })
+
+  scores_all <- reactive({
+    scoreempQu(weodat_qu() |>
+                 .d(,.(country, horizon, target_year, get(paste0("tv_", tv_release)), prediction, quantile)) |>
+                 setnames("V4", paste0("tv_", tv_release), skip_absent = TRUE),
+               tv_release = tv_release,
+               by = c("horizon")) |>
+      .d(,country := "overall")
+  })
+
+  cvg_plot <- reactive({
+    cvg_ranges <- as.numeric(input$ci_lvls) * 10000
+    cvg_rg <- as.integer(cvg_ranges) / 100
+
+    cols <- paste0("coverage_", cvg_rg)
+
+    cvgdat <- score_qu() |>
+      .d(, c("country", "horizon", cols), with = FALSE) |>
+      melt(id.vars = c("country", "horizon"),
+           variable.name = "pilvl",
+           value.name = "coverage") |>
+      .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
+      .d(, pilvl := as.numeric(pilvl)/100)
+
+    cvgdat_overall <- scores_all() |>
+      .d(, c("country", "horizon", cols), with = FALSE) |>
+      melt(id.vars = c("country", "horizon"),
+           variable.name = "pilvl",
+           value.name = "coverage") |>
+      .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
+      .d(, pilvl := as.numeric(pilvl)/100)
+
+
+    plot <- ggplot() +
+      geom_point(aes(x = pilvl,
+                     y = coverage,
+                     color = country),
+                 data = cvgdat) +
+      geom_line(aes(x = pilvl,
+                    y = coverage,
+                    color = country),
+                data = cvgdat) +
+      geom_point(aes(x = pilvl,
+                     y = coverage),
+                 color = "black",
+                 data = cvgdat_overall,
+                 size = 3) +
+      geom_line(aes(x = pilvl,
+                     y = coverage),
+                 color = "black",
+                 data = cvgdat_overall,
+                lwd = 1.5) +
+      geom_segment(aes(x = 0, y = 0, xend = 1, yend = 1),
+                   color = "black",
+                   linetype = "dashed",
+                   data = cvgdat) +
+      #scale_color_brewer(palette = "Set1") +
+      facet_wrap(~ horizon,
+                 labeller = as_labeller(plot_horizon_label))+
+
+      scale_color_met_d(input$colorscale) +
+
+      ylab("Empirical Coverage Level (Central PI)") +
+      xlab("Nominal Coverage (Central PI)") +
+      theme_uqimf()
+
+    return(plot)
+  })
+
+  mytab <- reactive({
+
+    cvg_ranges <- as.numeric(input$ci_lvls) * 10000
+    cvg_rg <- as.integer(cvg_ranges) / 100
+
+    cols <- paste0("coverage_", cvg_rg)
+
+    scores_all() |>
+      .d(, c("country", "horizon", cols), with = FALSE) |>
+      melt(id.vars = c("country", "horizon"),
+           variable.name = "pilvl",
+           value.name = "coverage") |>
+      .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
+      .d(, pilvl := as.numeric(pilvl)/100)
+  })
+
+
   output$allcplot <- renderPlot(
 
     allcplot()
@@ -368,8 +476,20 @@ server <- function(input, output) {
   output$series_visual <- renderPlot(
 
     overallplot()
- )
+  )
 
+  output$cvgplot <- renderPlot(
+
+    cvg_plot()
+  )
+
+
+
+  output$tabtab <- renderTable(
+
+    mytab()
+
+  )
 
 
 
