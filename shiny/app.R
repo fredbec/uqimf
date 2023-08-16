@@ -16,12 +16,9 @@ ui <- fluidPage(
   titlePanel("IMF Empirical Quantile Forecasts"),
 
   # Sidebar layout with input and output definitions ----
-  sidebarLayout(
 
-    position = "left",
-
-    # Sidebar panel for inputs ----
-    sidebarPanel(
+  fluidRow(
+    column(6,
 
 
       # Input: Slider for the number of bins ----
@@ -51,7 +48,9 @@ ui <- fluidPage(
                    label = "Target Year",
                    value = 2000,
                    min = 1990,
-                   max = 2009),
+                   max = 2009)
+    ),
+    column(6,
 
       checkboxGroupInput("ci_lvls", label = "Prediction Intervals",
                          choices = list("50%" = 0.5, "80%" = 0.8, "90%" = 0.9),
@@ -72,23 +71,29 @@ ui <- fluidPage(
                    choices = setNames(c("OKeeffe1", "Hokusai1", "VanGogh1", "Monet"),
                                       c("Georgia O'Keeffe", "Katsushika Hokusai", "Vincent van Gogh", "Claude Monet")),
                    selected = "Hokusai1",
-                   label = "Your favorite artist?"),
+                   label = "Your favorite artist?")
+    )
 
     ),
 
-    # Main panel for displaying outputs ----
-    mainPanel(
+  fluidRow(
+    column(12,
+
       h2("Visualisation of quantile forecasts"),
 
-      plotOutput(outputId = "allcplot"),
+      plotOutput(outputId = "allcplot")
+    )
+  ),
 
+  fluidRow(
+    column(6,
       plotOutput(outputId = "series_visual"),
 
-      #textOutput(outputId = "hey"),
       h2("Scores of quantile forecasts")
     )
   )
 )
+
 
 
 server <- function(input, output) {
