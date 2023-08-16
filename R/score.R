@@ -49,6 +49,11 @@ scoreempQu <- function(fcdat,
 
   print(cvg_rg)
 
+  if(is.null(fcdat$model)){
+
+    fcdat$model <- "model1"
+  }
+
   scores <- fcdat |>
     data.table::copy() |>
     data.table::setnames(paste0("tv_", tv_release), "true_value") |>
