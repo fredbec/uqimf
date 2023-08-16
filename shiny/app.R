@@ -79,7 +79,10 @@ ui <- fluidPage(
   fluidRow(
     column(12,
 
-           uiOutput('ex4')
+
+           h2("Background"),
+
+           uiOutput('background')
            )
   ),
 
@@ -532,12 +535,26 @@ server <- function(input, output) {
   )
 
 
-  output$ex4 <- renderUI({
+  output$background <- renderUI({
     withMathJax(
-      helpText('The busy Cauchy distribution
-               $$\\frac{1}{\\pi\\gamma\\,\\left[1 +
-               \\left(\\frac{x-x_0}{\\gamma}\\right)^2\\right]}\\!$$'),
-      helpText('Also this'))
+      helpText('A forecast is made for target year t, horizon h, location l and target type j:
+               $$\\hat{y}_{t, h, l, j}$$'),
+      helpText('The true value for target year t is independent of h, but instead indexed by v, the origin of the true value:
+               $$y_{t,v,l,j} $$'),
+      helpText('Based on these, we can calculate forecast errors, either (i) \'directional\' or (ii) \'absolute\'
+               $$(i): e^{d}_{t,h,v,l,j} = y_{t,v,l,j} - \\hat{y}_{t, h, l, j}  $$
+               $$(ii): e^{a}_{t,h,v,l,j} = | y_{t,v,l,j} - \\hat{y}_{t, h, l, j} |  $$'),
+      helpText('We can group these forecast errors in sets, e.g. for the expanding window method:
+               $$\\mathcal{E}^{ew, d}_{t,h,v,l,j} = \\{ e^{d}_{t^*,h,v,l,j} | t^{*} < t\\}  $$'),
+      helpText('To now obtain the lower l and upper u values for a central interval prediction for level \'alpha\' based on past forecast errors, we take quantiles of these sets:
+               $$l^{\\alpha}_{t,h,v,l,j}; u^{\\alpha}_{t,h,v,l,j}, $$'),
+      helpText('For the directional method:
+               $$ l^{\\alpha, d}_{t,h,v,l,j} = \\hat{y}_{t, h, l, j} + q^{0.5 - \\alpha/2 } \\left(\\mathcal{E}^{m, d}_{t,h,v,l,j}  \\right) $$
+               $$ u^{\\alpha, d}_{t,h,v,l,j} = \\hat{y}_{t, h, l, j} + q^{0.5 + \\alpha/2 } \\left(\\mathcal{E}^{m, d}_{t,h,v,l,j}  \\right) $$'),
+      helpText('And for the absolute method:
+               $$ l^{\\alpha, a}_{t,h,v,l,j} = \\hat{y}_{t, h, l, j} - \\frac{1}{2} q^{\\alpha} \\left(\\mathcal{E}^{m, a}_{t,h,v,l,j}  \\right) $$
+               $$ u^{\\alpha, a}_{t,h,v,l,j} = \\hat{y}_{t, h, l, j} + \\frac{1}{2} q^{\\alpha} \\left(\\mathcal{E}^{m, a}_{t,h,v,l,j}  \\right) $$')
+      )
   })
 
 
