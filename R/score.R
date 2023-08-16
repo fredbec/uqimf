@@ -24,19 +24,10 @@ score_quants <- function(empquants,
 #'
 scoreempQu <- function(fcdat,
                        tv_release,
-                       by = c("country", "target", "horizon", "quantile")){
+                       by = c("country", "target", "horizon")){
 
   .d <- `[`
 
-  if(length(which(by == "quantile")) != 0){
-
-    bycvg <- by[-which(by == "quantile")]
-  } else {
-
-    bycvg <- by
-  }
-
-  print(bycvg)
   #Determine available CI's
   qus <- unique(fcdat$quantile) |>
     sort()
@@ -48,7 +39,6 @@ scoreempQu <- function(fcdat,
     function(idx) qus[length(qus)-(idx-1)] - qus[idx]
     ) |>
     sort()
-  print(cvg_ranges)
 
   scores <- fcdat |>
     data.table::copy() |>
