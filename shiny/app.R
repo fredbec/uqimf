@@ -59,7 +59,8 @@ ui <- fluidPage(
 
       selectInput(inputId = "country",
                   label = "Country to highlight",
-                  choices = c("Germany", "Canada", "Japan")),
+                  choices = c("Canada", "France", "Germany", "Italy",
+                              "Japan", "United Kingdom", "United States")),
 
       radioButtons(inputId = "zoomin",
                    label = "Zoom in?",
@@ -215,6 +216,9 @@ server <- function(input, output) {
           .d(country == input$country)) +
       ggtitle("Forecast Errors") +
       ylab("Error") +
+      ylim(max(abs(sub_weodat()$error)), - max(abs(sub_weodat()$error))) +
+
+      geom_hline(yintercept = 0, linetype = "dashed") +
 
       #Highlight years depending on method and window
       lapply(yearset(), function(yrs) {
@@ -270,7 +274,7 @@ server <- function(input, output) {
           data = linerange_dat() |>
             .d(country == input$country) |>
             .d(target_year == input$target_year),
-          lwd = 1, alpha = qupr[3], show.legend = TRUE)
+          lwd = 1.5, alpha = qupr[3], show.legend = TRUE)
       }) +
 
       geom_point(
@@ -311,10 +315,23 @@ server <- function(input, output) {
 
     ggplot() +
       geom_line(
-        aes(x = target_year, y = get(paste0("tv_", tv_release)),
-            group = country, color = country),
-        data = sub_weodat()) +
+        aes(x = target_year, y = get(paste0("tv_", tv_release))),
+        data = sub_weodat(),
+        color = "gray") +
       ylab("Value") +
+
+      geom_point(
+        aes(x = target_year, y = imf_pp, color = country),
+        data = weodat_qu(),
+        shape = 4
+      ) +
+
+      #geom_line(
+      #  aes(x = target_year, y = imf_pp, color = country),
+      #  data = weodat_qu(),
+      #  linetype = "dashed"
+
+      #) +
       lapply(qu_lvls(), function(qupr){
         geom_linerange(
           aes(x = target_year,
@@ -322,7 +339,7 @@ server <- function(input, output) {
               ymax = get(paste0("quant", qupr[2])),
               color = country),
           data = linerange_dat() ,
-          lwd = 1, alpha = qupr[3], show.legend = TRUE)
+          lwd = 1.5, alpha = qupr[3], show.legend = TRUE)
       }) +
 
       scale_color_met_d(input$colorscale) +
