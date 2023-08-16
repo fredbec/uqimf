@@ -24,27 +24,36 @@ score_quants <- function(empquants,
 #'
 scoreempQu <- function(fcdat,
                        tv_release,
-                       by = c("country", "target", "horizon")){
+                       by = c("country", "target", "horizon"),
+                       cvg_rg = NULL){
 
   .d <- `[`
 
   #Determine available CI's
-  qus <- unique(fcdat$quantile) |>
-    sort()
+  if(is.null(cvg_rg)){
+    qus <- unique(fcdat$quantile) |>
+      sort()
 
-  no_pairs <- floor(length(qus)/2)
+    no_pairs <- floor(length(qus)/2)
 
-  cvg_ranges <- sapply(
-    1:no_pairs,
-    function(idx) qus[length(qus)-(idx-1)] - qus[idx]
-    ) |>
-    sort()
+    cvg_ranges <- sapply(
+      1:no_pairs,
+      function(idx) qus[length(qus)-(idx-1)] - qus[idx]
+      ) |>
+      sort()
+
+    #floating point bullshit
+    cvg_ranges <- cvg_ranges * 10000
+    cvg_rg <- as.integer(cvg_ranges) / 100
+  }
+
+  print(cvg_rg)
 
   scores <- fcdat |>
     data.table::copy() |>
     data.table::setnames(paste0("tv_", tv_release), "true_value") |>
     scoringutils::score() |>
-    scoringutils::add_coverage(by = by, ranges = cvg_ranges * 100) |>
+    scoringutils::add_coverage(by = by, ranges = cvg_rg) |>
     scoringutils::summarise_scores(by = by)
 
   return(scores)
