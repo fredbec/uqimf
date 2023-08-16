@@ -79,6 +79,13 @@ ui <- fluidPage(
   fluidRow(
     column(12,
 
+           uiOutput('ex4')
+           )
+  ),
+
+  fluidRow(
+    column(12,
+
       h2("Visualisation of quantile forecasts"),
 
       plotOutput(outputId = "allcplot")
@@ -99,10 +106,7 @@ ui <- fluidPage(
 
   fluidRow(
     column(6,
-           tableOutput(outputId = "tabtab"),
-
-           h2("Scores of quantile forecasts")
-    )
+      tableOutput(outputId = "tabtab"))
   )
 )
 
@@ -451,21 +455,60 @@ server <- function(input, output) {
     return(plot)
   })
 
-  mytab <- reactive({
 
-    cvg_ranges <- as.numeric(input$ci_lvls) * 10000
-    cvg_rg <- as.integer(cvg_ranges) / 100
 
-    cols <- paste0("coverage_", cvg_rg)
+  #create all types of forecasts
+  weodat_allmods <- reactive({
 
-    scores_all() |>
-      .d(, c("country", "horizon", cols), with = FALSE) |>
-      melt(id.vars = c("country", "horizon"),
-           variable.name = "pilvl",
-           value.name = "coverage") |>
-      .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
-      .d(, pilvl := as.numeric(pilvl)/100)
+    scores_rw <-
+      sub_weodat() |>
+        empFC(target_years = min_viable_year():max(sub_weodat()$target_year),
+              tv_release = tv_release,
+              error_method = input$error_method,
+              method = "rolling window",
+              window_length = input$window,
+              ci_levels = c(0.3, 0.5, 0.8, 0.9)) |>
+      .d(,.(country, horizon, target_year, get(paste0("tv_", tv_release)), prediction, quantile)) |>
+      setnames("V4", paste0("tv_", tv_release)) |>
+      .d(, model := paste0("rolling_window", input$window)) |>
+      scoreempQu(tv_release = 0.5,
+                 by = c("model", "horizon"))
+
+    scores_ew <-
+      sub_weodat() |>
+      empFC(target_years = min_viable_year():max(sub_weodat()$target_year),
+            tv_release = tv_release,
+            error_method = input$error_method,
+            method = "expanding window",
+            window_length = input$window,
+            ci_levels = c(0.3, 0.5, 0.8, 0.9)) |>
+      .d(,.(country, horizon, target_year, get(paste0("tv_", tv_release)), prediction, quantile)) |>
+      setnames("V4", paste0("tv_", tv_release)) |>
+      .d(, model := "expanding window") |>
+      scoreempQu(tv_release = 0.5,
+                 by = c("model", "horizon"))
+
+    scores_loo <-
+      sub_weodat() |>
+      empFC(target_years = min_viable_year():max(sub_weodat()$target_year),
+            tv_release = tv_release,
+            error_method = input$error_method,
+            method = "leave-one-out",
+            window_length = input$window,
+            ci_levels = c(0.3, 0.5, 0.8, 0.9)) |>
+      .d(,.(country, horizon, target_year, get(paste0("tv_", tv_release)), prediction, quantile)) |>
+      setnames("V4", paste0("tv_", tv_release)) |>
+      .d(, model := "leave-one-out") |>
+      scoreempQu(tv_release = 0.5,
+                 by = c("model", "horizon"))
+
+    all_scores <- rbind(scores_rw,
+                        scores_ew,
+                        scores_loo)
+    return(all_scores |>
+             .d(order(horizon, model)))
   })
+
 
 
   output$allcplot <- renderPlot(
@@ -483,14 +526,19 @@ server <- function(input, output) {
     cvg_plot()
   )
 
-
-
   output$tabtab <- renderTable(
 
-    mytab()
-
+    weodat_allmods()
   )
 
+
+  output$ex4 <- renderUI({
+    withMathJax(
+      helpText('The busy Cauchy distribution
+               $$\\frac{1}{\\pi\\gamma\\,\\left[1 +
+               \\left(\\frac{x-x_0}{\\gamma}\\right)^2\\right]}\\!$$'),
+      helpText('Also this'))
+  })
 
 
 }
