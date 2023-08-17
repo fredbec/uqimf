@@ -16,10 +16,24 @@ oecd_q <- oecd |>
          value = Value) |>
   mutate(target_year = substr(yrq, 1, 4) |> as.numeric(),
          quarter = substr(yrq, 7, 7) |> as.numeric()) |>
-  filter(target_year >= 1985,
-         measure == "PC_CHGPP") |> #PC_CHGPP refers to previous period, PC_CHGPY refers to same period previous year
+  filter(target_year >= 1980) |> #PC_CHGPP refers to previous period, PC_CHGPY refers to same period previous year
   rename(ccode = country) |>
-  select(-c(measure, yrq))
+  select(-yrq)
 
 
-data.table::fwrite(oecd_q, here("oecd_data", "oecd_gdp_quarterly.csv"))
+oecd_y <- oecd |>
+  filter(FREQUENCY == "A",
+         SUBJECT == "TOT") |>
+  #filter(LOCATION %in% c("CAN", "FRA", "DEU", "ITA", "JPN", "GBR", "USA")) |>
+  select(-c(INDICATOR, SUBJECT, FREQUENCY, Flag.Codes)) |>
+  rename(country = LOCATION,
+         measure = MEASURE,
+         target_year = TIME,
+         value = Value) |>
+  mutate(quarter = "Y") |>
+  filter(target_year >= 1980) |> #PC_CHGPP refers to previous period, PC_CHGPY refers to same period previous year
+  rename(ccode = country)
+
+oecd <- rbind(oecd_q, oecd_y)
+
+data.table::fwrite(oecd, here("oecd_data", "oecd_gdp_quarterly_annual.csv"))
