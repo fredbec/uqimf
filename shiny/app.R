@@ -40,7 +40,7 @@ ui <- fluidPage(
 
       numericInput(inputId = "window",
                    label = "Window length (for rolling window)",
-                   value = 5,
+                   value = 7,
                    min = 4,
                    max = 10),
 
@@ -76,15 +76,6 @@ ui <- fluidPage(
 
     ),
 
-  fluidRow(
-    column(12,
-
-
-           h2("Background"),
-
-           uiOutput('background')
-           )
-  ),
 
   fluidRow(
     column(12,
@@ -110,6 +101,16 @@ ui <- fluidPage(
   fluidRow(
     column(6,
       tableOutput(outputId = "tabtab"))
+  ),
+
+  fluidRow(
+    column(12,
+
+
+           h2("Background"),
+
+           uiOutput('background')
+    )
   )
 )
 
@@ -140,7 +141,8 @@ server <- function(input, output) {
 
 
   # some non-reactive stuff
-  plot_horizon_label <- c(`0.5` = "Spring forecast, same year",
+  plot_horizon_label <- c(`1`= "Fall forecast, year ahead",
+                          `0.5` = "Spring forecast, same year",
                           `0` = "Fall forecast, same year")
   plot_country_label <- c("Germany" = "DE",
                           "France" = "FR",
@@ -159,7 +161,7 @@ server <- function(input, output) {
     data.table::fread(here("WEOforecasts_tidy.csv")) |>
       .d(g7 == 1,) |>
       .d(target == input$target) |>
-      .d(horizon <=0.5) |> ######################this shall be extended sometime##############
+      .d(horizon <= 1) |> ######################this shall be extended sometime##############
       .d(, error := prediction - get(paste0("tv_", tv_release))) |>
       .d(target_year < 2010) |>
       .d(, .(country, prediction, target, error,
@@ -531,7 +533,16 @@ server <- function(input, output) {
 
   output$tabtab <- renderTable(
 
-    weodat_allmods()
+    weodat_allmods() |>
+      setnames("model", "Method") |>
+      setnames("horizon", "Horizon") |>
+      setnames("interval_score", "WIS") |>
+      setnames("underprediction", "Underprediction") |>
+      setnames("overprediction", "Overprediction") |>
+      setnames("dispersion", "Dispersion") |>
+      .d(, .(Method, Horizon, WIS, Underprediction, Overprediction, Dispersion)),
+
+    digits = 4
   )
 
 
@@ -544,7 +555,9 @@ server <- function(input, output) {
       helpText('Based on these, we can calculate forecast errors, either (i) \'directional\' or (ii) \'absolute\'
                $$(i): e^{d}_{t,h,v,l,j} = y_{t,v,l,j} - \\hat{y}_{t, h, l, j}  $$
                $$(ii): e^{a}_{t,h,v,l,j} = | y_{t,v,l,j} - \\hat{y}_{t, h, l, j} |  $$'),
-      helpText('We can group these forecast errors in sets, e.g. for the expanding window method:
+      helpText('We can group these forecast errors in sets, depending on a specific method m:
+               $$\\mathcal{E}^{m, d}_{t,h,v,l,j} $$'),
+      helpText('e.g. for the expanding window method:
                $$\\mathcal{E}^{ew, d}_{t,h,v,l,j} = \\{ e^{d}_{t^*,h,v,l,j} | t^{*} < t\\}  $$'),
       helpText('To now obtain the lower l and upper u values for a central interval prediction for level \'alpha\' based on past forecast errors, we take quantiles of these sets:
                $$l^{\\alpha}_{t,h,v,l,j}; u^{\\alpha}_{t,h,v,l,j}, $$'),
