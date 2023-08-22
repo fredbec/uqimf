@@ -61,6 +61,11 @@ ui <- fluidPage(
                   choices = c("Canada", "France", "Germany", "Italy",
                               "Japan", "United Kingdom", "United States")),
 
+      radioButtons(inputId = "trueval",
+                   choices = c("0.5", "1", "1.5", "2"),
+                   selected = "0.5",
+                   label = "True Value release"),
+
       radioButtons(inputId = "zoomin",
                    label = "Zoom in?",
                    choices = c("TRUE", "FALSE"),
@@ -118,7 +123,9 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   #########PARAMS TO MOVE TO INPUT##################
-  tv_release <- 0.5
+  tv_release <- reactive({
+    as.numeric(input$trueval)
+  })
 
   qu_lvls <- reactive({
 
@@ -162,10 +169,14 @@ server <- function(input, output) {
       .d(g7 == 1,) |>
       .d(target == input$target) |>
       .d(horizon <= 1) |> ######################this shall be extended sometime##############
-      .d(, error := prediction - get(paste0("tv_", tv_release))) |>
+      .d(, error := prediction - get(paste0("tv_", tv_release()))) |>
       .d(target_year < 2010) |>
       .d(, .(country, prediction, target, error,
-             horizon, target_year, forecast_year, tv_0.5))
+             horizon, target_year, forecast_year,
+             get(paste0("tv_", tv_release()))
+             )
+         ) |>
+      setnames("V8", paste0("tv_", tv_release()))
   })
 
   #years that enter calculation
@@ -207,16 +218,13 @@ server <- function(input, output) {
   weodat_qu <- reactive({
     sub_weodat() |>
     empFC(target_years = min_viable_year():max(sub_weodat()$target_year),
-          tv_release = tv_release,
+          tv_release = tv_release(),
           error_method = input$error_method,
           method = input$method,
           window_length = input$window,
           ci_levels = as.numeric(input$ci_lvls))
   })
 
-
-
-  #make wide quantile data for displaying CI's in plot
   linerange_dat <- reactive({
 
 
@@ -251,7 +259,7 @@ server <- function(input, output) {
         list(annotate("rect", xmin = min(yrs)-0.5,
                       xmax = max(yrs)+0.5, ymin = -Inf, ymax = Inf,
                       alpha = .2))
-        }
+      }
       ) +
 
 
@@ -283,7 +291,7 @@ server <- function(input, output) {
 
     ggplot() +
       geom_line(
-        aes(x = target_year, y = get(paste0("tv_", tv_release)),
+        aes(x = target_year, y = get(paste0("tv_", tv_release())),
             group = country, color = country),
         data = sub_weodat() |>
           .d(country == input$country) |>
@@ -341,7 +349,7 @@ server <- function(input, output) {
 
     ggplot() +
       geom_line(
-        aes(x = target_year, y = get(paste0("tv_", tv_release))),
+        aes(x = target_year, y = get(paste0("tv_", tv_release()))),
         data = sub_weodat(),
         color = "gray") +
       ylab("Value") +
@@ -386,17 +394,17 @@ server <- function(input, output) {
   ##############################################################################
   score_qu <- reactive({
     scoreempQu(weodat_qu() |>
-                 .d(,.(country, horizon, target_year, get(paste0("tv_", tv_release)), prediction, quantile)) |>
-                 setnames("V4", paste0("tv_", tv_release), skip_absent = TRUE),
-               tv_release = tv_release,
+                 .d(,.(country, horizon, target_year, get(paste0("tv_", tv_release())), prediction, quantile)) |>
+                 setnames("V4", paste0("tv_", tv_release()), skip_absent = TRUE),
+               tv_release = tv_release(),
                by = c("country", "horizon"))
   })
 
   scores_all <- reactive({
     scoreempQu(weodat_qu() |>
-                 .d(,.(country, horizon, target_year, get(paste0("tv_", tv_release)), prediction, quantile)) |>
-                 setnames("V4", paste0("tv_", tv_release), skip_absent = TRUE),
-               tv_release = tv_release,
+                 .d(,.(country, horizon, target_year, get(paste0("tv_", tv_release())), prediction, quantile)) |>
+                 setnames("V4", paste0("tv_", tv_release()), skip_absent = TRUE),
+               tv_release = tv_release(),
                by = c("horizon")) |>
       .d(,country := "overall")
   })
@@ -439,9 +447,9 @@ server <- function(input, output) {
                  data = cvgdat_overall,
                  size = 3) +
       geom_line(aes(x = pilvl,
-                     y = coverage),
-                 color = "black",
-                 data = cvgdat_overall,
+                    y = coverage),
+                color = "black",
+                data = cvgdat_overall,
                 lwd = 1.5) +
       geom_segment(aes(x = 0, y = 0, xend = 1, yend = 1),
                    color = "black",
@@ -467,44 +475,44 @@ server <- function(input, output) {
 
     scores_rw <-
       sub_weodat() |>
-        empFC(target_years = min_viable_year():max(sub_weodat()$target_year),
-              tv_release = tv_release,
-              error_method = input$error_method,
-              method = "rolling window",
-              window_length = input$window,
-              ci_levels = c(0.3, 0.5, 0.8, 0.9)) |>
-      .d(,.(country, horizon, target_year, get(paste0("tv_", tv_release)), prediction, quantile)) |>
-      setnames("V4", paste0("tv_", tv_release)) |>
+      empFC(target_years = min_viable_year():max(sub_weodat()$target_year),
+            tv_release = tv_release(),
+            error_method = input$error_method,
+            method = "rolling window",
+            window_length = input$window,
+            ci_levels = c(0.3, 0.5, 0.8, 0.9)) |>
+      .d(,.(country, horizon, target_year, get(paste0("tv_", tv_release())), prediction, quantile)) |>
+      setnames("V4", paste0("tv_", tv_release())) |>
       .d(, model := paste0("rolling_window", input$window)) |>
-      scoreempQu(tv_release = 0.5,
+      scoreempQu(tv_release = tv_release(),
                  by = c("model", "horizon"))
 
     scores_ew <-
       sub_weodat() |>
       empFC(target_years = min_viable_year():max(sub_weodat()$target_year),
-            tv_release = tv_release,
+            tv_release = tv_release(),
             error_method = input$error_method,
             method = "expanding window",
             window_length = input$window,
             ci_levels = c(0.3, 0.5, 0.8, 0.9)) |>
-      .d(,.(country, horizon, target_year, get(paste0("tv_", tv_release)), prediction, quantile)) |>
-      setnames("V4", paste0("tv_", tv_release)) |>
+      .d(,.(country, horizon, target_year, get(paste0("tv_", tv_release())), prediction, quantile)) |>
+      setnames("V4", paste0("tv_", tv_release())) |>
       .d(, model := "expanding window") |>
-      scoreempQu(tv_release = 0.5,
+      scoreempQu(tv_release = tv_release(),
                  by = c("model", "horizon"))
 
     scores_loo <-
       sub_weodat() |>
       empFC(target_years = min_viable_year():max(sub_weodat()$target_year),
-            tv_release = tv_release,
+            tv_release = tv_release(),
             error_method = input$error_method,
             method = "leave-one-out",
             window_length = input$window,
             ci_levels = c(0.3, 0.5, 0.8, 0.9)) |>
-      .d(,.(country, horizon, target_year, get(paste0("tv_", tv_release)), prediction, quantile)) |>
-      setnames("V4", paste0("tv_", tv_release)) |>
+      .d(,.(country, horizon, target_year, get(paste0("tv_", tv_release())), prediction, quantile)) |>
+      setnames("V4", paste0("tv_", tv_release())) |>
       .d(, model := "leave-one-out") |>
-      scoreempQu(tv_release = 0.5,
+      scoreempQu(tv_release = tv_release(),
                  by = c("model", "horizon"))
 
     all_scores <- rbind(scores_rw,
@@ -567,7 +575,7 @@ server <- function(input, output) {
       helpText('And for the absolute method:
                $$ l^{\\alpha, a}_{t,h,v,l,j} = \\hat{y}_{t, h, l, j} - \\frac{1}{2} q^{\\alpha} \\left(\\mathcal{E}^{m, a}_{t,h,v,l,j}  \\right) $$
                $$ u^{\\alpha, a}_{t,h,v,l,j} = \\hat{y}_{t, h, l, j} + \\frac{1}{2} q^{\\alpha} \\left(\\mathcal{E}^{m, a}_{t,h,v,l,j}  \\right) $$')
-      )
+    )
   })
 
 
