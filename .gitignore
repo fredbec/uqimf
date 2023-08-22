@@ -47,3 +47,11 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# data files that are too large
+data_download/
+WEOforecasts_tidy.csv
+oecd_data/oecd_cpi_quarter.csv
+oecd_data/oecd_cpi_quarterly_annual.csv
+oecd_data/oecd_gdp_quarterly_annual.csv
+oecd_gdp_quarterly.csv
