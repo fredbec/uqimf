@@ -139,7 +139,8 @@ empFC <- function(weodat,
     quSet <- weodat |>
       .d(target_year %in% yearset) |>
       empQU(error_fct = error_fct,
-            quantiles = quantiles) |>
+            quantiles = quantiles,
+            tv_release = tv_release) |>
       .d(, target_year := target_year)
 
     if(error_method == "absolute"){
