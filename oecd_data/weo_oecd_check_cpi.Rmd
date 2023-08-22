@@ -16,46 +16,25 @@ library(dplyr)
 ## WEO Truth data against OECD
 
 ```{r oecd, warning = FALSE}
-oecd <- read.csv(here("oecd_data", "oecd_cpi.csv"))
+oecd <- read.csv(here("oecd_data", "oecd_cpi_quarter.csv"))
 
-oecd_q <- oecd |> 
-  filter(FREQUENCY == "Q",
-         SUBJECT == "TOT") |>
-  filter(LOCATION %in% c("CAN", "FRA", "DEU", "ITA", "JPN", "GBR", "USA")) |>
-  select(-c(INDICATOR, SUBJECT, FREQUENCY, Flag.Codes)) |>
-  rename(country = LOCATION,
+oecd_y <- read.csv(here("oecd_data", "oecd_cpi_quarter.csv")) |>
+  filter(Subject == "CPI: 01-12 - All items",
+         MEASURE %in% c("GP")) |>
+  select(-c(Measure, SUBJECT, Subject)) |>
+  select(LOCATION, MEASURE, TIME, Unit, Value) |>
+  rename(ccode = LOCATION,
          measure = MEASURE,
          yrq = TIME,
          value = Value) |>
   mutate(target_year = substr(yrq, 1, 4) |> as.numeric(),
          quarter = substr(yrq, 7, 7) |> as.numeric()) |>
-  filter(target_year >= 1989,
-         quarter == 4,
-         measure == "AGRWTH") |>
-  select(-c(yrq, quarter)) |>
-  rename(q4val = value,
-         ccode = country) |>
-  select(-measure)
-
-
-
-oecd_y <- oecd |> 
-  filter(FREQUENCY == "A",
-         SUBJECT == "TOT") |>
-  filter(LOCATION %in% c("CAN", "FRA", "DEU", "ITA", "JPN", "GBR", "USA"),
-         MEASURE == "AGRWTH") |>
-  select(-c(INDICATOR, SUBJECT, FREQUENCY, Flag.Codes)) |>
-  rename(country = LOCATION,
-         measure = MEASURE,
-         target_year = TIME,
-         value = Value) |>
-  mutate(target_year = as.numeric(target_year)) |>
-  filter(target_year >= 1990) |>
-  group_by(country) |>
-  arrange(target_year,  .by_group = TRUE) |>
-  rename(yearval = value,
-         ccode = country) |>
-  select(-measure)
+  mutate(quarter = ifelse(is.na(quarter), "Y", quarter)) |>
+  select(-yrq) |>
+  filter(ccode %in% c("CAN", "FRA", "DEU", "ITA", "JPN", "GBR", "USA")) |>
+  filter(quarter == "Y") |>
+  select(-quarter) |>
+  rename(yearval = value)
 
 weodat <- fread(here("WEOforecasts_tidy.csv"))
 
@@ -63,14 +42,15 @@ weodat <- fread(here("WEOforecasts_tidy.csv"))
 weodat_g7 <- weodat |>
   filter(horizon == 0.5,
          !is.na(tv_1),
-         g7 == "G7",
+         g7 == 1,
          target == "pcpi_pch") |>
   rename(ccode = ISOAlpha_3Code) |>
   select(ccode, country, target_year, tv_1, tv_2) |>
   distinct() |>
   left_join(oecd_y, by = c("ccode", "target_year")) |>
-  left_join(oecd_q, by = c("ccode", "target_year")) |>
+  #left_join(oecd_q, by = c("ccode", "target_year")) |>
   setDT() |>
+  select(c(ccode, country, target_year, tv_1, tv_2, yearval)) |>
   melt(id.vars = c("ccode", "country", "target_year"), 
        variable.name = "truth_type", 
        value.name = "truth_value") |>
