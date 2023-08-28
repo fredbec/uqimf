@@ -1,0 +1,37 @@
+source,target,error_method,method
+IMF,ngdp_rpch,absolute,expanding window
+IMF,ngdp_rpch,absolute,leave-one-out
+IMF,ngdp_rpch,absolute,rolling window
+IMF,ngdp_rpch,directional,expanding window
+IMF,ngdp_rpch,directional,leave-one-out
+IMF,ngdp_rpch,directional,rolling window
+IMF,pcpi_pch,absolute,expanding window
+IMF,pcpi_pch,absolute,leave-one-out
+IMF,pcpi_pch,absolute,rolling window
+IMF,pcpi_pch,directional,expanding window
+IMF,pcpi_pch,directional,leave-one-out
+IMF,pcpi_pch,directional,rolling window
+ar,ngdp_rpch,absolute,expanding window
+ar,ngdp_rpch,absolute,leave-one-out
+ar,ngdp_rpch,absolute,rolling window
+ar,ngdp_rpch,directional,expanding window
+ar,ngdp_rpch,directional,leave-one-out
+ar,ngdp_rpch,directional,rolling window
+ar,pcpi_pch,absolute,expanding window
+ar,pcpi_pch,absolute,leave-one-out
+ar,pcpi_pch,absolute,rolling window
+ar,pcpi_pch,directional,expanding window
+ar,pcpi_pch,directional,leave-one-out
+ar,pcpi_pch,directional,rolling window
+bvar,ngdp_rpch,absolute,expanding window
+bvar,ngdp_rpch,absolute,leave-one-out
+bvar,ngdp_rpch,absolute,rolling window
+bvar,ngdp_rpch,directional,expanding window
+bvar,ngdp_rpch,directional,leave-one-out
+bvar,ngdp_rpch,directional,rolling window
+bvar,pcpi_pch,absolute,expanding window
+bvar,pcpi_pch,absolute,leave-one-out
+bvar,pcpi_pch,absolute,rolling window
+bvar,pcpi_pch,directional,expanding window
+bvar,pcpi_pch,directional,leave-one-out
+bvar,pcpi_pch,directional,rolling window
