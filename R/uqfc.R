@@ -167,7 +167,6 @@ empFC <- function(weodat,
 
   if(!only_errorquants){
 
-    #return(quantileFC)
     imfpp <- truevals |>
       data.table::copy() |>
       .d(, .(country, target, target_year, horizon, imf_pp))
@@ -182,7 +181,6 @@ empFC <- function(weodat,
 
   if(include_truevals){
 
-    #return(list(quantileFC, truevals))
     quantileFC <- truevals[quantileFC, on = c("country", "target", "target_year", "horizon")]
   }
 
