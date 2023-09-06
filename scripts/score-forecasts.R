@@ -73,6 +73,12 @@ weodat_qu <- qufcs |>
 scores <- scoreempQu(weodat_qu, cvg_rg = c(50,80),
                      by = c("model", "error_method", "method", "country", "target", "horizon"))
 
+scores_avgcountry <- scoreempQu(weodat_qu, cvg_rg = c(50,80),
+                     by = c("model", "error_method", "method", "target", "horizon"))
+
+scores_cvgshort <- scoreempQu(weodat_qu, cvg_rg = c(50,80),
+                     by = c("model", "error_method", "method", "target"))
+
 
 weodat_samples <- fcdat |>
   .d(horizon < 2) |>
@@ -108,8 +114,12 @@ all_crps <- lapply(1:nrow(combs_methods), function(idx){
 
   }
 ) |>
-  rbindlist()
+  rbindlist() |>
+  .d(, .(score = mean(score)), by = c("target", "horizon", "method", "error_method", "source"))
 
 
 data.table::fwrite(scores, here("quantile_forecasts", "ci_scores.csv"))
 data.table::fwrite(all_crps, here("quantile_forecasts", "sample_scores.csv"))
+data.table::fwrite(scores_cvgshort, here("quantile_forecasts", "cvg_pooled.csv"))
+data.table::fwrite(scores_avgcountry, here("quantile_forecasts", "ci_scores_avgcnt.csv"))
+
