@@ -144,6 +144,10 @@ empFC <- function(weodat,
       .d(, target_year := target_year)
 
     if(error_method == "absolute"){
+      #with absolute errors, the extracted quantile must be transformed:
+      #e.g. when extracting a 50% quantile from the absolute errors, this value
+      #must be added on to the prediction to get the 75% quantile and subtracted
+      #from the prediction to get the 25% quantile
 
       quSet_pos <- quSet |>
         data.table::copy() |>

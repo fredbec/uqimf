@@ -94,7 +94,8 @@ theme_uqimf <- function() {
           axis.ticks = element_line(colour = "grey80"),
           panel.border = element_blank(),
           panel.background = element_blank(),
-          legend.position = "bottom")
+          legend.position = "bottom",
+          legend.title=element_blank())
 }
 
 
