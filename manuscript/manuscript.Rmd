@@ -1,5 +1,5 @@
 ---
-title: "Compare forecats"
+title: "IMF and Benchmark Forecasts"
 header-includes:
     - \usepackage{lineno}
     - \linenumbers
@@ -16,25 +16,484 @@ csl: vancouver.csl
 ---
 
 ```{r setup, include=FALSE}
+library(data.table)
+library(here)
+library(ggplot2)
+library(patchwork)
+library(MetBrewer)
+library(purrr)
+library(lattice)
+library(gt)
+library(rlang)
+library(tidyverse)
+devtools::load_all()
 knitr::opts_chunk$set(echo = TRUE)
+.d <- `[`
 ```
 
-## R Markdown
+# A short note on error handling
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+In almost all 72 cases, absolute error handling gives lower scores than directional error handling. The only exception is the inflation series for the IMF forecasts and horizon 0, where the expanding window and rolling window method give \textit{slightly} lower scores for the directional methodology. 
+We thus decide to focus on the absolute errors in this document. 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+# Scores, by estimation method, Horizon and forecast source 
+```{r, echo = FALSE}
+scores <- fread(here("quantile_forecasts", "ci_scores.csv"))
+
+wis_scores <- fread(here("quantile_forecasts", "ci_scores_avgcnt.csv")) |>
+  data.table::copy() |>
+  .d(, .(model, error_method, method, target, horizon, interval_score, dispersion, underprediction, overprediction)) |>
+  setnames("model", "source") 
+
+
+crps_scores <- fread(here("quantile_forecasts", "sample_scores.csv")) 
+
+all_scores <- 
+  crps_scores[wis_scores, on = c("source", "error_method", "method", "target", "horizon")]|>
+  .d(error_method == "absolute") |>
+  .d(, error_method := NULL)
+
+
+gather_scores <- all_scores |>
+  data.table::copy() |>
+  .d(target == "pcpi_pch") |>
+  .d(,target := NULL) |>
+  .d(, .(horizon, method, source, score, interval_score)) |>
+  setnames("score", "sample_crps") |>
+  melt(id.vars = c("horizon", "method", "source"), variable.name = "score_type", value.name = "score") |>
+  .d(, combms := paste0(method,"_", score_type)) |>
+  .d(, .(horizon, source, combms, score)) |>
+  .d(, horizon := paste0("horizon = ", horizon)) |>
+  .d(, score := round(score, 3)) |>
+  dcast(horizon + combms ~ source, value.var = "score") 
+
+
+gather_scores |>
+  data.table::copy() |>
+  gt(rowname_col = "combms", groupname_col = "horizon") |>
+  cols_label(
+      IMF = "IMF",
+      ar = "ar",
+      bvar = "bvar"
+    ) 
+
+
+
+
+
+
+
+col_names <- c("IMF", "ar", "bvar")
+
 ```
 
-## Including Plots
+## Inflation
 
-You can also embed plots, for example:
+```{r, echo = FALSE, warning=FALSE,fig.dim = c(10, 12)}
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+plots_is <- vector(mode = "list", length = 4)
+plots_cr <- vector(mode = "list", length = 4)
+
+for(i in 1:4){
+  
+  hor <- (i-1)*0.5
+  
+  mydat <- gather_scores |>
+    .d(horizon == paste0("horizon = ", hor)) |>
+  .d(grep("interval", combms)) |>
+  melt(id.vars = c("horizon", "combms"), variable.name = "source", value.name = "score") |>
+  .d(, c("method", "scorem", "extra") := tstrsplit(combms, "_", fixed=TRUE))
+  
+  plots_is[[i]] <- ggplot(mydat, aes(x = source, y = method)) +
+  geom_tile(aes(fill = score)) +
+    guides(fill = FALSE) +
+    ggtitle(paste0("horizon = ", hor, " - Weighted Interval Score"))
+}
+
+for(i in 1:4){
+  
+  hor <- (i-1)*0.5
+  
+  mydat <- gather_scores |>
+    .d(horizon == paste0("horizon = ", hor)) |>
+  .d(grep("crps", combms)) |>
+  melt(id.vars = c("horizon", "combms"), variable.name = "source", value.name = "score")|>
+  .d(, c("method", "scorem", "extra") := tstrsplit(combms, "_", fixed=TRUE))
+  
+  plots_cr[[i]] <- ggplot(mydat, aes(x = source, y = method)) +
+  geom_tile(aes(fill = score))+
+    guides(fill = FALSE)+
+    ggtitle(paste0("horizon = ", hor, " - CRPS by sample"))
+}
+
+
+ovr_plot <- 
+  (plots_is[[1]] + plots_cr[[1]]) /
+  (plots_is[[2]] + plots_cr[[2]]) /
+  (plots_is[[3]] + plots_cr[[3]]) /
+  (plots_is[[4]] + plots_cr[[4]]) +
+  plot_layout(heights = c(1, 1,1,1)) &
+    plot_annotation(tag_levels = 'I')  &
+    theme(legend.position = 'right', 
+          legend.box="vertical", legend.margin=margin()) 
+
+ovr_plot
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r cvgdat2, include=FALSE, echo = FALSE}
+
+scores <- fread(here("quantile_forecasts", "ci_scores.csv"))
+scores_cvgshort <- fread(here("quantile_forecasts", "cvg_pooled.csv"))
+
+cvg_rg <- c(50, 80)
+
+cols <- paste0("coverage_", cvg_rg)
+
+large_cvgdat <- scores |>
+  setnames("model", "source") |>
+  .d(, c("country", "horizon", "target", "error_method", "method", "source", cols), with = FALSE) |>
+  melt(id.vars = c("country", "horizon", "target", "error_method", "method", "source"),
+       variable.name = "pilvl",
+       value.name = "coverage") |>
+  .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
+  .d(, pilvl := as.numeric(pilvl)/100) |>
+  .d(, idcol := paste0(horizon, country, method)) |>
+  .d(, country := NULL) |>
+  .d(, horizon := NULL)
+
+
+cvgdat <- scores_cvgshort |>
+  setnames("model", "source") |>
+  .d(, c( "target", "error_method", "method", "source", cols), with = FALSE) |>
+  melt(id.vars = c("target", "error_method", "method", "source"),
+       variable.name = "pilvl",
+       value.name = "coverage") |>
+  .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
+  .d(, pilvl := as.numeric(pilvl)/100)
+
+
+cvgdat_cpi <- cvgdat |>
+  .d(target == "pcpi_pch")
+
+cvgdat_gdp <- cvgdat |>
+  .d(target == "ngdp_rpch")
+
+plot_cpi <- ggplot() +
+  geom_line(aes(x = pilvl,
+                y = coverage,
+                group = idcol),
+            data = large_cvgdat |> .d(target == "pcpi_pch"),
+            alpha = 0.4,
+            color = "gray") +
+  geom_point(aes(x = pilvl,
+                 y = coverage,
+                 color = method),
+             data = cvgdat_cpi,
+             size = 3) +
+  geom_line(aes(x = pilvl,
+                y = coverage,
+                color = method),
+            data = cvgdat_cpi,
+            lwd = 1.25) +
+  geom_segment(aes(x = 0, y = 0, xend = 1, yend = 1),
+               color = "black",
+               linetype = "dashed",
+               data = cvgdat_cpi) +
+  #scale_color_brewer(palette = "Set1") +
+  facet_grid(source ~ error_method)+
+  
+  ggtitle("Inflation") +
+  
+  scale_color_met_d("Hokusai1") +
+  
+  ylab("Empirical Coverage Level (Central PI)") +
+  xlab("Nominal Coverage (Central PI)") +
+  theme_uqimf()
+
+
+plot_gdp <- ggplot() +
+  geom_line(aes(x = pilvl,
+                y = coverage,
+                group = idcol),
+            data = large_cvgdat |> .d(target == "ngdp_rpch"),
+            alpha = 0.4,
+            color = "gray") +
+  geom_point(aes(x = pilvl,
+                 y = coverage,
+                 color = method),
+             data = cvgdat_gdp,
+             size = 3) +
+  geom_line(aes(x = pilvl,
+                y = coverage,
+                color = method),
+            data = cvgdat_gdp,
+            lwd = 1.25) +
+  geom_segment(aes(x = 0, y = 0, xend = 1, yend = 1),
+               color = "black",
+               linetype = "dashed",
+               data = cvgdat_gdp) +
+  #scale_color_brewer(palette = "Set1") +
+  facet_grid(source ~ error_method)+
+  
+  ggtitle("Real GDP Growth") + 
+  
+  scale_color_met_d("Hokusai1") +
+  
+  ylab("Empirical Coverage Level (Central PI)") +
+  xlab("Nominal Coverage (Central PI)") +
+  theme_uqimf()
+
+```
+
+## GDP
+
+```{r hey3, echo = FALSE}
+scores <- fread(here("quantile_forecasts", "ci_scores.csv"))
+
+wis_scores <- fread(here("quantile_forecasts", "ci_scores_avgcnt.csv")) |>
+  data.table::copy() |>
+  .d(, .(model, error_method, method, target, horizon, interval_score, dispersion, underprediction, overprediction)) |>
+  setnames("model", "source") 
+
+
+crps_scores <- fread(here("quantile_forecasts", "sample_scores.csv")) 
+
+all_scores <- 
+  crps_scores[wis_scores, on = c("source", "error_method", "method", "target", "horizon")]|>
+  .d(error_method == "absolute") |>
+  .d(, error_method := NULL)
+
+
+gather_scores <- all_scores |>
+  data.table::copy() |>
+  .d(target == "ngdp_rpch") |>
+  .d(,target := NULL) |>
+  .d(, .(horizon, method, source, score, interval_score)) |>
+  setnames("score", "sample_crps") |>
+  melt(id.vars = c("horizon", "method", "source"), variable.name = "score_type", value.name = "score") |>
+  .d(, combms := paste0(method,"_", score_type)) |>
+  .d(, .(horizon, source, combms, score)) |>
+  .d(, horizon := paste0("horizon = ", horizon)) |>
+  .d(, score := round(score, 3)) |>
+  dcast(horizon + combms ~ source, value.var = "score") 
+
+
+gather_scores |>
+  data.table::copy() |>
+  gt(rowname_col = "combms", groupname_col = "horizon") |>
+  cols_label(
+      IMF = "IMF",
+      ar = "ar",
+      bvar = "bvar"
+    ) 
+
+
+
+
+
+
+
+col_names <- c("IMF", "ar", "bvar")
+
+```
+
+```{r, echo = FALSE, warning=FALSE,fig.dim = c(10, 12)}
+
+plots_is <- vector(mode = "list", length = 4)
+plots_cr <- vector(mode = "list", length = 4)
+
+for(i in 1:4){
+  
+  hor <- (i-1)*0.5
+  
+  mydat <- gather_scores |>
+    .d(horizon == paste0("horizon = ", hor)) |>
+  .d(grep("interval", combms)) |>
+  melt(id.vars = c("horizon", "combms"), variable.name = "source", value.name = "score") |>
+  .d(, c("method", "scorem", "extra") := tstrsplit(combms, "_", fixed=TRUE))
+  
+  plots_is[[i]] <- ggplot(mydat, aes(x = source, y = method)) +
+  geom_tile(aes(fill = score)) +
+    guides(fill = FALSE) +
+    ggtitle(paste0("horizon = ", hor, " - Weighted Interval Score"))
+}
+
+for(i in 1:4){
+  
+  hor <- (i-1)*0.5
+  
+  mydat <- gather_scores |>
+    .d(horizon == paste0("horizon = ", hor)) |>
+  .d(grep("crps", combms)) |>
+  melt(id.vars = c("horizon", "combms"), variable.name = "source", value.name = "score")|>
+  .d(, c("method", "scorem", "extra") := tstrsplit(combms, "_", fixed=TRUE))
+  
+  plots_cr[[i]] <- ggplot(mydat, aes(x = source, y = method)) +
+  geom_tile(aes(fill = score))+
+    guides(fill = FALSE)+
+    ggtitle(paste0("horizon = ", hor, " - CRPS by sample"))
+}
+
+
+ovr_plot <- 
+  (plots_is[[1]] + plots_cr[[1]]) /
+  (plots_is[[2]] + plots_cr[[2]]) /
+  (plots_is[[3]] + plots_cr[[3]]) /
+  (plots_is[[4]] + plots_cr[[4]]) +
+  plot_layout(heights = c(1, 1,1,1)) &
+    plot_annotation(tag_levels = 'I')  &
+    theme(legend.position = 'right', 
+          legend.box="vertical", legend.margin=margin()) 
+
+ovr_plot
+
+```
+
+
+```{r cvgdat, include=FALSE, echo = FALSE}
+
+scores <- fread(here("quantile_forecasts", "ci_scores.csv"))
+scores_cvgshort <- fread(here("quantile_forecasts", "cvg_pooled.csv"))
+
+cvg_rg <- c(50, 80)
+
+cols <- paste0("coverage_", cvg_rg)
+
+large_cvgdat <- scores |>
+  setnames("model", "source") |>
+  .d(, c("country", "horizon", "target", "error_method", "method", "source", cols), with = FALSE) |>
+  melt(id.vars = c("country", "horizon", "target", "error_method", "method", "source"),
+       variable.name = "pilvl",
+       value.name = "coverage") |>
+  .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
+  .d(, pilvl := as.numeric(pilvl)/100) |>
+  .d(, idcol := paste0(horizon, country, method)) |>
+  .d(, country := NULL) |>
+  .d(, horizon := NULL)
+
+
+cvgdat <- scores_cvgshort |>
+  setnames("model", "source") |>
+  .d(, c( "target", "error_method", "method", "source", cols), with = FALSE) |>
+  melt(id.vars = c("target", "error_method", "method", "source"),
+       variable.name = "pilvl",
+       value.name = "coverage") |>
+  .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
+  .d(, pilvl := as.numeric(pilvl)/100)
+
+
+cvgdat_cpi <- cvgdat |>
+  .d(target == "pcpi_pch")
+
+cvgdat_gdp <- cvgdat |>
+  .d(target == "ngdp_rpch")
+
+plot_cpi <- ggplot() +
+  geom_line(aes(x = pilvl,
+                y = coverage,
+                group = idcol),
+            data = large_cvgdat |> .d(target == "pcpi_pch"),
+            alpha = 0.4,
+            color = "gray") +
+  geom_point(aes(x = pilvl,
+                 y = coverage,
+                 color = method),
+             data = cvgdat_cpi,
+             size = 3) +
+  geom_line(aes(x = pilvl,
+                y = coverage,
+                color = method),
+            data = cvgdat_cpi,
+            lwd = 1.25) +
+  geom_segment(aes(x = 0, y = 0, xend = 1, yend = 1),
+               color = "black",
+               linetype = "dashed",
+               data = cvgdat_cpi) +
+  #scale_color_brewer(palette = "Set1") +
+  facet_grid(source ~ error_method)+
+  
+  ggtitle("Inflation") +
+  
+  scale_color_met_d("Hokusai1") +
+  
+  ylab("Empirical Coverage Level (Central PI)") +
+  xlab("Nominal Coverage (Central PI)") +
+  theme_uqimf()
+
+
+plot_gdp <- ggplot() +
+  geom_line(aes(x = pilvl,
+                y = coverage,
+                group = idcol),
+            data = large_cvgdat |> .d(target == "ngdp_rpch"),
+            alpha = 0.4,
+            color = "gray") +
+  geom_point(aes(x = pilvl,
+                 y = coverage,
+                 color = method),
+             data = cvgdat_gdp,
+             size = 3) +
+  geom_line(aes(x = pilvl,
+                y = coverage,
+                color = method),
+            data = cvgdat_gdp,
+            lwd = 1.25) +
+  geom_segment(aes(x = 0, y = 0, xend = 1, yend = 1),
+               color = "black",
+               linetype = "dashed",
+               data = cvgdat_gdp) +
+  #scale_color_brewer(palette = "Set1") +
+  facet_grid(source ~ error_method)+
+  
+  ggtitle("Real GDP Growth") + 
+  
+  scale_color_met_d("Hokusai1") +
+  
+  ylab("Empirical Coverage Level (Central PI)") +
+  xlab("Nominal Coverage (Central PI)") +
+  theme_uqimf()
+
+```
+
+
+# Coverage, by target, methods and source
+
+```{r cvgplot, fig.dim = c(10, 12), echo = FALSE}
+
+ovr_plot <- 
+  (plot_gdp) /
+  (plot_cpi) +
+  plot_layout(guides = "collect", 
+              heights = c(1, 1)) &
+    plot_annotation(tag_levels = 'I')  &
+    theme(legend.position = 'bottom', 
+          legend.box="vertical", legend.margin=margin()) 
+
+ovr_plot
+
+```
+
+
+```{r loaddata, include = FALSE, echo = FALSE}
+
+sub_weodat <- 
+   data.table::fread(here("WEOforecasts_tidy.csv")) |>
+      .d(g7 == 1,) |>
+      .d(horizon < 2) |> ######################this shall be extended sometime##############
+      .d(, error := prediction - tv_1) |>
+      .d(target_year < 2015) |>
+      .d(, .(country, prediction, target, error,
+             horizon, target_year, forecast_year,
+             tv_1)
+      )
+
+```
+
+```{r, include = FALSE, echo = FALSE}
+head(sub_weodat)
+```
+
+

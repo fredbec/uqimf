@@ -35,46 +35,6 @@
 \makeatother
 \usepackage{xcolor}
 \usepackage[margin=1in]{geometry}
-\usepackage{color}
-\usepackage{fancyvrb}
-\newcommand{\VerbBar}{|}
-\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
-% Add ',fontsize=\small' for more characters per line
-\usepackage{framed}
-\definecolor{shadecolor}{RGB}{248,248,248}
-\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
-\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
-\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
-\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\BuiltInTok}[1]{#1}
-\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
-\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
-\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
-\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
-\newcommand{\ExtensionTok}[1]{#1}
-\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\ImportTok}[1]{#1}
-\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
-\newcommand{\NormalTok}[1]{#1}
-\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
-\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
-\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
-\newcommand{\RegionMarkerTok}[1]{#1}
-\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 \usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
@@ -106,6 +66,9 @@
 \linenumbers
 \newcommand{\beginsupplement}{\setcounter{table}{0}  \renewcommand{\thetable}{S\arabic{table}} \setcounter{figure}{0} \renewcommand{\thefigure}{S\arabic{figure}}}
 \usepackage{float}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{longtable}
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -113,11 +76,11 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same} % disable monospaced font for URLs
 \hypersetup{
-  pdftitle={Compare forecats},
+  pdftitle={IMF and Benchmark Forecasts},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
 
-\title{Compare forecats}
+\title{IMF and Benchmark Forecasts}
 \author{}
 \date{\vspace{-2.5em}}
 
@@ -125,36 +88,112 @@
 \maketitle
 
 \setstretch{2}
-\hypertarget{r-markdown}{%
-\subsection{R Markdown}\label{r-markdown}}
+\hypertarget{a-short-note-on-error-handling}{%
+\section{A short note on error handling}\label{a-short-note-on-error-handling}}
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see \url{http://rmarkdown.rstudio.com}.
+In almost all 72 cases, absolute error handling gives lower scores than directional error handling. The only exception is the inflation series for the IMF forecasts and horizon 0, where the expanding window and rolling window method give \textit{slightly} lower scores for the directional methodology.
+We thus decide to focus on the absolute errors in this document.
 
-When you click the \textbf{Knit} button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+\hypertarget{scores-by-estimation-method-horizon-and-forecast-source}{%
+\section{Scores, by estimation method, Horizon and forecast source}\label{scores-by-estimation-method-horizon-and-forecast-source}}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{summary}\NormalTok{(cars)}
-\end{Highlighting}
-\end{Shaded}
+\begin{longtable}{l|rrr}
+\toprule
+\multicolumn{1}{l}{} & IMF & ar & bvar \\ 
+\midrule
+\multicolumn{4}{l}{horizon = 0} \\ 
+\midrule
+expanding window\_interval\_score & 0.115 & 0.123 & 0.122 \\ 
+expanding window\_sample\_crps & 0.087 & 0.092 & 0.091 \\ 
+leave-one-out\_interval\_score & 0.119 & 0.133 & 0.134 \\ 
+leave-one-out\_sample\_crps & 0.088 & 0.099 & 0.100 \\ 
+rolling window\_interval\_score & 0.119 & 0.128 & 0.126 \\ 
+rolling window\_sample\_crps & 0.094 & 0.097 & 0.098 \\ 
+\midrule
+\multicolumn{4}{l}{horizon = 0.5} \\ 
+\midrule
+expanding window\_interval\_score & 0.258 & 0.272 & 0.296 \\ 
+expanding window\_sample\_crps & 0.182 & 0.208 & 0.241 \\ 
+leave-one-out\_interval\_score & 0.261 & 0.313 & 0.317 \\ 
+leave-one-out\_sample\_crps & 0.180 & 0.217 & 0.230 \\ 
+rolling window\_interval\_score & 0.261 & 0.266 & 0.288 \\ 
+rolling window\_sample\_crps & 0.191 & 0.201 & 0.235 \\ 
+\midrule
+\multicolumn{4}{l}{horizon = 1} \\ 
+\midrule
+expanding window\_interval\_score & 0.448 & 0.737 & 0.590 \\ 
+expanding window\_sample\_crps & 0.327 & 0.504 & 0.426 \\ 
+leave-one-out\_interval\_score & 0.427 & 0.726 & 0.600 \\ 
+leave-one-out\_sample\_crps & 0.302 & 0.448 & 0.400 \\ 
+rolling window\_interval\_score & 0.451 & 0.739 & 0.591 \\ 
+rolling window\_sample\_crps & 0.333 & 0.514 & 0.434 \\ 
+\midrule
+\multicolumn{4}{l}{horizon = 1.5} \\ 
+\midrule
+expanding window\_interval\_score & 0.495 & 1.044 & 0.800 \\ 
+expanding window\_sample\_crps & 0.346 & 0.627 & 0.602 \\ 
+leave-one-out\_interval\_score & 0.487 & 1.103 & 0.903 \\ 
+leave-one-out\_sample\_crps & 0.337 & 0.583 & 0.577 \\ 
+rolling window\_interval\_score & 0.494 & 1.041 & 0.779 \\ 
+rolling window\_sample\_crps & 0.347 & 0.632 & 0.570 \\ 
+\bottomrule
+\end{longtable}
 
-\begin{verbatim}
-##      speed           dist       
-##  Min.   : 4.0   Min.   :  2.00  
-##  1st Qu.:12.0   1st Qu.: 26.00  
-##  Median :15.0   Median : 36.00  
-##  Mean   :15.4   Mean   : 42.98  
-##  3rd Qu.:19.0   3rd Qu.: 56.00  
-##  Max.   :25.0   Max.   :120.00
-\end{verbatim}
+\hypertarget{inflation}{%
+\subsection{Inflation}\label{inflation}}
 
-\hypertarget{including-plots}{%
-\subsection{Including Plots}\label{including-plots}}
+\includegraphics{manuscript_files/figure-latex/unnamed-chunk-2-1.pdf}
 
-You can also embed plots, for example:
+\hypertarget{gdp}{%
+\subsection{GDP}\label{gdp}}
 
-\includegraphics{manuscript_files/figure-latex/pressure-1.pdf}
+\begin{longtable}{l|rrr}
+\toprule
+\multicolumn{1}{l}{} & IMF & ar & bvar \\ 
+\midrule
+\multicolumn{4}{l}{horizon = 0} \\ 
+\midrule
+expanding window\_interval\_score & 0.241 & 0.301 & 0.298 \\ 
+expanding window\_sample\_crps & 0.178 & 0.209 & 0.204 \\ 
+leave-one-out\_interval\_score & 0.257 & 0.312 & 0.310 \\ 
+leave-one-out\_sample\_crps & 0.183 & 0.219 & 0.214 \\ 
+rolling window\_interval\_score & 0.240 & 0.302 & 0.297 \\ 
+rolling window\_sample\_crps & 0.178 & 0.211 & 0.204 \\ 
+\midrule
+\multicolumn{4}{l}{horizon = 0.5} \\ 
+\midrule
+expanding window\_interval\_score & 0.416 & 0.540 & 0.493 \\ 
+expanding window\_sample\_crps & 0.298 & 0.383 & 0.358 \\ 
+leave-one-out\_interval\_score & 0.448 & 0.583 & 0.531 \\ 
+leave-one-out\_sample\_crps & 0.310 & 0.408 & 0.377 \\ 
+rolling window\_interval\_score & 0.416 & 0.554 & 0.504 \\ 
+rolling window\_sample\_crps & 0.297 & 0.405 & 0.373 \\ 
+\midrule
+\multicolumn{4}{l}{horizon = 1} \\ 
+\midrule
+expanding window\_interval\_score & 0.837 & 1.090 & 0.942 \\ 
+expanding window\_sample\_crps & 0.640 & 0.822 & 0.763 \\ 
+leave-one-out\_interval\_score & 0.858 & 1.067 & 0.948 \\ 
+leave-one-out\_sample\_crps & 0.634 & 0.759 & 0.709 \\ 
+rolling window\_interval\_score & 0.851 & 1.122 & 0.970 \\ 
+rolling window\_sample\_crps & 0.663 & 0.875 & 0.815 \\ 
+\midrule
+\multicolumn{4}{l}{horizon = 1.5} \\ 
+\midrule
+expanding window\_interval\_score & 1.045 & 1.288 & 1.102 \\ 
+expanding window\_sample\_crps & 0.790 & 0.937 & 0.897 \\ 
+leave-one-out\_interval\_score & 1.034 & 1.278 & 1.107 \\ 
+leave-one-out\_sample\_crps & 0.765 & 0.882 & 0.849 \\ 
+rolling window\_interval\_score & 1.056 & 1.312 & 1.143 \\ 
+rolling window\_sample\_crps & 0.831 & 0.985 & 0.949 \\ 
+\bottomrule
+\end{longtable}
 
-Note that the \texttt{echo\ =\ FALSE} parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+\includegraphics{manuscript_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+\hypertarget{coverage-by-target-methods-and-source}{%
+\section{Coverage, by target, methods and source}\label{coverage-by-target-methods-and-source}}
+
+\includegraphics{manuscript_files/figure-latex/cvgplot-1.pdf}
 
 \end{document}
