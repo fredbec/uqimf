@@ -63,7 +63,7 @@ ui <- fluidPage(
 
       radioButtons(inputId = "trueval",
                    choices = c("0.5", "1", "1.5", "2"),
-                   selected = "0.5",
+                   selected = "1",
                    label = "True Value release"),
 
       radioButtons(inputId = "zoomin",
