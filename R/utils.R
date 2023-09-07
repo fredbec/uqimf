@@ -109,3 +109,11 @@ custom_labeller <- function(variable, value) {
   }
   return(as.character(value))  # Default labelling for other variables
 }
+
+fperror <- function(type = 0.1){
+
+  if(type == 0.1){
+
+    return(-2.77e-17)
+  }
+}

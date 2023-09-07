@@ -108,7 +108,7 @@ qufcs <- lapply(1:nrow(combs),
 
 directional_expand <- qufcs |>
   .d(error_method == "directional") |>
-  .d(quantile %in% c(0.1-2.77e-17, 0.25, 0.75, 0.9)) |>
+  .d(quantile %in% c(0.1+fperror(type = 0.1), 0.25, 0.75, 0.9)) |>
   .d(, .(country, target, target_year, horizon, imf_pp, true_value, error, quantile, error_prediction, source, method)) |>
   .d(, quantile := paste0("q", quantile)) |>
   dcast(country + target + target_year + horizon + error + imf_pp + true_value + source + method ~ quantile,
