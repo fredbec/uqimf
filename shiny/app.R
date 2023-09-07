@@ -573,8 +573,8 @@ server <- function(input, output) {
                $$ l^{\\alpha, d}_{t,h,v,l,j} = \\hat{y}_{t, h, l, j} + q^{0.5 - \\alpha/2 } \\left(\\mathcal{E}^{m, d}_{t,h,v,l,j}  \\right) $$
                $$ u^{\\alpha, d}_{t,h,v,l,j} = \\hat{y}_{t, h, l, j} + q^{0.5 + \\alpha/2 } \\left(\\mathcal{E}^{m, d}_{t,h,v,l,j}  \\right) $$'),
       helpText('And for the absolute method:
-               $$ l^{\\alpha, a}_{t,h,v,l,j} = \\hat{y}_{t, h, l, j} - \\frac{1}{2} q^{\\alpha} \\left(\\mathcal{E}^{m, a}_{t,h,v,l,j}  \\right) $$
-               $$ u^{\\alpha, a}_{t,h,v,l,j} = \\hat{y}_{t, h, l, j} + \\frac{1}{2} q^{\\alpha} \\left(\\mathcal{E}^{m, a}_{t,h,v,l,j}  \\right) $$')
+               $$ l^{\\alpha, a}_{t,h,v,l,j} = \\hat{y}_{t, h, l, j} -  q^{\\alpha} \\left(\\mathcal{E}^{m, a}_{t,h,v,l,j}  \\right) $$
+               $$ u^{\\alpha, a}_{t,h,v,l,j} = \\hat{y}_{t, h, l, j} +  q^{\\alpha} \\left(\\mathcal{E}^{m, a}_{t,h,v,l,j}  \\right) $$')
     )
   })
 
