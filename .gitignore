@@ -55,3 +55,7 @@ oecd_data/oecd_cpi_quarter.csv
 oecd_data/oecd_cpi_quarterly_annual.csv
 oecd_data/oecd_gdp_quarterly_annual.csv
 oecd_gdp_quarterly.csv
+
+
+# manuscript files
+manuscript/manuscript_files
