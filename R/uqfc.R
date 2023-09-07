@@ -162,6 +162,12 @@ empFC <- function(weodat,
                      quSet_pos) |>
         .d(order(target, country, target_year, horizon, quantile))
 
+    } else if (error_method == "directional"){
+
+      quSet <- quSet |>
+        .d(, quantile := 1-quantile) |>
+        .d(, prediction := -1 * prediction)
+
     }
 
     return(quSet)
