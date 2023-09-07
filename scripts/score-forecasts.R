@@ -13,6 +13,7 @@ window_length <- 9
 
 cis <- c(0.5, 0.8)
 
+#########This Block is repeated from make-forecasts and only for scoring via crps_sample
 #extract truth and horizon values from WEO forecasts
 hordat <- data.table::fread(
   here("WEOforecasts_tidy.csv")
@@ -60,6 +61,9 @@ fcdat <- hordat[fcdat, on = c("target_year", "forecast_year", "season")] |>
   setnames("V8", paste0("tv_", tv_release)) |>
   .d(target_year <= max_year)
 
+
+
+#######read in quantile forecasts
 qufcs <- data.table::fread(here("quantile_forecasts", "quantile_forecasts.csv"))
 combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"))
 
