@@ -391,6 +391,39 @@ cvgdat_cpi <- cvgdat |>
 cvgdat_gdp <- cvgdat |>
   .d(target == "ngdp_rpch")
 
+
+
+#############block to merge with cvgdat symmetric
+
+cvgdat_cpin <- data.table::fread(here("quantile_forecasts", "cvg_pooled_directionalsymmetric.csv")) |>
+  setnames("model", "source") |>
+  .d(, c( "target", "error_method", "method", "source", cols), with = FALSE) |>
+  melt(id.vars = c("target", "error_method", "method", "source"),
+       variable.name = "pilvl",
+       value.name = "coverage") |>
+  .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
+  .d(, pilvl := as.numeric(pilvl)/100) |>
+  .d(target == "pcpi_pch") |>
+  rbind(cvgdat_cpi)
+
+cvgdat_cpi <- cvgdat_cpin
+
+
+cvgdat_gdpn <- data.table::fread(here("quantile_forecasts", "cvg_pooled_directionalsymmetric.csv")) |>
+  setnames("model", "source") |>
+  .d(, c( "target", "error_method", "method", "source", cols), with = FALSE) |>
+  melt(id.vars = c("target", "error_method", "method", "source"),
+       variable.name = "pilvl",
+       value.name = "coverage") |>
+  .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
+  .d(, pilvl := as.numeric(pilvl)/100) |>
+  .d(target == "ngdp_rpch") |>
+  rbind(cvgdat_gdp)
+
+cvgdat_gdp <- cvgdat_gdpn
+
+
+
 plot_cpi <- ggplot() +
   geom_line(aes(x = pilvl,
                 y = coverage,
