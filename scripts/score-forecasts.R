@@ -68,6 +68,7 @@ qufcs <- data.table::fread(here("quantile_forecasts", "quantile_forecasts.csv"))
 combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"))
 
 
+#################score CI's####################################################
 weodat_qu_sameyearset <- qufcs |>
   .d(target_year>=1999) |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, method, error_method, source)) |>
@@ -93,6 +94,22 @@ scores_cvgshort <- scoreempQu(weodat_qu_sameyearset, cvg_rg = c(50,80),
                      by = c("model", "error_method", "method", "target"))
 
 
+
+################################Score Point Predictions############################
+pp_scores <- fcdat |>
+  .d(target_year>=1999) |>
+  data.table::copy() |>
+  .d(, ae := abs(get(paste0("tv_", tv_release)) - prediction)) |>
+  .d(, sque := (get(paste0("tv_", tv_release)) - prediction)^2) |>
+  .d(, meanae := mean(ae), .(source, target, country, horizon)) |>
+  .d(, meansque := mean(sque), .(source, target, country, horizon)) |>
+  .d(, .(source, target, country, horizon, meanae, meansque)) |>
+  setnames(c("meanae", "meansque"), c("ae", "sque")) |>
+  unique()
+
+
+
+#################################Score by CRPS Sample##############################
 weodat_samples <- fcdat |>
   .d(horizon < 2) |>
   .d(,.(country, source, target, horizon, target_year, tv_1, prediction))
@@ -136,4 +153,5 @@ data.table::fwrite(scores_allyears, here("quantile_forecasts", "ci_scores_allyea
 data.table::fwrite(all_crps, here("quantile_forecasts", "sample_scores.csv"))
 data.table::fwrite(scores_cvgshort, here("quantile_forecasts", "cvg_pooled.csv"))
 data.table::fwrite(scores_avgcountry, here("quantile_forecasts", "ci_scores_avgcnt.csv"))
+data.table::fwrite(pp_scores, here("quantile_forecasts", "pointfc_scores.csv"))
 
