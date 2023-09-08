@@ -68,19 +68,28 @@ qufcs <- data.table::fread(here("quantile_forecasts", "quantile_forecasts.csv"))
 combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"))
 
 
-weodat_qu <- qufcs |>
+weodat_qu_sameyearset <- qufcs |>
+  .d(target_year>=1999) |>
+  .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, method, error_method, source)) |>
+  setnames("source", "model") |>
+  .d(quantile %in% c(0.1, 0.25, 0.75, 0.9))
+
+weodat_qu_allyears <- qufcs |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, method, error_method, source)) |>
   setnames("source", "model") |>
   .d(quantile %in% c(0.1, 0.25, 0.75, 0.9))
 
 
-scores <- scoreempQu(weodat_qu, cvg_rg = c(50,80),
+scores <- scoreempQu(weodat_qu_sameyearset, cvg_rg = c(50,80),
                      by = c("model", "error_method", "method", "country", "target", "horizon"))
 
-scores_avgcountry <- scoreempQu(weodat_qu, cvg_rg = c(50,80),
+scores_allyears <- scoreempQu(weodat_qu_sameyearset, cvg_rg = c(50,80),
+                     by = c("model", "error_method", "method", "country", "target", "horizon"))
+
+scores_avgcountry <- scoreempQu(weodat_qu_sameyearset, cvg_rg = c(50,80),
                      by = c("model", "error_method", "method", "target", "horizon"))
 
-scores_cvgshort <- scoreempQu(weodat_qu, cvg_rg = c(50,80),
+scores_cvgshort <- scoreempQu(weodat_qu_sameyearset, cvg_rg = c(50,80),
                      by = c("model", "error_method", "method", "target"))
 
 
@@ -123,6 +132,7 @@ all_crps <- lapply(1:nrow(combs_methods), function(idx){
 
 
 data.table::fwrite(scores, here("quantile_forecasts", "ci_scores.csv"))
+data.table::fwrite(scores_allyears, here("quantile_forecasts", "ci_scores_allyears.csv"))
 data.table::fwrite(all_crps, here("quantile_forecasts", "sample_scores.csv"))
 data.table::fwrite(scores_cvgshort, here("quantile_forecasts", "cvg_pooled.csv"))
 data.table::fwrite(scores_avgcountry, here("quantile_forecasts", "ci_scores_avgcnt.csv"))
