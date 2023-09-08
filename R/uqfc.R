@@ -32,7 +32,7 @@ empQU <- function(weodat,
   quants <-
     weodat |>
     #.d(horizon == horizon) |>
-    .d(, error := error_fct(prediction - get(paste0("tv_", tv_release)))) |>
+    .d(, error := error_fct(get(paste0("tv_", tv_release)) - prediction)) |>
     .d(!is.na(error)) |>
     .d(, {
       quantile_vals <- calculate_quantiles(error, quantiles)
@@ -162,12 +162,6 @@ empFC <- function(weodat,
                      quSet_pos) |>
         .d(order(target, country, target_year, horizon, quantile))
 
-    } else if (error_method == "directional"){
-
-      quSet <- quSet |>
-        .d(, quantile := 1-quantile) |>
-        .d(, prediction := -1 * prediction)
-
     }
 
     return(quSet)
@@ -193,7 +187,6 @@ empFC <- function(weodat,
 
     quantileFC <- truevals[quantileFC, on = c("country", "target", "target_year", "horizon")]
   }
-
 
 
   return(quantileFC)
