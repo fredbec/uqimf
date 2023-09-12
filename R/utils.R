@@ -117,3 +117,26 @@ fperror <- function(type = 0.1){
     return(-2.77e-17)
   }
 }
+
+
+
+plot_horizon_label <- function(length.out = 4){
+
+  phl <- c(`0` = "Fall forecast, same year",
+           `0.5` = "Spring forecast, same year",
+           `1`= "Fall forecast, year ahead",
+           `1.5`= "Spring forecast, year ahead")
+
+  return(phl[1:length.out])
+}
+
+
+plot_horizon_label_short <- function(length.out = 4){
+
+  phl <- c(`0` = "F, same year",
+           `0.5` = "S, same year",
+           `1`= "F, year ahead",
+           `1.5`= "S, year ahead")
+
+  return(phl[1:length.out])
+}
