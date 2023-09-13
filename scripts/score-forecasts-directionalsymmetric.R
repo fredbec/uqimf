@@ -33,6 +33,6 @@ scores_cvgshort_symm <- scoreempQu(weodat_qu_symm, cvg_rg = c(50,80),
                               by = c("model", "error_method", "method", "target"))
 
 
-data.table::fwrite(scores_symm, here("quantile_forecasts", "ci_scores_directionalsymmetric.csv"))
-data.table::fwrite(scores_cvgshort_symm, here("quantile_forecasts", "cvg_pooled_directionalsymmetric.csv"))
-data.table::fwrite(scores_avgcountry_symm, here("quantile_forecasts", "ci_scores_avgcnt_directionalsymmetric.csv"))
+data.table::fwrite(scores_symm, here("scores", "ci_scores_directionalsymmetric.csv"))
+data.table::fwrite(scores_cvgshort_symm, here("scores", "cvg_pooled_directionalsymmetric.csv"))
+data.table::fwrite(scores_avgcountry_symm, here("scores", "ci_scores_avgcnt_directionalsymmetric.csv"))

@@ -206,14 +206,14 @@ bvar_scores_cvgshort <- scoreempQu(bvar_qu_sameyearset, cvg_rg = c(50,80),
 
 
 ######################################Saving#######################################################
-data.table::fwrite(scores, here("quantile_forecasts", "ci_scores.csv"))
-data.table::fwrite(scores_allyears, here("quantile_forecasts", "ci_scores_allyears.csv"))
-data.table::fwrite(scores_cvgshort, here("quantile_forecasts", "cvg_pooled.csv"))
-data.table::fwrite(scores_avgcountry, here("quantile_forecasts", "ci_scores_avgcnt.csv"))
-data.table::fwrite(all_crps, here("quantile_forecasts", "sample_scores.csv"))
-data.table::fwrite(pp_scores, here("quantile_forecasts", "pointfc_scores.csv"))
-data.table::fwrite(bvar_scores, here("quantile_forecasts", "bvar_ci_scores.csv"))
-data.table::fwrite(bvar_scores_allyears, here("quantile_forecasts", "bvar_ci_scores_allyears.csv"))
-data.table::fwrite(bvar_scores_cvgshort, here("quantile_forecasts", "bvar_cvg_pooled.csv"))
-data.table::fwrite(bvar_scores_avgcountry, here("quantile_forecasts", "bvar_ci_scores_avgcnt.csv"))
+data.table::fwrite(scores, here("scores", "ci_scores.csv"))
+data.table::fwrite(scores_allyears, here("scores", "ci_scores_allyears.csv"))
+data.table::fwrite(scores_cvgshort, here("scores", "cvg_pooled.csv"))
+data.table::fwrite(scores_avgcountry, here("scores", "ci_scores_avgcnt.csv"))
+data.table::fwrite(all_crps, here("scores", "sample_scores.csv"))
+data.table::fwrite(pp_scores, here("scores", "pointfc_scores.csv"))
+data.table::fwrite(bvar_scores, here("scores", "bvar_ci_scores.csv"))
+data.table::fwrite(bvar_scores_allyears, here("scores", "bvar_ci_scores_allyears.csv"))
+data.table::fwrite(bvar_scores_cvgshort, here("scores", "bvar_cvg_pooled.csv"))
+data.table::fwrite(bvar_scores_avgcountry, here("scores", "bvar_ci_scores_avgcnt.csv"))
 
