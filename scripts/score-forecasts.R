@@ -153,10 +153,10 @@ all_crps <- lapply(1:nrow(combs_methods), function(idx){
 
 
 ####################################Score BVAR Quantile Forecasts###########################
-idx_bvar <- which(bvar_qufcs$quantile_level == 0.05)[1] #where bvar starts
+#idx_bvar <- which(bvar_qufcs$quantile_level == 0.05)[1] #where bvar starts
 
 #remove redundant rows and rename target
-bvar_qus <- hordat[bvar_qufcs[idx_bvar:nrow(bvar_qufcs)], on = c("target_year", "forecast_year", "season")]  |>
+bvar_qus <- hordat[bvar_qufcs |> .d(method == "BVAR"), on = c("target_year", "forecast_year", "season")]  |>
   .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
   .d(, var := NULL)  |>
   .d(, source := "bvar") |>
