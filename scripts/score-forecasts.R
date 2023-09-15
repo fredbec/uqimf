@@ -13,52 +13,8 @@ window_length <- specs$window_length
 
 cis <- specs$ci_levels_eval
 
-#########This Block is repeated from make-forecasts and only for scoring via crps_sample
-#extract truth and horizon values from WEO forecasts
-hordat <- data.table::fread(
-  here("weodat.csv")
-) |>
-  .d(, .(target_year, forecast_year, forecast_season, horizon)) |>
-  unique() |>
-  setnames("forecast_season", "season")
-
-truth <- data.table::fread(
-  here("weodat.csv")
-) |>
-  .d(, .(country, target, target_year, tv_0.5, tv_1, tv_1.5, tv_2)) |>
-  .d(!is.na(get(paste0("tv_", tv_release)))) |>
-  unique()
-
-
-#read in forecast data and prepare for feeding to empFC function
-#rename some stuff, join with truth and horizon data, reduce columns and
-#filter for year set
-fcdat <- data.table::fread(
-  here("benchmarks", "forecast_long.csv")
-) |>
-  .d(, V1 := NULL) |>
-  .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
-  .d(, var := NULL)
-
-fcdat <- hordat[fcdat, on = c("target_year", "forecast_year", "season")] |>
-  .d(method != "Truth") |>
-  split(by = c("method")) |>
-  lapply(function(dt)
-    dt |>
-      .d(, method := NULL) |>
-      .d(!is.na(horizon)) |>
-      setnames("value", "prediction")) |>
-  lapply(function(dt)
-    truth[dt, on = c("target", "target_year", "country")]) |>
-  rbindlist(idcol = "source") |>
-  .d(order(source, target, country, forecast_year, horizon)) |>
-  .d(, .(source, target, country, forecast_year, horizon, target_year,
-         prediction, get(paste0("tv_", tv_release))
-  )
-  ) |>
-  setnames("V8", paste0("tv_", tv_release)) |>
-  .d(target_year <= max_year)
-
+#for scoring crps values
+fcdat <- data.table::fread(here("point_forecasts.csv"))
 
 
 ####################################read in quantile forecasts########################
