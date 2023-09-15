@@ -8,25 +8,33 @@ source(here("specs", "specs.R"))
 
 max_year <- specs$score_max_year
 min_year <- specs$min_year
+score_min_year <- specs$score_min_year
 tv_release <- specs$tv_release
 window_length <- specs$window_length
 
 cis <- specs$ci_levels_eval
+qus <- ci_to_quantiles(cis, "directional") ###################remove hardcoding
 
 #for scoring crps values
-fcdat <- data.table::fread(here("point_forecasts.csv"))
+#as these are scored directly on the point forecasts and not on the extracted
+#quantile forecasts
+fcdat <- data.table::fread(here("point_forecasts.csv"))|>
+  .d(target_year <= max_year)
 
 
 ####################################read in quantile forecasts########################
-qufcs <- data.table::fread(here("quantile_forecasts", "quantile_forecasts.csv"))
+qufcs <- data.table::fread(here("quantile_forecasts", "quantile_forecasts.csv")) |>
+  .d(target_year <= max_year)
 combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"))
-bvar_qufcs <- data.table::fread(here("benchmarks", "raw", "forecast_quantiles.csv"))
+bvar_qus <- data.table::fread(here("benchmarks", "quantile_benchmarks_processed.csv")) |>
+  setnames("tv_1", "true_value")|>
+  .d(target_year <= max_year)
 
 
 #################score CI's####################################################
 weodat_qu_sameyearset <- qufcs |>
   data.table::copy() |>
-  .d(target_year>=1999) |>
+  .d(target_year>=score_min_year) |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, method, error_method, source)) |>
   setnames("source", "model") |>
   .d(quantile %in% c(0.1, 0.25, 0.75, 0.9))
@@ -53,7 +61,7 @@ scores_cvgshort <- scoreempQu(weodat_qu_sameyearset, cvg_rg = c(50,80),
 
 ################################Score Point Predictions############################
 pp_scores <- fcdat |>
-  .d(target_year>=1999) |>
+  .d(target_year>=score_min_year) |>
   data.table::copy() |>
   .d(, ae := abs(get(paste0("tv_", tv_release)) - prediction)) |>
   .d(, sque := (get(paste0("tv_", tv_release)) - prediction)^2) |>
@@ -107,31 +115,9 @@ all_crps <- lapply(1:nrow(combs_methods), function(idx){
 
 
 ####################################Score BVAR Quantile Forecasts###########################
-#idx_bvar <- which(bvar_qufcs$quantile_level == 0.05)[1] #where bvar starts
-
-#remove redundant rows and rename target
-bvar_qus <- hordat[bvar_qufcs |> .d(method == "BVAR"), on = c("target_year", "forecast_year", "season")]  |>
-  .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
-  .d(, var := NULL)  |>
-  .d(, source := "bvar") |>
-  .d(, method := NULL) |>
-  setnames("value", "prediction") |>
-  .d(target_year >= min_year & target_year <= max_year) |>
-  setnames("quantile_level", "quantile")
-
-#join with truth data
-bvar_qus <- truth[bvar_qus, on = c("target", "target_year", "country") ]  |>
-  .d(order(source, target, country, forecast_year, horizon)) |>
-  .d(, .(source, target, country, forecast_year, horizon, target_year,
-         prediction, get(paste0("tv_", tv_release)), quantile)) |>
-  setnames("V8", paste0("tv_", tv_release)) |>
-  setnames(paste0("tv_", tv_release), "true_value") |>
-  .d(target_year <= max_year)
-
-
 bvar_qu_sameyearset <- bvar_qus |>
   data.table::copy() |>
-  .d(target_year>=1999) |>
+  .d(target_year>=score_min_year) |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, source)) |>
   setnames("source", "model") |>
   .d(quantile %in% c(0.1, 0.25, 0.75, 0.9))

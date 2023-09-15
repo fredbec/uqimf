@@ -7,7 +7,6 @@ source(here("specs", "specs.R"))
 
 .d <- `[`
 
-max_year <- specs$score_max_year
 min_year <- specs$min_year
 tv_release <- specs$tv_release
 window_length <- specs$window_length
@@ -56,8 +55,7 @@ benchmark_fc <- hordat[fcdat, on = c("target_year", "forecast_year", "season")] 
          prediction, get(paste0("tv_", tv_release))
   )
   ) |>
-  setnames("V8", paste0("tv_", tv_release)) |>
-  .d(target_year <= max_year)
+  setnames("V8", paste0("tv_", tv_release))
 
 
 #read in WEO forecasts, process the same way and merge with benchmarks
@@ -67,19 +65,37 @@ weodat <- fread(here("weodat.csv")) |>
   .d(, .(source, target, country, forecast_year, horizon, target_year,
          prediction, get(paste0("tv_", tv_release)))) |>
   setnames("V8", paste0("tv_", tv_release)) |>
-  .d(target_year <= max_year) |>
   rbind(benchmark_fc)
 
 
 ################################################################################
 #quantile forecasts
-#bvar_qufcs <- data.table::fread(here("benchmarks", "forecast_quantiles.csv"))
+bvar_qufcs <- data.table::fread(
+  here("benchmarks", "raw", "forecast_quantiles.csv")
+  ) |>
+  .d(, V1 := NULL) |>
+  .d(method == "BVAR") |> #remove Truth and IMF forecasts
+  .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
+  .d(, var := NULL) |>
+  setnames("method", "source") |>
+  .d(, source := "bvar")
 
+bvar_fc <- hordat[bvar_qufcs, on = c("target_year", "forecast_year", "season")] |>
+  .d(!is.na(horizon)) |>
+  setnames("value", "prediction") |>
+  setnames("quantile_level", "quantile")
 
+bvar_fc <- truth[bvar_fc, on = c("target", "target_year", "country") ]  |>
+  .d(order(source, target, country, forecast_year, horizon)) |>
+  .d(, .(source, target, country, forecast_year, horizon, target_year,
+         prediction, get(paste0("tv_", tv_release)), quantile)) |>
+  setnames("V8", paste0("tv_", tv_release)) #|>
+  #setnames(paste0("tv_", tv_release), "true_value")
 
 
 
 ################################################################################
 #save data
 data.table::fwrite(benchmark_fc, here("benchmarks", "point_benchmarks_processed.csv"))
+data.table::fwrite(bvar_fc, here("benchmarks", "quantile_benchmarks_processed.csv"))
 data.table::fwrite(weodat, here("point_forecasts.csv"))
