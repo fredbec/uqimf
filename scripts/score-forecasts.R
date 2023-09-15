@@ -13,7 +13,8 @@ tv_release <- specs$tv_release
 window_length <- specs$window_length
 
 cis <- specs$ci_levels_eval
-qus <- ci_to_quantiles(cis, "directional") ###################remove hardcoding
+qus <- specs$qu_levels
+cis100 <- specs$ci_levels_eval_su #for passing to scoring function
 
 #for scoring crps values
 #as these are scored directly on the point forecasts and not on the extracted
@@ -37,24 +38,24 @@ weodat_qu_sameyearset <- qufcs |>
   .d(target_year>=score_min_year) |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, method, error_method, source)) |>
   setnames("source", "model") |>
-  .d(quantile %in% c(0.1, 0.25, 0.75, 0.9))
+  .d(quantile %in% qus)
 
 weodat_qu_allyears <- qufcs |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, method, error_method, source)) |>
   setnames("source", "model") |>
-  .d(quantile %in% c(0.1, 0.25, 0.75, 0.9))
+  .d(quantile %in% qus)
 
 
-scores <- scoreempQu(weodat_qu_sameyearset, cvg_rg = c(50,80),
+scores <- scoreempQu(weodat_qu_sameyearset, cvg_rg = cis100,
                      by = c("model", "error_method", "method", "country", "target", "horizon"))
 
-scores_allyears <- scoreempQu(weodat_qu_allyears, cvg_rg = c(50,80),
+scores_allyears <- scoreempQu(weodat_qu_allyears, cvg_rg = cis100,
                      by = c("model", "error_method", "method", "country", "target", "horizon"))
 
-scores_avgcountry <- scoreempQu(weodat_qu_sameyearset, cvg_rg = c(50,80),
+scores_avgcountry <- scoreempQu(weodat_qu_sameyearset, cvg_rg = cis100,
                      by = c("model", "error_method", "method", "target", "horizon"))
 
-scores_cvgshort <- scoreempQu(weodat_qu_sameyearset, cvg_rg = c(50,80),
+scores_cvgshort <- scoreempQu(weodat_qu_sameyearset, cvg_rg = cis100,
                      by = c("model", "error_method", "method", "target"))
 
 
@@ -120,25 +121,25 @@ bvar_qu_sameyearset <- bvar_qus |>
   .d(target_year>=score_min_year) |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, source)) |>
   setnames("source", "model") |>
-  .d(quantile %in% c(0.1, 0.25, 0.75, 0.9))
+  .d(quantile %in% qus)
 
 bvar_qu_allyears <- bvar_qus |>
   .d(!is.na(horizon)) |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile,  source)) |>
   setnames("source", "model") |>
-  .d(quantile %in% c(0.1, 0.25, 0.75, 0.9))
+  .d(quantile %in% qus)
 
 
-bvar_scores <- scoreempQu(bvar_qu_sameyearset, cvg_rg = c(50,80),
+bvar_scores <- scoreempQu(bvar_qu_sameyearset, cvg_rg = cis100,
                      by = c("model", "country", "target", "horizon"))
 
-bvar_scores_allyears <- scoreempQu(bvar_qu_allyears, cvg_rg = c(50,80),
+bvar_scores_allyears <- scoreempQu(bvar_qu_allyears, cvg_rg = cis100,
                               by = c("model", "country", "target", "horizon"))
 
-bvar_scores_avgcountry <- scoreempQu(bvar_qu_sameyearset, cvg_rg = c(50,80),
+bvar_scores_avgcountry <- scoreempQu(bvar_qu_sameyearset, cvg_rg = cis100,
                                 by = c("model", "target", "horizon"))
 
-bvar_scores_cvgshort <- scoreempQu(bvar_qu_sameyearset, cvg_rg = c(50,80),
+bvar_scores_cvgshort <- scoreempQu(bvar_qu_sameyearset, cvg_rg = cis100,
                               by = c("model", "target"))
 
 

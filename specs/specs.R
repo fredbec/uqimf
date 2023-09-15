@@ -13,7 +13,9 @@ specs <- list(
   min_year = min_year,
   score_min_year = min_year + window_length,
   ci_levels_eval = c(0.5, 0.8),
-  ci_levels_make =  seq(0.1, 0.9, by = 0.1)
+  ci_levels_eval_su = c(50, 80), #for scoringutils wrapper
+  ci_levels_make =  seq(0.1, 0.9, by = 0.1),
+  qu_levels = c(0.1, 0.25, 0.75, 0.9)
 )
 
 
