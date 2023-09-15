@@ -1,35 +1,33 @@
 library(here)
 library(data.table)
-library(ggplot2)
-library(MetBrewer)
 devtools::load_all()
+
+source(here("specs", "specs.R"))
 
 .d <- `[`
 
-max_year <- 2012
-min_year <- 1990
-tv_release <- 1
-window_length <- 9
+max_year <- specs$score_max_year
+min_year <- specs$min_year
+tv_release <- specs$tv_release
+window_length <- specs$window_length
 
-cis <- c(0.5, 0.8)
+cis <- specs$ci_levels_eval
 
 #########This Block is repeated from make-forecasts and only for scoring via crps_sample
 #extract truth and horizon values from WEO forecasts
 hordat <- data.table::fread(
-  here("WEOforecasts_tidy.csv")
+  here("weodat.csv")
 ) |>
   .d(, .(target_year, forecast_year, forecast_season, horizon)) |>
   unique() |>
   setnames("forecast_season", "season")
 
 truth <- data.table::fread(
-  here("WEOforecasts_tidy.csv")
+  here("weodat.csv")
 ) |>
-  .d(g7 == 1) |>
-  .d(, .(ISOAlpha_3Code, target, target_year, tv_0.5, tv_1, tv_1.5, tv_2)) |>
+  .d(, .(country, target, target_year, tv_0.5, tv_1, tv_1.5, tv_2)) |>
   .d(!is.na(get(paste0("tv_", tv_release)))) |>
-  unique() |>
-  setnames("ISOAlpha_3Code", "country")
+  unique()
 
 
 #read in forecast data and prepare for feeding to empFC function
@@ -66,7 +64,7 @@ fcdat <- hordat[fcdat, on = c("target_year", "forecast_year", "season")] |>
 ####################################read in quantile forecasts########################
 qufcs <- data.table::fread(here("quantile_forecasts", "quantile_forecasts.csv"))
 combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"))
-bvar_qufcs <- data.table::fread(here("benchmarks", "forecast_quantiles.csv"))
+bvar_qufcs <- data.table::fread(here("benchmarks", "raw", "forecast_quantiles.csv"))
 
 
 #################score CI's####################################################

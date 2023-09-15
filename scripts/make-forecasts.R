@@ -2,40 +2,35 @@ library(here)
 library(data.table)
 devtools::load_all()
 
+source(here("specs", "specs.R"))
+
 .d <- `[`
-max_year <- 2012
-min_year <- 1990
-tv_release <- 1
-window_length <- 9
 
-error_method <- c("directional", "absolute")
-method <- c("rolling window", "expanding window", "leave-one-out")
-target <- c("pcpi_pch", "ngdp_rpch")
-source <- c("IMF", "bvar", "ar")
+max_year <- specs$score_max_year
+min_year <- specs$min_year
+tv_release <- specs$tv_release
+window_length <- specs$window_length
 
-cis <- seq(0.1, 0.9, by = 0.1)
+cis <- specs$ci_levels_make
 
 #make all combinations of settings
-combs <- data.table::CJ(source, target, error_method, method)
-data.table::fwrite(combs, here("quantile_forecasts", "setting_combinations.csv"))
+combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"))
 
 
 #extract truth and horizon values from WEO forecasts
 hordat <- data.table::fread(
-  here("WEOforecasts_tidy.csv")
+  here("weodat.csv")
   ) |>
   .d(, .(target_year, forecast_year, forecast_season, horizon)) |>
   unique() |>
   setnames("forecast_season", "season")
 
 truth <- data.table::fread(
-  here("WEOforecasts_tidy.csv")
+  here("weodat.csv")
   ) |>
-  .d(g7 == 1) |>
-  .d(, .(ISOAlpha_3Code, target, target_year, tv_0.5, tv_1, tv_1.5, tv_2)) |>
+  .d(, .(country, target, target_year, tv_0.5, tv_1, tv_1.5, tv_2)) |>
   .d(!is.na(get(paste0("tv_", tv_release)))) |>
-  unique() |>
-  setnames("ISOAlpha_3Code", "country")
+  unique()
 
 
 #read in forecast data and prepare for feeding to empFC function

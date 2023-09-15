@@ -26,12 +26,6 @@ qu_lvls <- lapply(seq_along(1:no_pairs),
                   function(ind) c(qus[ind], qus[(n_qus)-(ind-1)], alpha_vals[ind]))
 
 
-
-
-sub_weodat <- data.table::fread(here("WEOforecasts_tidy.csv")) |>
-  .d(g7 == 1) |>
-  .d(horizon < 2)
-
 fcdat <- bvar_qus |>
   .d(!is.na(horizon)) |>
   .d(quantile %in% c(0.1, 0.25, 0.75, 0.9)) |>
