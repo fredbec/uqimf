@@ -78,7 +78,7 @@ bvar_qufcs <- data.table::fread(
   .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
   .d(, var := NULL) |>
   setnames("method", "source") |>
-  .d(, source := "bvar")
+  .d(, source := "bvar_qu")
 
 bvar_fc <- hordat[bvar_qufcs, on = c("target_year", "forecast_year", "season")] |>
   .d(!is.na(horizon)) |>
