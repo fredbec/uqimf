@@ -35,46 +35,6 @@
 \makeatother
 \usepackage{xcolor}
 \usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
-\usepackage{color}
-\usepackage{fancyvrb}
-\newcommand{\VerbBar}{|}
-\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
-% Add ',fontsize=\small' for more characters per line
-\usepackage{framed}
-\definecolor{shadecolor}{RGB}{248,248,248}
-\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
-\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
-\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
-\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\BuiltInTok}[1]{#1}
-\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
-\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
-\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
-\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
-\newcommand{\ExtensionTok}[1]{#1}
-\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\ImportTok}[1]{#1}
-\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
-\newcommand{\NormalTok}[1]{#1}
-\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
-\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
-\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
-\newcommand{\RegionMarkerTok}[1]{#1}
-\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 \usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
@@ -190,24 +150,84 @@ Two different philosophies.
 
 The absolute method will always yield symmetric central prediction intervals around the forecast value, while the directional method will in general yield asymmetric intervals. They thus result in different central intervals, unless the errors in \(\mathcal{E}\) are perfectly symmetric around zero\footnote{Not totally correct, actually. For this to hold exactly, the error set would need to be augmented with one zero value.}. In fact, the directional method can yield central prediction intervals that do not even contain the forecast value, in cases where the \((0.5 - \alpha/2)\)-quantile is positive or the \((0.5 + \alpha/2)\)-quantile is negative.
 
-\hypertarget{a-short-note-on-error-handling}{%
-\section{A short note on error handling}\label{a-short-note-on-error-handling}}
+\hypertarget{scores-by-error-method-horizon-and-forecast-source}{%
+\section{Scores, by error method, Horizon and forecast source}\label{scores-by-error-method-horizon-and-forecast-source}}
 
-In almost all 72 cases, absolute error handling gives lower scores than directional error handling. The only exception is the inflation series for the IMF forecasts and horizon 0, where the expanding window and rolling window method give \textit{slightly} lower scores for the directional methodology.
-We thus decide to focus on the absolute errors in this document.
+\hypertarget{inflation}{%
+\subsection{Inflation}\label{inflation}}
 
-\hypertarget{scores-by-estimation-method-horizon-and-forecast-source}{%
-\section{Scores, by estimation method, Horizon and forecast source}\label{scores-by-estimation-method-horizon-and-forecast-source}}
+\includegraphics{manuscript_files/figure-latex/overall_assessment_ew-1.pdf}
+\newpage
+Some notes:
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\#bring into long format}
-\NormalTok{long\_scores }\OtherTok{\textless{}{-}} \FunctionTok{gather\_scores}\NormalTok{(all\_scores, }\StringTok{"pcpi\_pch"}\NormalTok{)}
+\begin{itemize}
+\item Inflation: directional vs. absolute errors:
+\begin{itemize}
+\item difference small for IMF method, absolute slighly better, likely due to longer central intervals
+\item AR and BVAR profit more from directional correction (upward bias)
+\item for expanding window method, difference in coverage is smaller (-> structural breaks)
 
-\FunctionTok{scores\_to\_table}\NormalTok{(all\_scores, }\StringTok{"pcpi\_pch"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
+\end{itemize}
+\item Inflation overall scores: IMF forecasts outperform others
+\begin{itemize}
+\item lower scores for point forecasts
+\item lower WIS 
+\item lower bias (compute directly?)
+\end{itemize}
 
+
+\item GDP Growth: more similar results for different sources
+\begin{itemize}
+\item lower scores at shorter horizons, more similar at larger horizons
+\item IMF forecasts better only for absolute error method
+\end{itemize}
+\end{itemize}
+
+\newpage
+
+\hypertarget{gdp}{%
+\subsection{GDP}\label{gdp}}
+
+\begin{verbatim}
+## Warning: Using alpha for a discrete variable is not advised.
+## Using alpha for a discrete variable is not advised.
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Removed 1 rows containing missing values (`geom_bar()`).
+\end{verbatim}
+
+\includegraphics{manuscript_files/figure-latex/gdpovr_ew-1.pdf}
+
+\hypertarget{expanding-window---scores-by-error-method-horizon-and-forecast-source}{%
+\section{Expanding Window - Scores, by error method, Horizon and forecast source}\label{expanding-window---scores-by-error-method-horizon-and-forecast-source}}
+
+\hypertarget{inflation-1}{%
+\subsection{Inflation}\label{inflation-1}}
+
+\includegraphics{manuscript_files/figure-latex/overall_assessment-1.pdf}
+\newpage
+
+\hypertarget{gdp-1}{%
+\subsection{GDP}\label{gdp-1}}
+
+\begin{verbatim}
+## Warning: Using alpha for a discrete variable is not advised.
+## Using alpha for a discrete variable is not advised.
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Removed 1 rows containing missing values (`geom_bar()`).
+\end{verbatim}
+
+\includegraphics{manuscript_files/figure-latex/gdpovr-1.pdf}
+
+\hypertarget{coverage-by-target-methods-and-source}{%
+\section{Coverage, by target, methods and source}\label{coverage-by-target-methods-and-source}}
+
+\includegraphics{manuscript_files/figure-latex/cvgplot-1.pdf}
+
+\newpage
 \begin{longtable}{l|rrr}
 \toprule
 \multicolumn{1}{l}{} & IMF & ar & bvar \\ 
@@ -250,13 +270,13 @@ rolling window\_sample\_crps & 0.347 & 0.632 & 0.570 \\
 \bottomrule
 \end{longtable}
 
-\hypertarget{inflation}{%
-\subsection{Inflation}\label{inflation}}
+\hypertarget{inflation-2}{%
+\subsection{Inflation}\label{inflation-2}}
 
 \includegraphics{manuscript_files/figure-latex/cpitileplot-1.pdf}
 
-\hypertarget{gdp}{%
-\subsection{GDP}\label{gdp}}
+\hypertarget{gdp-2}{%
+\subsection{GDP}\label{gdp-2}}
 
 \begin{longtable}{l|rrr}
 \toprule
@@ -301,17 +321,5 @@ rolling window\_sample\_crps & 0.831 & 0.985 & 0.949 \\
 \end{longtable}
 
 \includegraphics{manuscript_files/figure-latex/gdptileplot-1.pdf}
-
-\begin{verbatim}
-## Warning: Using alpha for a discrete variable is not advised.
-## Using alpha for a discrete variable is not advised.
-\end{verbatim}
-
-\includegraphics{manuscript_files/figure-latex/overall_assessment-1.pdf}
-
-\hypertarget{coverage-by-target-methods-and-source}{%
-\section{Coverage, by target, methods and source}\label{coverage-by-target-methods-and-source}}
-
-\includegraphics{manuscript_files/figure-latex/cvgplot-1.pdf}
 
 \end{document}

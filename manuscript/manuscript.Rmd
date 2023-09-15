@@ -94,21 +94,17 @@ Two different philosophies.
 
 The absolute method will always yield symmetric central prediction intervals around the forecast value, while the directional method will in general yield asymmetric intervals. They thus result in different central intervals, unless the errors in $\mathcal{E}$ are perfectly symmetric around zero\footnote{Not totally correct, actually. For this to hold exactly, the error set would need to be augmented with one zero value.}. In fact, the directional method can yield central prediction intervals that do not even contain the forecast value, in cases where the $(0.5 - \alpha/2)$-quantile is positive or the $(0.5 + \alpha/2)$-quantile is negative.
 
-# A short note on error handling
-
-In almost all 72 cases, absolute error handling gives lower scores than directional error handling. The only exception is the inflation series for the IMF forecasts and horizon 0, where the expanding window and rolling window method give \textit{slightly} lower scores for the directional methodology. 
-We thus decide to focus on the absolute errors in this document. 
 
 
 ```{r loaddata, echo = FALSE}
-scores <- fread(here("quantile_forecasts", "ci_scores.csv"))
+scores <- fread(here("scores", "ci_scores.csv"))
 
-wis_scores <- fread(here("quantile_forecasts", "ci_scores_avgcnt.csv")) |>
+wis_scores <- fread(here("scores", "ci_scores_avgcnt.csv")) |>
   data.table::copy() |>
   .d(, .(model, error_method, method, target, horizon, interval_score, dispersion, underprediction, overprediction)) |>
   setnames("model", "source") 
 
-crps_scores <- fread(here("quantile_forecasts", "sample_scores.csv")) 
+crps_scores <- fread(here("scores", "sample_scores.csv")) 
 
 #join score sets
 all_scores <- 
@@ -116,90 +112,48 @@ all_scores <-
   .d(error_method == "absolute") |>
   .d(, error_method := NULL)
 
+########
+
+bvar_wis_scores <- fread(here("scores", "bvar_ci_scores_avgcnt.csv")) |>
+  data.table::copy() |>
+  .d(, .(model, target, horizon, interval_score, dispersion, underprediction, overprediction)) |>
+  .d(,model := "bvar_qu") |>
+  setnames("model", "source") |>
+  .d(,error_method := "directional") |>
+  .d(,method := "rolling window") #change later
+
+
+bvar_wis_scores <- rbind(bvar_wis_scores, bvar_wis_scores |> copy() |> .d(, error_method := "absolute"))
+
 ```
 
 
 
 
-# Scores, by estimation method, Horizon and forecast source 
-```{r, cpitable = FALSE}
-#bring into long format
-long_scores <- gather_scores(all_scores, "pcpi_pch")
-
-scores_to_table(all_scores, "pcpi_pch")
-
-
-```
+# Scores, by error method, Horizon and forecast source 
 
 ## Inflation
 
-```{r cpitileplot, echo = FALSE, warning=FALSE,fig.dim = c(10, 12)}
+```{r overall_assessment_ew, fig.dim=c(12,12), echo = FALSE, warning = FALSE}
 
-plots_is <- vector(mode = "list", length = 4)
-plots_cr <- vector(mode = "list", length = 4)
-
-hor_list <- as.list(1:4)
-
-plots_is <- lapply(hor_list, function(i) tile_plot(long_scores, hor = (i-1)*0.5, "interval"))
-plots_cr <- lapply(hor_list, function(i) tile_plot(long_scores, hor = (i-1)*0.5, "crps"))
-
-ovr_plot <- 
-  (plots_is[[1]] + plots_cr[[1]]) /
-  (plots_is[[2]] + plots_cr[[2]]) /
-  (plots_is[[3]] + plots_cr[[3]]) /
-  (plots_is[[4]] + plots_cr[[4]]) +
-  plot_layout(heights = c(1, 1,1,1)) &
-    plot_annotation(tag_levels = 'I')  &
-    theme(legend.position = 'right', 
-          legend.box="vertical", legend.margin=margin()) 
-
-ovr_plot
-
-```
-
-
-## GDP
-
-```{r gdptable, echo = FALSE}
-
-long_scores <- gather_scores(all_scores, "ngdp_rpch")
-scores_to_table(all_scores, "ngdp_rpch")
-
-```
-
-```{r gdptileplot, echo = FALSE, warning=FALSE,fig.dim = c(10, 12)}
-
-plots_is <- vector(mode = "list", length = 4)
-plots_cr <- vector(mode = "list", length = 4)
-
-hor_list <- as.list(1:4)
-
-plots_is <- lapply(hor_list, function(i) tile_plot(long_scores, hor = (i-1)*0.5, "interval"))
-plots_cr <- lapply(hor_list, function(i) tile_plot(long_scores, hor = (i-1)*0.5, "crps"))
-
-ovr_plot <- 
-  (plots_is[[1]] + plots_cr[[1]]) /
-  (plots_is[[2]] + plots_cr[[2]]) /
-  (plots_is[[3]] + plots_cr[[3]]) /
-  (plots_is[[4]] + plots_cr[[4]]) +
-  plot_layout(heights = c(1, 1,1,1)) &
-    plot_annotation(tag_levels = 'I')  &
-    theme(legend.position = 'right', 
-          legend.box="vertical", legend.margin=margin()) 
-
-ovr_plot
-
-```
-
-
-
-```{r overall_assessment, fig.dim=c(12,12), echo = FALSE}
-
-scores_cvgshort <- fread(here("quantile_forecasts", "ci_scores_avgcnt.csv")) |>
+scores_cvgshort <- fread(here("scores", "ci_scores_avgcnt.csv")) |>
   setnames("model", "source", skip_absent = TRUE)
 
-point_scores <- data.table::fread(here("quantile_forecasts", "pointfc_scores.csv")) 
 
+bvar_scores_cvgshort <- fread(here("scores", "bvar_ci_scores_avgcnt.csv")) |>
+  setnames("model", "source", skip_absent = TRUE) |>
+  .d(, source := "bvar_qu") |>
+  .d(, method := "rolling window") |>
+  .d(, error_method := "absolute")
+
+
+bvar_scores_cvgshort <- rbind(bvar_scores_cvgshort, bvar_scores_cvgshort |> copy() |> .d(, error_method := "directional"))
+
+
+point_scores <- data.table::fread(here("scores", "pointfc_scores.csv")) 
+
+wis_scores <- rbind(wis_scores, bvar_wis_scores)
+scores_cvgshort <- rbind(scores_cvgshort, bvar_scores_cvgshort)
 
 ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_scores, trgt){
 
@@ -249,9 +203,9 @@ ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_s
   wis_plot <- function(decompdat, error_m, maxval){
     
     if(error_m == "directional"){
-      plot_name <- "Directional Errors"
+      plot_name <- "WIS - Directional Errors"
     } else {
-      plot_name <- "Absolute Errors"
+      plot_name <- "WIS - Absolute Errors"
     }
     
     
@@ -271,11 +225,12 @@ ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_s
                                       "Dispersion"),
                            name = "Components of the WIS") +
       scale_x_discrete(name = "",
-                       breaks = c("IMF", "bvar", "ar"),
-                       labels = c("IMF", "BVAR", "AR")) +
+                       breaks = c("IMF", "bvar", "bvar_qu", "ar"),
+                       labels = c("IMF", "BVAR", "BVAR_QU", "AR")) +
       scale_y_continuous(name = "WIS", limits = c(0, maxval)) +
-      scale_fill_brewer(palette = "Set2", 
-                        name = "Model Type")+
+      scale_fill_met_d("Hokusai1") +
+      #scale_fill_brewer(palette = "Set2", 
+      #                  name = "Model Type")+
       xlab("") +
       #labs(fill = "Model Type") +
       theme_uqimf() %+replace%
@@ -292,13 +247,18 @@ ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_s
   horizon_path_plot <- function(score_data,
                                 score_rule,
                                 ylab = score_rule, 
-                                facet = NULL){
+                                facet = NULL,
+                                title = NULL){
     
     path_plot <- ggplot(score_data, 
            aes(x = horizon,
                y = get(score_rule), 
                color = source)) +
-      scale_color_brewer(palette = "Set2") +
+      
+      scale_color_met_d("Hokusai1", breaks = c("IMF", "bvar", "ar", "bvar_qu"),
+                       labels = c("IMF", "BVAR", "AR", "BVAR_QU")) +
+      
+      #scale_color_brewer(palette = "Set2") +
       geom_line() +
       geom_point() +
       ylab(ylab) +
@@ -306,7 +266,8 @@ ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_s
       guides(fill = "none", colour = "none") +
       theme_uqimf() %+replace%
       theme(legend.title=element_blank(),
-            legend.position = "none")
+            legend.position = "none") +
+      ggtitle(title)
     
     if(!is.null(facet)){
       
@@ -324,13 +285,13 @@ ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_s
   dir_wis_plot <- wis_plot(decomp_data, "directional", xmax)
   abs_wis_plot <- wis_plot(decomp_data, "absolute", xmax)
   
-  c50plot <- horizon_path_plot(cvgscores, "coverage_50", "CI Coverage - 50", facet = "error_method") +
+  c50plot <- horizon_path_plot(cvgscores, "coverage_50", "CI Coverage - 50", facet = "error_method", title = "Central Interval Coverage - alpha = 50") +
     geom_hline(aes(yintercept = 0.5)) +
     scale_y_continuous(labels = paste0(seq(0, 100, by = 25), "%"),
                        breaks = seq(0,1, by = 0.25),
                        limits = c(0,1)) 
   
-  c80plot <- horizon_path_plot(cvgscores, "coverage_80", "CI Coverage - 80", facet = "error_method") +
+  c80plot <- horizon_path_plot(cvgscores, "coverage_80", "CI Coverage - 80", facet = "error_method", title = "Central Interval Coverage - alpha = 80") +
     geom_hline(aes(yintercept = 0.8)) +
     scale_y_continuous(labels = paste0(seq(0, 100, by = 25), "%"),
                        breaks = seq(0,1, by = 0.25),
@@ -339,20 +300,22 @@ ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_s
   erow <-  ggplot() + theme_void()
   
   
-  aeplot <- horizon_path_plot(point_scores |> .d(, error_method := "directional"), "meanae", "Absolute Error")
+  aeplot <- horizon_path_plot(point_scores |> .d(, error_method := "directional"), "meanae", "Absolute Error", title = "Point Forecast - Abs. Error")
   
-  squeplot <- horizon_path_plot(point_scores |> .d(, error_method := "directional"), "meansque", "Squared Error")
+  squeplot <- horizon_path_plot(point_scores |> .d(, error_method := "directional"), "meansque", "Squared Error", title = "Point Forecast - Squ. Error")
   
-  crpsplot_rw <- horizon_path_plot(crps_scores_rw |>.d(, error_method := "directional"), "score", "CRPS by Sample")
+  crpsplot_rw <- horizon_path_plot(crps_scores_rw |>.d(, error_method := "directional"), "score", "CRPS by Sample", title = "CRPS - Rolling Window") +
+    scale_y_continuous(limits = c(0.07,1.05)) 
   
-  crpsplot_loo <- horizon_path_plot(crps_scores_loo |>.d(, error_method := "directional"), "score", "CRPS by Sample")
+  
+  crpsplot_loo <- horizon_path_plot(crps_scores_loo |>.d(, error_method := "directional"), "score", "CRPS by Sample", title = "CRPS - LOO") +
+    scale_y_continuous(limits = c(0.07,1.05)) 
   
   
   
   ovr_plot <- 
     (dir_wis_plot | abs_wis_plot) /
     (plot_spacer()) /
-    (plot_annotation(title = "hey")) /
     (c50plot | c80plot) /
     (plot_spacer()) /
     (squeplot | aeplot | crpsplot_rw | crpsplot_loo) +
@@ -371,13 +334,266 @@ ovr_assessment_plot(wis_scores, scores_cvgshort, point_scores, all_scores, "pcpi
    
 
 ```
+\newpage
+Some notes:
+\begin{itemize}
+\item Inflation: directional vs. absolute errors:
+\begin{itemize}
+\item difference small for IMF method, absolute slighly better, likely due to longer central intervals
+\item AR and BVAR profit more from directional correction (upward bias)
+\item for expanding window method, difference in coverage is smaller (-> structural breaks)
+
+\end{itemize}
+\item Inflation overall scores: IMF forecasts outperform others
+\begin{itemize}
+\item lower scores for point forecasts
+\item lower WIS 
+\item lower bias (compute directly?)
+\end{itemize}
+
+
+\item GDP Growth: more similar results for different sources
+\begin{itemize}
+\item lower scores at shorter horizons, more similar at larger horizons
+\item IMF forecasts better only for absolute error method
+\end{itemize}
+\end{itemize}
+
+
+\newpage
+
+## GDP
+
+```{r gdpovr_ew, echo = FALSE, warning = TRUE, fig.dim=c(12,12)}
+
+ovr_assessment_plot(wis_scores, scores_cvgshort, point_scores, all_scores, "ngdp_rpch")
+```
+
+
+
+
+
+# Expanding Window - Scores, by error method, Horizon and forecast source 
+
+## Inflation
+
+```{r overall_assessment, fig.dim=c(12,12), echo = FALSE, warning = FALSE}
+
+scores_cvgshort <- fread(here("scores", "ci_scores_avgcnt.csv")) |>
+  setnames("model", "source", skip_absent = TRUE)
+
+
+bvar_scores_cvgshort <- fread(here("scores", "bvar_ci_scores_avgcnt.csv")) |>
+  setnames("model", "source", skip_absent = TRUE) |>
+  .d(, source := "bvar_qu") |>
+  .d(, method := "expanding window") |>
+  .d(, error_method := "absolute")
+
+
+bvar_scores_cvgshort <- rbind(bvar_scores_cvgshort, bvar_scores_cvgshort |> copy() |> .d(, error_method := "directional"))
+
+
+point_scores <- data.table::fread(here("scores", "pointfc_scores.csv")) 
+
+wis_scores <- rbind(wis_scores, bvar_wis_scores)
+scores_cvgshort <- rbind(scores_cvgshort, bvar_scores_cvgshort)
+
+ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_scores, trgt){
+
+  cvgscores <- cvg_scoredat |>
+    .d(method == "expanding window") |>
+    .d(target == trgt) |>
+    .d(, target := NULL) |>
+    .d(, method := NULL) #|>
+  
+  
+  decomp_data <- wis_scoredat |>
+    .d(method == "expanding window") |>
+    .d(target == trgt) |>
+    .d(, target := NULL) |>
+    .d(, method := NULL) #|>
+  
+  point_scores <- point_scores |>
+    .d(target == trgt) |>
+    .d(, target := NULL) |>
+    .d(, meanae := mean(ae), by = c("source", "horizon")) |>
+    .d(, meansque := mean(sque), by = c("source", "horizon")) |>
+    .d(, .(source, country, horizon, meanae, meansque)) |>
+    unique()
+  
+  crps_scores_rw <- crps_scores |>
+    .d(method == "expanding window") |>
+    .d(target == trgt) |>
+    .d(, target := NULL)
+  
+  crps_scores_loo <- crps_scores |>
+    .d(method == "leave-one-out") |>
+    .d(target == trgt) |>
+    .d(, target := NULL)
+  
+  
+  xmax <- max(decomp_data$interval_score)
+  
+  decomp_data <- decomp_data |>
+    data.table::melt(id.vars = c("source", "error_method", "horizon"),
+                     value.name = "score",
+                     variable.name = "type") |>
+    .d(type != "interval_score") # filter out total score, only interested in decomposition
+  
+  
+  
+  #check arguments of function!
+  wis_plot <- function(decompdat, error_m, maxval){
+    
+    if(error_m == "directional"){
+      plot_name <- "WIS - Directional Errors"
+    } else {
+      plot_name <- "WIS - Absolute Errors"
+    }
+    
+    
+    plt <- ggplot(decomp_data |> .d(error_method == error_m),
+                          aes(x = source, 
+                              fill = source,
+                              y = score,
+                              alpha = type)) +
+      geom_bar(position="stack", stat="identity") +
+      facet_wrap(~ horizon,
+                 labeller = as_labeller(plot_horizon_label_short(4)),
+                 nrow = 1) +
+      #geom_hline(yintercept = 1) +
+      scale_alpha_discrete(range = c(0.35,1),
+                           labels = c("Overprediction",
+                                      "Underprediction",
+                                      "Dispersion"),
+                           name = "Components of the WIS") +
+      scale_x_discrete(name = "",
+                       breaks = c("IMF", "bvar", "bvar_qu", "ar"),
+                       labels = c("IMF", "BVAR", "BVAR_QU", "AR")) +
+      scale_y_continuous(name = "WIS", limits = c(0, maxval)) +
+      scale_fill_met_d("Hokusai1") +
+      #scale_fill_brewer(palette = "Set2", 
+      #                  name = "Model Type")+
+      xlab("") +
+      #labs(fill = "Model Type") +
+      theme_uqimf() %+replace%
+      theme(axis.text.x = element_text(size = 8, angle = 90, hjust = .5, vjust = .5, face = "plain"),
+            strip.text = element_text(size = 8)) +
+      ggtitle(plot_name) +
+      theme(#legend.title=element_blank(),
+            legend.position = "none")
+
+    return(plt)
+  
+  }
+  
+  horizon_path_plot <- function(score_data,
+                                score_rule,
+                                ylab = score_rule, 
+                                facet = NULL,
+                                title = NULL){
+    
+    path_plot <- ggplot(score_data, 
+           aes(x = horizon,
+               y = get(score_rule), 
+               color = source)) +
+      
+      scale_color_met_d("Hokusai1", breaks = c("IMF", "bvar", "ar", "bvar_qu"),
+                       labels = c("IMF", "BVAR", "AR", "BVAR_QU")) +
+      
+      #scale_color_brewer(palette = "Set2") +
+      geom_line() +
+      geom_point() +
+      ylab(ylab) +
+      xlab("Forecast Horizon") +
+      guides(fill = "none", colour = "none") +
+      theme_uqimf() %+replace%
+      theme(legend.title=element_blank(),
+            legend.position = "none") +
+      ggtitle(title)
+    
+    if(!is.null(facet)){
+      
+      path_plot <- path_plot +
+      facet_wrap(~ get(facet),
+                 scales = "free") 
+    }
+    
+    return(path_plot)
+    
+  }
+  
+  
+    
+  dir_wis_plot <- wis_plot(decomp_data, "directional", xmax)
+  abs_wis_plot <- wis_plot(decomp_data, "absolute", xmax)
+  
+  c50plot <- horizon_path_plot(cvgscores, "coverage_50", "CI Coverage - 50", facet = "error_method", title = "Central Interval Coverage - alpha = 50") +
+    geom_hline(aes(yintercept = 0.5)) +
+    scale_y_continuous(labels = paste0(seq(0, 100, by = 25), "%"),
+                       breaks = seq(0,1, by = 0.25),
+                       limits = c(0,1)) 
+  
+  c80plot <- horizon_path_plot(cvgscores, "coverage_80", "CI Coverage - 80", facet = "error_method", title = "Central Interval Coverage - alpha = 80") +
+    geom_hline(aes(yintercept = 0.8)) +
+    scale_y_continuous(labels = paste0(seq(0, 100, by = 25), "%"),
+                       breaks = seq(0,1, by = 0.25),
+                       limits = c(0,1)) 
+  
+  erow <-  ggplot() + theme_void()
+  
+  
+  aeplot <- horizon_path_plot(point_scores |> .d(, error_method := "directional"), "meanae", "Absolute Error", title = "Point Forecast - Abs. Error")
+  
+  squeplot <- horizon_path_plot(point_scores |> .d(, error_method := "directional"), "meansque", "Squared Error", title = "Point Forecast - Squ. Error")
+  
+  crpsplot_rw <- horizon_path_plot(crps_scores_rw |>.d(, error_method := "directional"), "score", "CRPS by Sample", title = "CRPS - expanding window") +
+    scale_y_continuous(limits = c(0.07,1.05)) 
+  
+  
+  crpsplot_loo <- horizon_path_plot(crps_scores_loo |>.d(, error_method := "directional"), "score", "CRPS by Sample", title = "CRPS - LOO") +
+    scale_y_continuous(limits = c(0.07,1.05)) 
+  
+  
+  
+  ovr_plot <- 
+    (dir_wis_plot | abs_wis_plot) /
+    (plot_spacer()) /
+    (c50plot | c80plot) /
+    (plot_spacer()) /
+    (squeplot | aeplot | crpsplot_rw | crpsplot_loo) +
+    plot_layout(guides = "collect", 
+                heights = c(0.2, 0.05, 0.2, 0.05, 0.2)) &
+      plot_annotation(tag_levels = 'I')  &
+      theme(legend.position = 'bottom', 
+            legend.box="vertical", legend.margin=margin()) 
+
+
+  
+  return(ovr_plot)
+}
+
+ovr_assessment_plot(wis_scores, scores_cvgshort, point_scores, all_scores, "pcpi_pch")
+   
+
+```
+\newpage
+
+
+
+## GDP
+
+```{r gdpovr, echo = FALSE, warning = TRUE, fig.dim=c(12,12)}
+
+ovr_assessment_plot(wis_scores, scores_cvgshort, point_scores, all_scores, "ngdp_rpch")
+```
 
 
 
 ```{r cvgdat, include=FALSE, echo = FALSE}
 
-scores <- fread(here("quantile_forecasts", "ci_scores.csv"))
-scores_cvgshort <- fread(here("quantile_forecasts", "cvg_pooled.csv"))
+scores <- fread(here("scores", "ci_scores.csv"))
+scores_cvgshort <- fread(here("scores", "cvg_pooled.csv"))
 
 cvg_rg <- c(50, 80)
 
@@ -416,7 +632,7 @@ cvgdat_gdp <- cvgdat |>
 
 #############block to merge with cvgdat symmetric
 
-cvgdat_cpin <- data.table::fread(here("quantile_forecasts", "cvg_pooled_directionalsymmetric.csv")) |>
+cvgdat_cpin <- data.table::fread(here("scores", "cvg_pooled_directionalsymmetric.csv")) |>
   setnames("model", "source") |>
   .d(, c( "target", "error_method", "method", "source", cols), with = FALSE) |>
   melt(id.vars = c("target", "error_method", "method", "source"),
@@ -430,7 +646,7 @@ cvgdat_cpin <- data.table::fread(here("quantile_forecasts", "cvg_pooled_directio
 cvgdat_cpi <- cvgdat_cpin
 
 
-cvgdat_gdpn <- data.table::fread(here("quantile_forecasts", "cvg_pooled_directionalsymmetric.csv")) |>
+cvgdat_gdpn <- data.table::fread(here("scores", "cvg_pooled_directionalsymmetric.csv")) |>
   setnames("model", "source") |>
   .d(, c( "target", "error_method", "method", "source", cols), with = FALSE) |>
   melt(id.vars = c("target", "error_method", "method", "source"),
@@ -513,6 +729,8 @@ plot_gdp <- ggplot() +
 ```
 
 
+
+
 # Coverage, by target, methods and source
 
 ```{r cvgplot, fig.dim = c(10, 12), echo = FALSE}
@@ -529,4 +747,77 @@ ovr_plot <-
 ovr_plot
 
 ```
+
+\newpage
+```{r, cpitable = FALSE, echo=FALSE}
+#bring into long format
+long_scores <- gather_scores(all_scores, "pcpi_pch")
+
+scores_to_table(all_scores, "pcpi_pch")
+
+
+```
+
+## Inflation
+
+```{r cpitileplot, echo = FALSE, warning=FALSE,fig.dim = c(10, 12)}
+
+plots_is <- vector(mode = "list", length = 4)
+plots_cr <- vector(mode = "list", length = 4)
+
+hor_list <- as.list(1:4)
+
+plots_is <- lapply(hor_list, function(i) tile_plot(long_scores, hor = (i-1)*0.5, "interval"))
+plots_cr <- lapply(hor_list, function(i) tile_plot(long_scores, hor = (i-1)*0.5, "crps"))
+
+ovr_plot <- 
+  (plots_is[[1]] + plots_cr[[1]]) /
+  (plots_is[[2]] + plots_cr[[2]]) /
+  (plots_is[[3]] + plots_cr[[3]]) /
+  (plots_is[[4]] + plots_cr[[4]]) +
+  plot_layout(heights = c(1, 1,1,1)) &
+    plot_annotation(tag_levels = 'I')  &
+    theme(legend.position = 'right', 
+          legend.box="vertical", legend.margin=margin()) 
+
+ovr_plot
+
+```
+
+
+
+
+## GDP
+
+```{r gdptable, echo = FALSE}
+
+long_scores <- gather_scores(all_scores, "ngdp_rpch")
+scores_to_table(all_scores, "ngdp_rpch")
+
+```
+
+```{r gdptileplot, echo = FALSE, warning=FALSE,fig.dim = c(10, 12)}
+
+plots_is <- vector(mode = "list", length = 4)
+plots_cr <- vector(mode = "list", length = 4)
+
+hor_list <- as.list(1:4)
+
+plots_is <- lapply(hor_list, function(i) tile_plot(long_scores, hor = (i-1)*0.5, "interval"))
+plots_cr <- lapply(hor_list, function(i) tile_plot(long_scores, hor = (i-1)*0.5, "crps"))
+
+ovr_plot <- 
+  (plots_is[[1]] + plots_cr[[1]]) /
+  (plots_is[[2]] + plots_cr[[2]]) /
+  (plots_is[[3]] + plots_cr[[3]]) /
+  (plots_is[[4]] + plots_cr[[4]]) +
+  plot_layout(heights = c(1, 1,1,1)) &
+    plot_annotation(tag_levels = 'I')  &
+    theme(legend.position = 'right', 
+          legend.box="vertical", legend.margin=margin()) 
+
+ovr_plot
+
+```
+
 
