@@ -10,6 +10,8 @@ specs <- list(
   tv_release = 1,
   window_length = window_length,
   score_max_year = 2012,
+  max_year_imf = 2023, #for MAKING forecasts, won't affect scoring at all
+  max_year_others = 2021, #for MAKING forecasts, won't affect scoring at all
   min_year = min_year,
   score_min_year = min_year + window_length,
   ci_levels_eval = c(0.5, 0.8),

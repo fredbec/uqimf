@@ -6,7 +6,8 @@ source(here("specs", "specs.R"))
 
 .d <- `[`
 
-max_year <- specs$score_max_year
+max_year_imf <- specs$max_year_imf
+max_year_others <- specs$max_year_others
 min_year <- specs$min_year
 tv_release <- specs$tv_release
 window_length <- specs$window_length
@@ -38,6 +39,9 @@ qufcs <- lapply(1:nrow(combs),
       .d(target == setting[, "target"]) |>
       .d(, source := NULL)
 
+    if (setting[, "source"] %in% c("bvar", "ar")) {
+      max_year <- specs$max_year_others
+    }
 
     empFC(subdat,
           target_year = start_year:max_year,
