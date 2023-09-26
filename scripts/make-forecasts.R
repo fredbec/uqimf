@@ -41,6 +41,9 @@ qufcs <- lapply(1:nrow(combs),
 
     if (setting[, "source"] %in% c("bvar", "ar")) {
       max_year <- specs$max_year_others
+    } else {
+
+      max_year <- specs$max_year_imf
     }
 
     empFC(subdat,
@@ -57,8 +60,8 @@ qufcs <- lapply(1:nrow(combs),
     }
   ) |>
   rbindlist() |>
-  setnames(paste0("tv_", tv_release), "true_value") |>
-  .d(!is.na(true_value))
+  setnames(paste0("tv_", tv_release), "true_value") #|>
+  #.d(!is.na(true_value))
 
 
 directional_expand <- qufcs |>
