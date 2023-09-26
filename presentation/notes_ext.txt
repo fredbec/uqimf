@@ -1,0 +1,92 @@
+Hello everyone,
+
+welcome to the presentation on Simple and Transparent Macroeconomic Prediction Intervals
+
+This is joint and ongoing work with Fabian Krüger (who just presented similar work) and Melanie Schienle. As it's ongoing work, I and we are especially keen to hear feedback.
+
+
+F2:
+	- I'll introduce the setting and practice of forecasts for macroeconomics
+	- introduce the methods (spoiler: It's very simple and transparent)
+	- results 
+	- outlookk
+
+
+F3: 
+	- an economist's favorite pastime
+
+	- there is a widespread practice of issuing point forecasts for the two major macroeconomic target
+	- increased attention on inflation in past years
+	- attention on real GDP growth was always 
+
+	- fixed-event forecasts: 
+
+F4: can we really be that sure?
+	- refers to the fact that the focus of these instituions is to issue point forecasts 
+	- you could say that they are still presented 
+	- prognoses, or projections
+
+	- underlying uncertainty is taken for granted
+
+	- if you play close attention to these forecasts, you can pick up on nuances that suggest a level of certainty or incongruities 
+	- and in any case, we know here that attaching a  number to uncertainty is valuable, leads to more rational decision making etc. 
+
+	- uncertainty is at best acknowledged, rarely quantified
+		- of course pertains to media reception, but also the scientific publications of these insitutions
+		 	- "increased uncertainty" during times that the institution regards as particularly turbulent
+		 	- uncertainty as almost a binary concept 
+	- Germany is averting or avoiding a recession in 2023.
+
+
+F7:
+
+	- attach distributional forecasts in the form of central prediction intervals 
+
+	- choice of 9 past forecast errors was intentional and not tuned.
+
+
+F8:
+	- (1) can be seen as a benchmark for the point forecasts:
+		- given the methodology, are these a good source of point forecasts?
+		- could we use better point forecassts?
+	- (2) check on the methodology itself
+
+	- commonly used forecasts in the field, BVAR especially 
+
+	- conceptually, they have a bit of an advantage, as they are trained on final data and we're also evaluating on final data
+
+F10:
+- here, we show the central interval coverage levels.
+	- for each source, simply count over all instances (grouping all countries and horizons together) how many observations fall inside the interval
+	- once for the 50% and once for the 80% interval
+	- we would like to be close to the 45-degree-line
+
+- for inflation, slightly overconfident (values are 0.45 and 0.75 respectively)
+	- while BVAR direct are underconfident 
+	- and BVAR, AR tend to be calibrated the best
+	- overall, they are very close to nominal coverage
+
+- even more so true for GDP growth
+	- IMF; BVAR, AR all have extremely close to nominal coverage
+	- BVAR direct is overconfident
+
+- the grey lines are individual horizon-country pairs for the IMF method only
+	- for conciseness, show only for IMF method
+	- we can see that there is some substantial variability 
+	- but at least we're not hiding somehing bimodial or otherwise degenerated
+	- for other methods, these are a bit more spread out
+- 
+
+F11:
+- within this framework, what is the level of uncertainty we would attach to these forecasts?
+	- as we would expect, uncertainty in general increases with the distance to the target
+	- and: uncertainty is quite substantial, especially if you recall what value range these quantities are usually set in.  E.g. if we're forecasting a growth of 0.7 for next year, a very large part of the probability mass is below zero.
+
+- this actually if I have the time relates back to earlier point: 
+ - in the article, they also cite the most recent IMF forecast to make their point (0.1 percent at the time)
+ - but if we then look at the prediction intervals we would assign to this, we see that a large part of this is still below zero
+ - interesting to observe the October forecast
+
+- they don't (which seems like another potential lesson in transparity, but I digress)
+
+

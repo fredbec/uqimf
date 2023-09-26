@@ -13,6 +13,7 @@ devtools::load_all()
 
 
 chosen_method <- "rolling window"
+chosen_em <- "absolute"
 
 ######## WIS Data
 scores <- fread(here("scores", "ci_scores.csv"))
@@ -27,17 +28,17 @@ bvar_wis_scores <- fread(here("scores", "bvar_ci_scores_avgcnt.csv")) |>
   .d(, .(model, target, horizon, interval_score, dispersion, underprediction, overprediction)) |>
   .d(,model := "bvar_qu") |>
   setnames("model", "source") |>
-  .d(,error_method := "absolute") |>
+  .d(,error_method := chosen_em) |>
   .d(,method := chosen_method) #change later
 
 
-#bvar_wis_scores <- rbind(bvar_wis_scores, bvar_wis_scores)# |> copy() |> .d(, error_method := "absolute"))
+#bvar_wis_scores <- rbind(bvar_wis_scores, bvar_wis_scores)# |> copy() |> .d(, error_method := chosen_em))
 
 wis_scores <- rbind(wis_scores, bvar_wis_scores) |>
   .d(, source := factor(source, levels = c("IMF", "bvar", "bvar_qu", "ar"),
                      label = c("IMF", "BVAR", "BVAR - direct", "AR"))) |>
   .d(method == chosen_method) |>
-  .d(error_method == "absolute")
+  .d(error_method == chosen_em)
 
 
 ####Coverage Data
@@ -49,7 +50,7 @@ bvar_scores_cvgshort <- fread(here("scores", "bvar_ci_scores_avgcnt.csv")) |>
   setnames("model", "source", skip_absent = TRUE) |>
   .d(, source := "bvar_qu") |>
   .d(, method := chosen_method) |>
-  .d(, error_method := "absolute")
+  .d(, error_method := chosen_em)
 
 
 bvar_scores_cvgshort <- rbind(bvar_scores_cvgshort, bvar_scores_cvgshort |> copy() |> .d(, error_method := "directional"))
@@ -81,7 +82,7 @@ dev.off()
 scores <- fread(here("scores", "ci_scores.csv"))
 scores_cvgshort <- fread(here("scores", "cvg_pooled.csv")) |>
   rbind(fread(here("scores", "bvar_cvg_pooled.csv")) |>
-          .d(, error_method := "absolute") |>
+          .d(, error_method := chosen_em) |>
           .d(, method := chosen_method))
 
 cvg_rg <- c(50, 80)
@@ -99,7 +100,7 @@ large_cvgdat <- scores |>
   .d(, idcol := paste0(horizon, country, method)) |>
   .d(, country := NULL) |>
   .d(, horizon := NULL) |>
-  .d(error_method == "absolute") |>
+  .d(error_method == chosen_em) |>
   .d(method == chosen_method)
 
 
@@ -117,12 +118,12 @@ cvgdat <- scores_cvgshort |>
 
 cvgdat_cpi <- cvgdat |>
   .d(target == "pcpi_pch")|>
-  .d(error_method == "absolute") |>
+  .d(error_method == chosen_em) |>
   .d(method == chosen_method)
 
 cvgdat_gdp <- cvgdat |>
   .d(target == "ngdp_rpch")|>
-  .d(error_method == "absolute") |>
+  .d(error_method == chosen_em) |>
   .d(method == chosen_method)
 
 

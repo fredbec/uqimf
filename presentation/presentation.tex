@@ -19,7 +19,7 @@
 
 % Beginn der Präsentation
 
-\title[Simple Prediction Intervals]{Simple and Transparent Macroeconomic Prediction Intervals}
+\title[Simple Prediction Intervals]{Simple and Transparent Macroeconomic Distributional Forecasts}
 \subtitle{} 
 \author[Friederike Becker, Fabian Krüger, Melanie Schienle]{Friederike Becker, Fabian Krüger, Melanie Schienle}
 
@@ -90,9 +90,21 @@
 
 \begin{frame}[t]{Contributions of this work}
 \begin{itemize}
-    \item simple and transparent method of attaching prediction intervals 
-\item show that attaching distributional forecasts to an existing
-\item evaluate on years 1999-2021
+    \item show that attaching prediction intervals to an existing base of point forecasts can be 
+    \begin{itemize} 
+    \item simple
+    \item cheap
+    \end{itemize}   
+    \item provide solidly performing distributional forecasts for 
+    \begin{itemize}
+    \item  GDP growth and inflation
+    \item  all G7 countries
+    \item  current and next year 
+    \end{itemize}
+    %\item simple and transparent method of attaching prediction intervals 
+%\item show that attaching distributional forecasts to an existing
+%\item for up to one and a half years into the future 
+%\item evaluate on years 1999-2021
 \end{itemize}
 \end{frame}
 
@@ -128,7 +140,7 @@ We apply an attractively simple and cheap method. For a given country and target
     \end{itemize}
     \item ... construct sets $\mathcal{E}_{t, h} = \{\hat{e}_{t^*, h}  | t-9 \leq t^* < t \}$, containing the last nine forecast errors
     \begin{itemize}
-        \item based on \textit{absolute} errors $\hat{e} = |y_{t} - \hat{y}_{t, h}| $
+        \item based on \textit{absolute} errors $\hat{e}_{t,h} = |y_{t} - \hat{y}_{t, h}| $
         \item sets are stratified by country, target and horizon
     \end{itemize}
     \item for $\alpha \in \{0.5, 0.8\}$, compute $q^{\alpha}_{t, h} =  Q\left(\mathcal{E}_{t, h}, \alpha \right)$
@@ -155,7 +167,7 @@ We apply an attractively simple and cheap method. For a given country and target
     \end{itemize}
 \end{enumerate}
 \begin{itemize}
-    \item trained on quarterly data, with \textit{slight informational advantage - specify this!} 
+    \item trained on quarterly data, with slight informational advantage
 \end{itemize}
 
 \end{frame}
@@ -255,13 +267,20 @@ Spring, NY &1.3 &2.1 \\
 \end{frame}
 
 
-\begin{frame}{Robustness Checks}
-\textit{each will be linked to a short slide in Appendix giving the alternative results}
+\begin{frame}{Robustness Checks / Alternative Methods}
 \begin{itemize}
     \item error extraction method: absolute vs. directional errors
-    \item window method
+    \begin{itemize}
+    \item similar scores, worse calibration \hyperlink{errorextraction}{\beamerbutton{link}}
+    \end{itemize}
+    \item window method: rolling vs. expanding window
+    \begin{itemize}
+    \item slightly improved coverage and scores, at the cost of interpretability \hyperlink{extractionmethod}{\beamerbutton{link}}
+    \end{itemize}
     \item potential dependency of results on quantile extraction \\
-    \textit{what I mean by this: does the fact that we are extracting quantiles from the samples influence the results? Show results for sample-based CRPS}
+    \begin{itemize}
+        \item ordering between forecasts remains the same with sample-based CRPS \hyperlink{samplecrps}{\beamerbutton{link}}
+    \end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -277,7 +296,7 @@ Spring, NY &1.3 &2.1 \\
         \item competitive
         \item transparent
     \end{itemize}
-\item Attachment of uncertainty to point forecasts is often substantial, making its communication necessary
+\item Uncertainty around point forecasts is often substantial, making its communication necessary
 \item IMF forecasts are valuable source for distributional forecasts in their own right \bigskip \\
 \item     Outlook
     \begin{itemize}
@@ -309,6 +328,48 @@ Spring, NY &1.3 &2.1 \\
 
 \appendix
 \beginbackup
+\begin{frame}{Directional Errors - Scores}
+\label{errorextraction}
+\begin{figure}
+        \centering
+        \includegraphics[width=0.9\textwidth]{figures/wis_cpigdp_new_directional.pdf}
+        %\caption{Coverage at the 50 and 80 percent level}
+    \end{figure}
+\end{frame}
+\begin{frame}{Directional Errors - Coverage}
+\begin{figure}
+        \centering
+        \includegraphics[width=0.9\textwidth]{figures/coverage_directional.pdf}
+        %\caption{Coverage at the 50 and 80 percent level}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Expanding Window - Scores}
+\label{extractionmethod}
+\begin{figure}
+        \centering
+        \includegraphics[width=0.9\textwidth]{figures/wis_cpigdp_new_ew.pdf}
+        %\caption{Coverage at the 50 and 80 percent level}
+    \end{figure}
+\end{frame}
+\begin{frame}{Expanding Window - Coverage}
+\begin{figure}
+        \centering
+        \includegraphics[width=0.9\textwidth]{figures/coverage_ew.pdf}
+        %\caption{Coverage at the 50 and 80 percent level}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{CRPS by sample}
+\label{samplecrps}
+\begin{figure}
+        \centering
+        \includegraphics[width=0.7\textwidth]{figures/crpssample.png}
+        %\caption{Coverage at the 50 and 80 percent level}
+    \end{figure}
+\end{frame}
+
 
 %\begin{frame}{Literatur}
 %\begin{exampleblock}{Backup-Teil}
