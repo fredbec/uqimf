@@ -1,6 +1,20 @@
+library(here)
+library(data.table)
+devtools::load_all()
+
+source(here("specs", "specs.R"))
+
+.d <- `[`
+
+max_year <- specs$score_max_year
+min_year <- specs$min_year
+score_min_year <- specs$score_min_year
+tv_release <- specs$tv_release
+window_length <- specs$window_length
+
 imf_fc <- fread(here("quantile_forecasts", "quantile_forecasts.csv")) |>
+  .d(target_year <= max_year) |>
   .d(source == "IMF") |>
-  .d(country == "DEU") |>
   .d(error_method == "absolute") |>
   .d(method == "rolling window") |>
   .d(quantile %in% c(0.1, 0.25, 0.75, 0.9)) |>

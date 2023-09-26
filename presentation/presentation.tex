@@ -210,16 +210,16 @@ We apply an attractively simple and cheap method. For a given country and target
 \begin{tabular}{ l c c }
 &   50\%  & 80\%\\[0.3em]
 \multicolumn{3}{c}{\textbf{GDP Growth}}\\
-Fall,  SY & 0.5 & 0.9\\ 
-Spring, SY &0.8 &2.1 \\ 
-Fall, NY & 2.2 & 3.9\\ 
-Spring, NY &2.4 &4.9 \\[0.3em] 
+Fall,  SY & 0.5 & 1.1\\ 
+Spring, SY &1.2 &2.1 \\ 
+Fall, NY & 1.9 & 3.5\\ 
+Spring, NY &2.2 &4.0 \\[0.3em] 
 \multicolumn{3}{c}{\textbf{Inflation}}\\
 %&   50\%  & 80\%\\[0.3em]
-Fall,  SY & 0.3 & 0.6\\ 
-Spring, SY &0.5 &1.3 \\ 
-Fall, NY & 1.2 & 2.2\\ 
-Spring, NY &1.9 &2.4 \\ 
+Fall,  SY & 0.3 & 0.5\\ 
+Spring, SY &0.6 &1.1 \\ 
+Fall, NY & 1.1 & 1.8\\ 
+Spring, NY &1.3 &2.1 \\ 
 \end{tabular}
 \end{table}
 \vspace{1.25cm}
@@ -239,13 +239,28 @@ Spring, NY &1.9 &2.4 \\
 
 %\textit{relate back to article shown in the beginning, which also mentions IMF forecast of 0.1 percent $\rightarrow$ almost 50\% of any predictive intervals at this time would actually be below zero}
 \end{frame}
+\addtocounter{framenumber}{-1}
+\begin{frame}{Will Germany avoid recession?}
+%Width of Prediction Intervals, by Horizon
+%\textit{include graphic or table showing increasing uncertainty with rising horizons}\\ 
+\begin{figure}
+        \centering
+        \includegraphics[width=0.6\textwidth]{figures/horizon_uncc_germany2023.pdf}
+        %\caption{Coverage at the 50 and 80 percent level}
+        \label{fig:enter-label}
+    \end{figure}
+
+
+%\textit{relate back to article shown in the beginning, which also mentions IMF forecast of 0.1 percent $\rightarrow$ almost 50\% of any predictive intervals at this time would actually be below zero}
+\end{frame}
+
 
 \begin{frame}{Robustness Checks}
 \textit{each will be linked to a short slide in Appendix giving the alternative results}
 \begin{itemize}
     \item error extraction method: absolute vs. directional errors
     \item window method
-    \item potential dependency of results on discretization \\
+    \item potential dependency of results on quantile extraction \\
     \textit{what I mean by this: does the fact that we are extracting quantiles from the samples influence the results? Show results for sample-based CRPS}
 \end{itemize}
 \end{frame}

@@ -12,6 +12,8 @@ devtools::load_all()
 .d <- `[`
 
 
+chosen_method <- "rolling window"
+
 ######## WIS Data
 scores <- fread(here("scores", "ci_scores.csv"))
 
@@ -25,15 +27,17 @@ bvar_wis_scores <- fread(here("scores", "bvar_ci_scores_avgcnt.csv")) |>
   .d(, .(model, target, horizon, interval_score, dispersion, underprediction, overprediction)) |>
   .d(,model := "bvar_qu") |>
   setnames("model", "source") |>
-  .d(,error_method := "directional") |>
-  .d(,method := "rolling window") #change later
+  .d(,error_method := "absolute") |>
+  .d(,method := chosen_method) #change later
 
 
-bvar_wis_scores <- rbind(bvar_wis_scores, bvar_wis_scores |> copy() |> .d(, error_method := "absolute"))
+#bvar_wis_scores <- rbind(bvar_wis_scores, bvar_wis_scores)# |> copy() |> .d(, error_method := "absolute"))
 
 wis_scores <- rbind(wis_scores, bvar_wis_scores) |>
   .d(, source := factor(source, levels = c("IMF", "bvar", "bvar_qu", "ar"),
-                     label = c("IMF", "BVAR", "BVAR - direct", "AR")))
+                     label = c("IMF", "BVAR", "BVAR - direct", "AR"))) |>
+  .d(method == chosen_method) |>
+  .d(error_method == "absolute")
 
 
 ####Coverage Data
@@ -44,7 +48,7 @@ scores_cvgshort <- fread(here("scores", "ci_scores_avgcnt.csv")) |>
 bvar_scores_cvgshort <- fread(here("scores", "bvar_ci_scores_avgcnt.csv")) |>
   setnames("model", "source", skip_absent = TRUE) |>
   .d(, source := "bvar_qu") |>
-  .d(, method := "rolling window") |>
+  .d(, method := chosen_method) |>
   .d(, error_method := "absolute")
 
 
@@ -78,7 +82,7 @@ scores <- fread(here("scores", "ci_scores.csv"))
 scores_cvgshort <- fread(here("scores", "cvg_pooled.csv")) |>
   rbind(fread(here("scores", "bvar_cvg_pooled.csv")) |>
           .d(, error_method := "absolute") |>
-          .d(, method := "rolling window"))
+          .d(, method := chosen_method))
 
 cvg_rg <- c(50, 80)
 
@@ -96,7 +100,7 @@ large_cvgdat <- scores |>
   .d(, country := NULL) |>
   .d(, horizon := NULL) |>
   .d(error_method == "absolute") |>
-  .d(method == "rolling window")
+  .d(method == chosen_method)
 
 
 cvgdat <- scores_cvgshort |>
@@ -114,12 +118,12 @@ cvgdat <- scores_cvgshort |>
 cvgdat_cpi <- cvgdat |>
   .d(target == "pcpi_pch")|>
   .d(error_method == "absolute") |>
-  .d(method == "rolling window")
+  .d(method == chosen_method)
 
 cvgdat_gdp <- cvgdat |>
   .d(target == "ngdp_rpch")|>
   .d(error_method == "absolute") |>
-  .d(method == "rolling window")
+  .d(method == chosen_method)
 
 
 
