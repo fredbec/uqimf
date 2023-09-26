@@ -1,0 +1,38 @@
+
+Introduce practice of fixed-event forecasting in economics
+	- e.g. predict the inflation rate in a year or quarter
+		- annual is more usual, also what we'll cover here
+	- furthermore, it is very usual to get "Eilmeldungen" for these things
+		- there is large attention on these 
+
+You'll often find footnotes but what is missing is quantification of the uncertainty
+	- either excplicitly, with intervals
+	- or simply putting the variability of the different horizons into context
+
+Or now you could say that this is the media
+	- there are exceptions (BoE fangraphs)
+	- but the rule is still 
+
+Relevance
+	- people form opinions on , consumption decisions
+	- inflation expectations influence 
+
+
+I won't go into too much detail about the benchmark models here, but suffice to say that
+	- they are competitive
+	- they have a slight informational advantage
+
+
+Introduce shiny app
+	- Hosting via Github?
+
+
+Of course, we are still statisticians, so we are not so happy with simply leaving at at the simple method
+
+
+Warum wird es nicht gemacht?
+
+Eigentlich so einfach. Wir werden zeigen dass selbst eine komplett aus historischen forecast fehlern genährte vorhersage bereits ausreichend ist und zudem auch noch gute UQ vorhersagen gibt
+
+
+git@gitlab.kit.edu:kit/kastel/sdq/dokumentvorlagen/praesentationen/beamer.git
