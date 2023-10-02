@@ -8,16 +8,17 @@ This is joint and ongoing work with Fabian Krüger (who just presented similar w
 F2:
 	- I'll introduce the setting and practice of forecasts for macroeconomics
 	- introduce the methods (spoiler: It's very simple and transparent)
-	- results 
-	- outlookk
+	- go through results of our analysis
+	- and finish by summing up an providing an outlook
 
 
 F3: 
 	- an economist's favorite pastime
 
 	- there is a widespread practice of issuing point forecasts for the two major macroeconomic target
+
 	- increased attention on inflation in past years
-	- attention on real GDP growth was always 
+	- attention on real GDP growth was always strong
 
 	- fixed-event forecasts: 
 
@@ -36,6 +37,12 @@ F4: can we really be that sure?
 		 	- "increased uncertainty" during times that the institution regards as particularly turbulent
 		 	- uncertainty as almost a binary concept 
 	- Germany is averting or avoiding a recession in 2023.
+
+	- distributional forecasts
+		- and also, a whole lot of assumptions.
+		- e.g. you need a distributional assumption
+		- how do you generate uncertainty? by changing inputs?
+		- attaching a clear measure of uncertainty is of course risky, because you can check whether or not it's calibrated
 
 
 F7:
@@ -87,6 +94,31 @@ F11:
  - but if we then look at the prediction intervals we would assign to this, we see that a large part of this is still below zero
  - interesting to observe the October forecast
 
-- they don't (which seems like another potential lesson in transparity, but I digress)
+- they don't cite the exact publication of where this number stems from (which seems like another potential lesson in transparity, but I digress)
 
+
+F12:
+	- even though our method is quite straightforward, there are still some different routes we could have taken
+	- 1. first and foremost, error extraction
+		- extract error quantiles directly
+		- philosophically, do we just regard the size of the error as informative, or also its direction?
+		- this can produce some undesired artifacts if the lower quantile is positive or the upper quantile is negative, because then the point forecsat won't lie in the respective central prediction interval
+			- which is not necessarily an issue because it is not defined which functional these point forecasts are.
+			- but it would raise some eyebrows
+	- 2. window method
+		- expanding window, we're using all available past forecast errors, not just the past 9
+		- but then, our methodology is not exact anymore, since we're working on such a small sample, sometimes we'll be taking the fifth value, other times we're interpolating between the 5th and the 6th, and so forth
+	- 3. lastly, shortly, you could also pose the question whether the method of quantile extracting and taking the WIS benefits one source more than another
+		- so as an alternative score, we also computed the CRPS by sample, which produces the same ordering
+
+F13:
+
+	- and actually, referring to the fact that these forecasts are mostly well calibrated and score relatively well, it appears that these point forecasts are actually a valuable source of distributional forecasts in their own right
+		- we're still not saying that we can't do better (in fact, we plan to attempt to do better)
+
+F13:
+- Outlook:
+	- so far, we only looked at G7 countries, forecasts from the IMF
+		- but: IMF contains more countries of course, and there are other sources for forecasts available
+	- 
 
