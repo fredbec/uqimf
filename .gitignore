@@ -59,3 +59,9 @@ oecd_gdp_quarterly.csv
 
 # manuscript files
 manuscript/manuscript_files
+manuscript.out
+manuscript.aux
+
+#presentation files
+presentation/logos
+presentation/figures_old
