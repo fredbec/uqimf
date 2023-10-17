@@ -1,82 +1,62 @@
-
-ovr_assessment_plot <- function(wis_scoredat, trgt){
-
-
-  decomp_data <- wis_scoredat |>
-    #.d(method == "rolling window") |>
-    .d(target == trgt) |>
-    .d(, target := NULL) |>
-    .d(, method := NULL) #|>
-
-
-  xmax <- max(decomp_data$interval_score) + 0.05
-
-  decomp_data <- decomp_data |>
-    data.table::melt(id.vars = c("source", "error_method", "horizon"),
-                     value.name = "score",
-                     variable.name = "type") |>
-    .d(type != "interval_score") # filter out total score, only interested in decomposition
-
-
-
-
-  #return(decomp_data)
-  dir_wis_plot <- wis_plot(decomp_data, "directional", xmax)
-  abs_wis_plot <- wis_plot(decomp_data, "absolute", xmax)
-
-
-
-  #ovr_plot <-
-  #  (dir_wis_plot | abs_wis_plot) +
-  #  plot_layout(guides = "collect",
-  #              heights = c(0.2, 0.05, 0.2, 0.05, 0.2)) &
-  #  plot_annotation(tag_levels = 'I')  &
-  #  theme(legend.position = 'bottom',
-  #        legend.box="vertical", legend.margin=margin())
-
-
-
-  return(dir_wis_plot)
-}
-
-
-#check arguments of function!
-wis_plot <- function(wis_scoredat, trgt, error_m){
+#' Plot decomposition of WIS by horizon and forecast source
+#'
+#' @param score_data score data that includes WIS values, prefiltered! by desired
+#' error_method and method
+#' @param trgt target variable for which the plot should be produced
+#' @param tolerance deviation to be exceeded, to be considered violator
+#' @param exclude_h1.5 if TRUE, excludes the largest horizon to calculate violators
+#' @param fcsource forecast source for which to calculate violators
+#' @param upper_lim upper limit for plotting legend
+#' @return nothing, saves tidied data in directory
+#' @export
+#'
+wis_plot_new <- function(wis_scoredat,
+                                trgt = c("pcpi_pch", "ngdp_rpch"),
+                         xmax = NULL,
+                                plot_name = NULL){
 
   if(length(unique(wis_scoredat$error_method)) > 1){
-    stop("only one error method allowed")
+    stop("Only one error method allowed. Prefilter data")
   }
 
   if(length(unique(wis_scoredat$method)) > 1){
-    stop("only one method allowed")
+    stop("Only one method allowed. Prefilter data")
   }
 
-  if(trgt == "ngdp_rpch"){
-    plot_name <- "GDP Growth"
-  } else {
-    plot_name <- "Inflation"
+  if(length(trgt) > 1){
+    stop("need to supply single value for trgt")
   }
 
-  maxval <- max(wis_scoredat$interval_score) + 0.05
+  if(is.null(plot_name)){
+    plot_name <- plot_target_label()[trgt]
+  }
 
   decomp_data <- wis_scoredat |>
     .d(target == trgt) |>
     .d(, target := NULL) |>
-    .d(, method := NULL)  |>
-    setnames("model", "source") |>
-    .d(, .(source, error_method, horizon, dispersion, underprediction, overprediction)) |>
-    data.table::melt(id.vars = c("source", "error_method", "horizon"),
+    .d(, method := NULL) |>
+    .d(, error_method := NULL)
+
+
+  #prespecify xmax (otherwise, largest values are sometimes cut off)
+  if(is.null(xmax)){
+    xmax <- max(decomp_data$interval_score) + 0.02
+  }
+
+  decomp_data <- decomp_data |>
+    .d(, .(source, horizon, dispersion, underprediction, overprediction)) |>
+    data.table::melt(id.vars = c("source", "horizon"),
                      value.name = "score",
                      variable.name = "type") |>
+    # is technically already filtered out, but just to make sure
     .d(type != "interval_score")
 
 
 
-  plt <- ggplot(decomp_data,
-                aes(x = source,
-                    fill = source,
-                    y = score,
-                    alpha = type)) +
+  decomp_plot <- ggplot(decomp_data, aes(x = source,
+                                         fill = source,
+                                         y = score,
+                                         alpha = type)) +
     geom_bar(position="stack", stat="identity") +
     facet_wrap(~ horizon,
                labeller = as_labeller(plot_horizon_label_short(4)),
@@ -86,29 +66,32 @@ wis_plot <- function(wis_scoredat, trgt, error_m){
                                     "Underprediction",
                                     "Dispersion"),
                          name = "Components of the WIS") +
-    scale_x_discrete(name = "") +
-    #breaks = c("IMF", "bvar", "bvar_qu", "ar"),
-    #labels = c("IMF", "BVAR", "BVAR_QU", "AR")) +
-    scale_y_continuous(name = "Weighted Interval Score", limits = c(0, maxval)) +
-    scale_fill_met_d("Hokusai1") +
+    scale_x_discrete(name = "",
+                     breaks = c("IMF", "bvar", "bvar_qu", "ar"),
+                     labels = c("IMF", "BVAR", "BVAR_QU", "AR")) +
+
+    scale_y_continuous(name = "Weighted Interval Score", limits = c(0, xmax)) +
+    scale_fill_met_d("Hokusai1",
+                     breaks = c("IMF", "bvar", "bvar_qu", "ar"),
+                     labels = c("IMF", "BVAR", "BVAR_QU", "AR")) +
     xlab("") +
     theme_uqimf() %+replace%
     theme(axis.text.x = element_text(size = 8, angle = 90, hjust = .5, vjust = .5, face = "plain"),
           strip.text = element_text(size = 8)) +
     ggtitle(plot_name) +
-    theme(legend.position = "none")
+    theme(legend.title=element_blank()) +
+    guides(fill = "none")
 
-  return(plt)
+    return(decomp_plot)
 
 }
-
-
 
 
 
 #' Plot proportions of 'monotonic horizon uncertainty' violators
 #'
 #' @param fcdat forecast data, as output from make-forecasts.R
+#' Note: this can be DIRECTLY used with quantile_forecasts.csv, no preprocess needed
 #' @param cilvl CI level for which to calculate violations
 #' @param tolerance deviation to be exceeded, to be considered violator
 #' @param exclude_h1.5 if TRUE, excludes the largest horizon to calculate violators
@@ -196,3 +179,53 @@ horizon_violators <- function(fcdat,
 
 }
 
+
+#' Plot values of scoring rule / function / other metric over horizon, by
+#' forecast source (color)
+#'
+#' @param score_data data that contains scores, as output from score-forecasts).
+#' Can either by score data or coverage data, but for each need to supply version
+#' that is averaged by country
+#' @param score_rule name of the scoring rule to plot (must be in score_data, obvs)
+#' @param ylab name for plot y axis (score_rule by default)
+#' @param facet optional, variable to facet by
+#' @param title optional, title for plot
+#' @param metcolor colorscale from Metcolorbrewer package
+#' @return plot
+#' @export
+#' Note to self: currently used in manuscript.Rmd
+#'
+horizon_path_plot <- function(score_data,
+                              score_rule,
+                              ylab = score_rule,
+                              facet = NULL,
+                              title = NULL,
+                              metcolor = "Hokusai1"){
+
+  path_plot <- ggplot(score_data,
+                      aes(x = horizon,
+                          y = get(score_rule),
+                          color = source)) +
+
+    scale_color_met_d(metcolor, breaks = c("IMF", "bvar", "ar", "bvar_qu"),
+                      labels = c("IMF", "BVAR", "AR", "BVAR_QU")) +
+    geom_line() +
+    geom_point() +
+    ylab(ylab) +
+    xlab("Forecast Horizon") +
+    guides(fill = "none", colour = "none") +
+    theme_uqimf() %+replace%
+    theme(legend.title=element_blank(),
+          legend.position = "none") +
+    ggtitle(title)
+
+  if(!is.null(facet)){
+
+    path_plot <- path_plot +
+      facet_wrap(~ get(facet),
+                 scales = "free")
+  }
+
+  return(path_plot)
+
+}

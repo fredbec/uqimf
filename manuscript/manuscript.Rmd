@@ -155,20 +155,20 @@ point_scores <- data.table::fread(here("scores", "pointfc_scores.csv"))
 wis_scores <- rbind(wis_scores, bvar_wis_scores)
 scores_cvgshort <- rbind(scores_cvgshort, bvar_scores_cvgshort)
 
-ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_scores, trgt){
+ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_scores, trgt, window_method){
 
   cvgscores <- cvg_scoredat |>
-    .d(method == "rolling window") |>
+    .d(method == window_method) |>
     .d(target == trgt) |>
     .d(, target := NULL) |>
-    .d(, method := NULL) #|>
+    .d(, method := NULL) 
   
   
   decomp_data <- wis_scoredat |>
-    .d(method == "rolling window") |>
-    .d(target == trgt) |>
-    .d(, target := NULL) |>
-    .d(, method := NULL) #|>
+    .d(method == window_method) |>
+    .d(, method := NULL) 
+  
+  xmax <- max(decomp_data |> copy() |> .d(target == trgt) |> .d(, .(interval_score))) + 0.01
   
   point_scores <- point_scores |>
     .d(target == trgt) |>
@@ -179,7 +179,7 @@ ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_s
     unique()
   
   crps_scores_rw <- crps_scores |>
-    .d(method == "rolling window") |>
+    .d(method == window_method) |>
     .d(target == trgt) |>
     .d(, target := NULL)
   
@@ -189,101 +189,8 @@ ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_s
     .d(, target := NULL)
   
   
-  xmax <- max(decomp_data$interval_score)
-  
-  decomp_data <- decomp_data |>
-    data.table::melt(id.vars = c("source", "error_method", "horizon"),
-                     value.name = "score",
-                     variable.name = "type") |>
-    .d(type != "interval_score") # filter out total score, only interested in decomposition
-  
-  
-  
-  #check arguments of function!
-  wis_plot <- function(decompdat, error_m, maxval){
-    
-    if(error_m == "directional"){
-      plot_name <- "WIS - Directional Errors"
-    } else {
-      plot_name <- "WIS - Absolute Errors"
-    }
-    
-    
-    plt <- ggplot(decomp_data |> .d(error_method == error_m),
-                          aes(x = source, 
-                              fill = source,
-                              y = score,
-                              alpha = type)) +
-      geom_bar(position="stack", stat="identity") +
-      facet_wrap(~ horizon,
-                 labeller = as_labeller(plot_horizon_label_short(4)),
-                 nrow = 1) +
-      #geom_hline(yintercept = 1) +
-      scale_alpha_discrete(range = c(0.35,1),
-                           labels = c("Overprediction",
-                                      "Underprediction",
-                                      "Dispersion"),
-                           name = "Components of the WIS") +
-      scale_x_discrete(name = "",
-                       breaks = c("IMF", "bvar", "bvar_qu", "ar"),
-                       labels = c("IMF", "BVAR", "BVAR_QU", "AR")) +
-      scale_y_continuous(name = "WIS", limits = c(0, maxval)) +
-      scale_fill_met_d("Hokusai1") +
-      #scale_fill_brewer(palette = "Set2", 
-      #                  name = "Model Type")+
-      xlab("") +
-      #labs(fill = "Model Type") +
-      theme_uqimf() %+replace%
-      theme(axis.text.x = element_text(size = 8, angle = 90, hjust = .5, vjust = .5, face = "plain"),
-            strip.text = element_text(size = 8)) +
-      ggtitle(plot_name) +
-      theme(#legend.title=element_blank(),
-            legend.position = "none")
-
-    return(plt)
-  
-  }
-  
-  horizon_path_plot <- function(score_data,
-                                score_rule,
-                                ylab = score_rule, 
-                                facet = NULL,
-                                title = NULL){
-    
-    path_plot <- ggplot(score_data, 
-           aes(x = horizon,
-               y = get(score_rule), 
-               color = source)) +
-      
-      scale_color_met_d("Hokusai1", breaks = c("IMF", "bvar", "ar", "bvar_qu"),
-                       labels = c("IMF", "BVAR", "AR", "BVAR_QU")) +
-      
-      #scale_color_brewer(palette = "Set2") +
-      geom_line() +
-      geom_point() +
-      ylab(ylab) +
-      xlab("Forecast Horizon") +
-      guides(fill = "none", colour = "none") +
-      theme_uqimf() %+replace%
-      theme(legend.title=element_blank(),
-            legend.position = "none") +
-      ggtitle(title)
-    
-    if(!is.null(facet)){
-      
-      path_plot <- path_plot +
-      facet_wrap(~ get(facet),
-                 scales = "free") 
-    }
-    
-    return(path_plot)
-    
-  }
-  
-  
-    
-  dir_wis_plot <- wis_plot(decomp_data, "directional", xmax)
-  abs_wis_plot <- wis_plot(decomp_data, "absolute", xmax)
+  dir_wis_plot <- wis_plot_new(decomp_data |> .d(error_method  == "directional"), trgt, xmax = xmax, plot_name = "WIS - Directional Errors")
+  abs_wis_plot <- wis_plot_new(decomp_data |> .d(error_method  == "absolute"), trgt, xmax = xmax, plot_name = "WIS - Absolute Errors")
   
   c50plot <- horizon_path_plot(cvgscores, "coverage_50", "CI Coverage - 50", facet = "error_method", title = "Central Interval Coverage - alpha = 50") +
     geom_hline(aes(yintercept = 0.5)) +
@@ -304,7 +211,7 @@ ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_s
   
   squeplot <- horizon_path_plot(point_scores |> .d(, error_method := "directional"), "meansque", "Squared Error", title = "Point Forecast - Squ. Error")
   
-  crpsplot_rw <- horizon_path_plot(crps_scores_rw |>.d(, error_method := "directional"), "score", "CRPS by Sample", title = "CRPS - Rolling Window") +
+  crpsplot_rw <- horizon_path_plot(crps_scores_rw |>.d(, error_method := "directional"), "score", "CRPS by Sample", title = paste0("CRPS - ", window_method)) +
     scale_y_continuous(limits = c(0.07,1.05)) 
   
   
@@ -330,7 +237,7 @@ ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_s
   return(ovr_plot)
 }
 
-ovr_assessment_plot(wis_scores, scores_cvgshort, point_scores, all_scores, "pcpi_pch")
+ovr_assessment_plot(wis_scores, scores_cvgshort, point_scores, all_scores, trgt = "pcpi_pch", window_method = "rolling window")
    
 
 ```
@@ -339,7 +246,7 @@ Some notes:
 \begin{itemize}
 \item Inflation: directional vs. absolute errors:
 \begin{itemize}
-\item difference small for IMF method, absolute slighly better, likely due to longer central intervals
+\item difference small for IMF method, absolute slightly better, likely due to longer central intervals
 \item AR and BVAR profit more from directional correction (upward bias)
 \item for expanding window method, difference in coverage is smaller (-> structural breaks)
 
@@ -364,9 +271,9 @@ Some notes:
 
 ## GDP
 
-```{r gdpovr_ew, echo = FALSE, warning = TRUE, fig.dim=c(12,12)}
+```{r gdpovr_rw, echo = FALSE, warning = TRUE, fig.dim=c(12,12), warning = FALSE}
 
-ovr_assessment_plot(wis_scores, scores_cvgshort, point_scores, all_scores, "ngdp_rpch")
+ovr_assessment_plot(wis_scores, scores_cvgshort, point_scores, all_scores, "ngdp_rpch", window_method = "rolling window")
 ```
 
 
@@ -376,216 +283,20 @@ ovr_assessment_plot(wis_scores, scores_cvgshort, point_scores, all_scores, "ngdp
 # Expanding Window - Scores, by error method, Horizon and forecast source 
 
 ## Inflation
+```{r infklovr_ew, echo = FALSE, warning = TRUE, fig.dim=c(12,12), warning = FALSE}
 
-```{r overall_assessment, fig.dim=c(12,12), echo = FALSE, warning = FALSE}
-
-scores_cvgshort <- fread(here("scores", "ci_scores_avgcnt.csv")) |>
-  setnames("model", "source", skip_absent = TRUE)
-
-
-bvar_scores_cvgshort <- fread(here("scores", "bvar_ci_scores_avgcnt.csv")) |>
-  setnames("model", "source", skip_absent = TRUE) |>
-  .d(, source := "bvar_qu") |>
-  .d(, method := "expanding window") |>
-  .d(, error_method := "absolute")
-
-
-bvar_scores_cvgshort <- rbind(bvar_scores_cvgshort, bvar_scores_cvgshort |> copy() |> .d(, error_method := "directional"))
-
-
-point_scores <- data.table::fread(here("scores", "pointfc_scores.csv")) 
-
-wis_scores <- rbind(wis_scores, bvar_wis_scores)
-scores_cvgshort <- rbind(scores_cvgshort, bvar_scores_cvgshort)
-
-ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_scores, trgt){
-
-  cvgscores <- cvg_scoredat |>
-    .d(method == "expanding window") |>
-    .d(target == trgt) |>
-    .d(, target := NULL) |>
-    .d(, method := NULL) #|>
-  
-  
-  decomp_data <- wis_scoredat |>
-    .d(method == "expanding window") |>
-    .d(target == trgt) |>
-    .d(, target := NULL) |>
-    .d(, method := NULL) #|>
-  
-  point_scores <- point_scores |>
-    .d(target == trgt) |>
-    .d(, target := NULL) |>
-    .d(, meanae := mean(ae), by = c("source", "horizon")) |>
-    .d(, meansque := mean(sque), by = c("source", "horizon")) |>
-    .d(, .(source, country, horizon, meanae, meansque)) |>
-    unique()
-  
-  crps_scores_rw <- crps_scores |>
-    .d(method == "expanding window") |>
-    .d(target == trgt) |>
-    .d(, target := NULL)
-  
-  crps_scores_loo <- crps_scores |>
-    .d(method == "leave-one-out") |>
-    .d(target == trgt) |>
-    .d(, target := NULL)
-  
-  
-  xmax <- max(decomp_data$interval_score)
-  
-  decomp_data <- decomp_data |>
-    data.table::melt(id.vars = c("source", "error_method", "horizon"),
-                     value.name = "score",
-                     variable.name = "type") |>
-    .d(type != "interval_score") # filter out total score, only interested in decomposition
-  
-  
-  
-  #check arguments of function!
-  wis_plot <- function(decompdat, error_m, maxval){
-    
-    if(error_m == "directional"){
-      plot_name <- "WIS - Directional Errors"
-    } else {
-      plot_name <- "WIS - Absolute Errors"
-    }
-    
-    
-    plt <- ggplot(decomp_data |> .d(error_method == error_m),
-                          aes(x = source, 
-                              fill = source,
-                              y = score,
-                              alpha = type)) +
-      geom_bar(position="stack", stat="identity") +
-      facet_wrap(~ horizon,
-                 labeller = as_labeller(plot_horizon_label_short(4)),
-                 nrow = 1) +
-      #geom_hline(yintercept = 1) +
-      scale_alpha_discrete(range = c(0.35,1),
-                           labels = c("Overprediction",
-                                      "Underprediction",
-                                      "Dispersion"),
-                           name = "Components of the WIS") +
-      scale_x_discrete(name = "",
-                       breaks = c("IMF", "bvar", "bvar_qu", "ar"),
-                       labels = c("IMF", "BVAR", "BVAR_QU", "AR")) +
-      scale_y_continuous(name = "WIS", limits = c(0, maxval)) +
-      scale_fill_met_d("Hokusai1") +
-      #scale_fill_brewer(palette = "Set2", 
-      #                  name = "Model Type")+
-      xlab("") +
-      #labs(fill = "Model Type") +
-      theme_uqimf() %+replace%
-      theme(axis.text.x = element_text(size = 8, angle = 90, hjust = .5, vjust = .5, face = "plain"),
-            strip.text = element_text(size = 8)) +
-      ggtitle(plot_name) +
-      theme(#legend.title=element_blank(),
-            legend.position = "none")
-
-    return(plt)
-  
-  }
-  
-  horizon_path_plot <- function(score_data,
-                                score_rule,
-                                ylab = score_rule, 
-                                facet = NULL,
-                                title = NULL){
-    
-    path_plot <- ggplot(score_data, 
-           aes(x = horizon,
-               y = get(score_rule), 
-               color = source)) +
-      
-      scale_color_met_d("Hokusai1", breaks = c("IMF", "bvar", "ar", "bvar_qu"),
-                       labels = c("IMF", "BVAR", "AR", "BVAR_QU")) +
-      
-      #scale_color_brewer(palette = "Set2") +
-      geom_line() +
-      geom_point() +
-      ylab(ylab) +
-      xlab("Forecast Horizon") +
-      guides(fill = "none", colour = "none") +
-      theme_uqimf() %+replace%
-      theme(legend.title=element_blank(),
-            legend.position = "none") +
-      ggtitle(title)
-    
-    if(!is.null(facet)){
-      
-      path_plot <- path_plot +
-      facet_wrap(~ get(facet),
-                 scales = "free") 
-    }
-    
-    return(path_plot)
-    
-  }
-  
-  
-    
-  dir_wis_plot <- wis_plot(decomp_data, "directional", xmax)
-  abs_wis_plot <- wis_plot(decomp_data, "absolute", xmax)
-  
-  c50plot <- horizon_path_plot(cvgscores, "coverage_50", "CI Coverage - 50", facet = "error_method", title = "Central Interval Coverage - alpha = 50") +
-    geom_hline(aes(yintercept = 0.5)) +
-    scale_y_continuous(labels = paste0(seq(0, 100, by = 25), "%"),
-                       breaks = seq(0,1, by = 0.25),
-                       limits = c(0,1)) 
-  
-  c80plot <- horizon_path_plot(cvgscores, "coverage_80", "CI Coverage - 80", facet = "error_method", title = "Central Interval Coverage - alpha = 80") +
-    geom_hline(aes(yintercept = 0.8)) +
-    scale_y_continuous(labels = paste0(seq(0, 100, by = 25), "%"),
-                       breaks = seq(0,1, by = 0.25),
-                       limits = c(0,1)) 
-  
-  erow <-  ggplot() + theme_void()
-  
-  
-  aeplot <- horizon_path_plot(point_scores |> .d(, error_method := "directional"), "meanae", "Absolute Error", title = "Point Forecast - Abs. Error")
-  
-  squeplot <- horizon_path_plot(point_scores |> .d(, error_method := "directional"), "meansque", "Squared Error", title = "Point Forecast - Squ. Error")
-  
-  crpsplot_rw <- horizon_path_plot(crps_scores_rw |>.d(, error_method := "directional"), "score", "CRPS by Sample", title = "CRPS - expanding window") +
-    scale_y_continuous(limits = c(0.07,1.05)) 
-  
-  
-  crpsplot_loo <- horizon_path_plot(crps_scores_loo |>.d(, error_method := "directional"), "score", "CRPS by Sample", title = "CRPS - LOO") +
-    scale_y_continuous(limits = c(0.07,1.05)) 
-  
-  
-  
-  ovr_plot <- 
-    (dir_wis_plot | abs_wis_plot) /
-    (plot_spacer()) /
-    (c50plot | c80plot) /
-    (plot_spacer()) /
-    (squeplot | aeplot | crpsplot_rw | crpsplot_loo) +
-    plot_layout(guides = "collect", 
-                heights = c(0.2, 0.05, 0.2, 0.05, 0.2)) &
-      plot_annotation(tag_levels = 'I')  &
-      theme(legend.position = 'bottom', 
-            legend.box="vertical", legend.margin=margin()) 
-
-
-  
-  return(ovr_plot)
-}
-
-ovr_assessment_plot(wis_scores, scores_cvgshort, point_scores, all_scores, "pcpi_pch")
-   
-
+ovr_assessment_plot(wis_scores, scores_cvgshort, point_scores, all_scores, "ngdp_rpch", window_method = "expanding window")
 ```
+
 \newpage
 
 
 
 ## GDP
 
-```{r gdpovr, echo = FALSE, warning = TRUE, fig.dim=c(12,12)}
+```{r gdpovr, echo = FALSE, warning = TRUE, fig.dim=c(12,12), warning = FALSE}
 
-ovr_assessment_plot(wis_scores, scores_cvgshort, point_scores, all_scores, "ngdp_rpch")
+ovr_assessment_plot(wis_scores, scores_cvgshort, point_scores, all_scores, "ngdp_rpch", window_method = "expanding window")
 ```
 
 
