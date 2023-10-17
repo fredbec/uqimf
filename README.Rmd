@@ -18,9 +18,8 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-This repo contains code to generate simple and transparent prediction intervals for the IMF World Economic Outlook forecasts [1]. Central prediction intervals are generated at the 50% and 80% levels for CPI inflation and real GDP growth, based on past forecast errors. See below for documentation on which files the respective folders contain. 
+This repo contains code to generate simple and transparent prediction intervals for the IMF World Economic Outlook forecasts (see references). Central prediction intervals are generated at the 50% and 80% levels for CPI inflation and real GDP growth, based on past forecast errors. See below for documentation on which files the respective folders contain. 
 
-[1]: International Monetary Fund. 2023. \textit{World Economic Outlook: A Rocky Recovery.} Washington, DC. April.
 
 ## Contents of the repository
 
@@ -80,3 +79,8 @@ The folders of this repository contain the following:
   - `score-forecasts.R`: score quantile forecasts, those generated here and the benchmark BVAR quantile forecasts.
 
 - `specs`: contains file to specify global settings (window length, etc.)
+
+
+## References
+
+International Monetary Fund. 2023. *World Economic Outlook: A Rocky Recovery.* Washington, DC. April.

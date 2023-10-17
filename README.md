@@ -7,8 +7,7 @@
 <!-- badges: end -->
 
 This repo contains code to generate simple and transparent prediction
-intervals for the IMF World Economic Outlook forecasts
-[1](International%20Monetary%20Fund.%202023.%20\textit%7BWorld%20Economic%20Outlook:%20A%20Rocky%20Recovery.%7D%20Washington,%20DC.%20April.).
+intervals for the IMF World Economic Outlook forecasts (see references).
 Central prediction intervals are generated at the 50% and 80% levels for
 CPI inflation and real GDP growth, based on past forecast errors. See
 below for documentation on which files the respective folders contain.
@@ -92,3 +91,8 @@ The folders of this repository contain the following:
 
 - `specs`: contains file to specify global settings (window length,
   etc.)
+
+## References
+
+International Monetary Fund. 2023. *World Economic Outlook: A Rocky
+Recovery.* Washington, DC. April.
