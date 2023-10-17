@@ -140,3 +140,12 @@ plot_horizon_label_short <- function(length.out = 4){
 
   return(phl[1:length.out])
 }
+
+plot_target_label <- function(){
+
+  ptl <- c(`pcpi_pch` = "Inflation",
+          `ngdp_rpch` = "Real GDP Growth")
+
+  return(ptl)
+}
+
