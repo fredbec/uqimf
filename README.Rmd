@@ -21,13 +21,21 @@ knitr::opts_chunk$set(
 The goal of uqimf is to ...
 
 ## Contents of the repository
+
 The folders of this repository contain the following:
-* `R`: all functions and that the analysis is based on
+
+- `R`: all functions and that the analysis is based on
+
   - `plot.R`: plotting files 
+  
   - `score.R`: functions to score quantile forecasts (coverage, interval_score, crps by sample)
+  
   - `uqfc.R`: functions to generate quantile forecasts from past errors
+  
   - `uqimf-package.R` some stuff, as this is technically an R package
+  
   - `utils.R` miscellaneous small functions
+  
   - `utils-manuscript.R` miscellaneous small functions for manuscript 
 
 
