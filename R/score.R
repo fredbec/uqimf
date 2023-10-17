@@ -54,7 +54,6 @@ scoreempQu <- function(fcdat,
     stop("need to supply a value for tv_release")
   }
 
-  print(cvg_rg)
 
   if(is.null(fcdat$model)){
 

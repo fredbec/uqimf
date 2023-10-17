@@ -1,0 +1,241 @@
+---
+title: "IMF and Benchmark Forecasts"
+header-includes:
+    - \usepackage{lineno}
+    - \linenumbers
+    -  \newcommand{\beginsupplement}{\setcounter{table}{0}  \renewcommand{\thetable}{S\arabic{table}} \setcounter{figure}{0} \renewcommand{\thefigure}{S\arabic{figure}}}
+output: 
+  bookdown::pdf_document2:
+    extra_dependencies: ["float"]
+    keep_tex:  true
+    toc: false
+linestretch: 2 
+geometry: "left=2cm,right=2cm,top=2cm,bottom=2cm"
+
+---
+
+```{r setup, include=FALSE}
+library(data.table)
+library(here)
+library(ggplot2)
+library(patchwork)
+library(MetBrewer)
+library(purrr)
+library(lattice)
+library(gt)
+library(rlang)
+library(tidyverse)
+devtools::load_all()
+knitr::opts_chunk$set(echo = TRUE)
+.d <- `[`
+
+source(here("specs", "specs.R"))
+```
+
+```{r, echo = FALSE}
+bvarqufcs <- fread(here("benchmarks", "quantile_benchmarks_processed.csv"))|>
+  setnames("tv_1", "true_value") |>
+  .d(target_year <= specs$score_max_year) |>
+  .d(, grouped := source) |>
+  .d(, error_method := "absolute") |>
+  .d(target_year >= 1999) |>
+  .d(,.(country, target, horizon, target_year, true_value, prediction, quantile,  grouped, source, error_method)) 
+
+qufcs <- fread(here("quantile_forecasts", "quantile_forecasts.csv")) |>
+  .d(method == "expanding window") |>
+  .d(, grouped := paste0(source, "_", error_method))  |>
+  .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, grouped, source, error_method)) |>
+  .d(target_year <= specs$score_max_year) |>
+  rbind(bvarqufcs) |>
+  .d(quantile %in% specs$qu_levels)
+```
+
+
+
+```{r, echo = FALSE}
+exceed <- qufcs |>
+  .d(,below_ci := ifelse(true_value < prediction, 1, 0)) |>
+  .d(, below_ci := ifelse(quantile %in% c(0.1, 0.25), below_ci, NA)) |>
+  .d(,above_ci := ifelse(true_value > prediction, 1, 0)) |>
+  .d(, above_ci := ifelse(quantile %in% c(0.75, 0.9), above_ci, NA)) |>
+  .d(, meanexc_below := mean(below_ci), by = c("target", "horizon", "grouped", "quantile")) |>
+  .d(, meanexc_above := mean(above_ci), by = c("target", "horizon", "grouped", "quantile") )  |>
+  .d(, target := ifelse(target == "pcpi_pch", "Inflation", "GDP Growth"))
+
+keep_exceed <- exceed |> copy()
+
+below <- exceed |>
+  copy() |>
+  .d(quantile %in% c(0.1, 0.25)) |>
+  .d(, .(target, horizon, grouped, source, error_method, quantile, meanexc_below)) |>
+  unique()|>
+  setnames("meanexc_below", "exc")
+
+above <- exceed |>
+  copy() |>
+  .d(quantile %in% c(0.75, 0.9)) |>
+  .d(, .(target, horizon, grouped, source, error_method, quantile, meanexc_above)) |>
+  unique() |>
+  setnames("meanexc_above", "exc")
+
+exceed <- rbind(below, above)
+```
+# This document
+
+Here we document the proportion of true values that "miss" the 50% and 80% central prediction intervals - that is, the proportions of observations that falls \textit{below} the 0.1-quantile and 0.25-quantile and the proportion that falls \textit{above} the 0.75-quantile and 0.9-quantile. 
+
+The respective proportions are calculated separately for each forecast source (IMF, ar, bvar, bvarqu\footnote{bvarqu denotes the quantile forecasts that are taken directly from the BVAR model, while bvar denotes the quantile forecasts that are drawn from past point forecast errors of the BVAR model (analagously to the IMF and ar forecasts)}, target (GDP Growth and Inflation) and horizon (0 - "Fall, same year" to 1.5 - "Spring, previous year"). We treat absolute error handling as the default, and show results for directional error handling in the same respective source's color, but in a lighter shade. This plot is shown on page 3, with desired nominal exceedance proportions shown as dashed lines.
+
+On page 4, we also plot exceedance levels for the bvarqu model separately for two equally sized parts of the time period under study. Differences in coverage between the two time periods at the respective quantile levels seem non-substantial.
+
+
+# GDP growth forecasts
+
+Overall, the forecasts that stem (a) from the directional error methods for the ar and bvar forecasts and (b) the IMF forecasts in general tend to be better calibrated, especially at the lower quantile levels.
+
+The bvarqu forecasts show relatively large\footnote{in relation to the respective desired nominal level} exceedance proportions at the lower quantile levels (q = 0.1, q = 0.25) and small exceedance proportions at the upper quantile levels, an indication of overprediction. The respective forecast intervals "cover too much ground" in the direction of positive deviations of the realized values from the point prediction, while simultaneously "covering too little" in the other direction. Similarly, this is also an issue for the absolute ar, bvar and (albeit to a slightly lesser extent) IMF forecasts.
+
+Lastly, the bvarqu forecasts appear to be too narrow at the shortest horizon (0 - "Fall, same year") only, since they show relatively large exceedances at both the lower and the upper quantile levels. 
+
+# Inflation forecasts
+
+For the inflation forecasts, the bvarqu model (along with absolute ar and bvar to a lesser extent) show small exceedance proportions at the upper quantiles, especially for the 0.9-quantile and larger horizons, indicating intervals that are too long in the region above the point forecast. This also explains the aggregate near-zero underprediction scores for these methods (see other pdf).
+
+Interestingly, the directional methods show the opposite issue, in that they have a too large proportion of exceedances at the upper quantile levels.
+
+At the lower quantile levels, all methods appear to be better calibrated.
+
+
+# Overall
+
+In summary, it appears that for GDP, the entire distributions seem to be biased (shifted) upwards for the bvarqu and absolute ar and bvar models. For inflation, it seems that they are just too long at the top, while being better calibrated at the bottom.
+
+```{r, echo = FALSE}
+
+
+qpathplot <- function(scoredat, quantl){
+  
+  if(quantl > 0.5){
+    lineh <- 1-quantl
+  } else {
+    lineh <- quantl
+  }
+  
+  pldat <- scoredat |>
+    .d(quantile == quantl)
+  
+  qplot <- ggplot(pldat, 
+           aes(x = horizon,
+               y = exc,
+               color = source,
+               alpha = error_method)) +
+    scale_alpha_manual(values = c("directional" = 0.4, "absolute" = 1)) +
+      #scale_color_brewer(palette = "Set2") +
+      geom_line(lwd = 1.2) +
+      geom_point(size = 2)  +
+    scale_color_met_d("Egypt") +
+      xlab("Forecast Horizon") +
+      theme_uqimf() +
+    geom_hline(aes(yintercept = lineh), linetype = "dashed") +
+  facet_wrap(~target )
+  
+  return(qplot)
+}
+
+myplot <- qpathplot(above, 0.75)
+plotlist <- vector(mode = "list", 4)
+qus <- c(0.1, 0.25, 0.75, 0.9)
+textqus <- c("BELOW", "BELOW", "ABOVE", "ABOVE")
+
+for(i in seq_along(qus)){
+  
+  plotlist[[i]] <- qpathplot(exceed, qus[i]) +
+    ggtitle(paste0("Exceedance at Quantile Level q = ", qus[i], ". Proportion of observations that fell ", textqus[i], " the respective quantile"))
+}
+
+ ovr_plot <- 
+    (plotlist[[1]]) /
+    (plotlist[[2]]) /
+    (plotlist[[3]]) /
+    (plotlist[[4]]) +
+    plot_layout(guides = "collect", 
+                heights = c(0.2, 0.2, 0.2, 0.2)) &
+      plot_annotation(tag_levels = 'I')  &
+      theme(legend.position = 'bottom', 
+            legend.box="vertical", legend.margin=margin()) 
+
+```
+
+```{r, fig.dim=c(12,17), echo = FALSE}
+ovr_plot
+```
+
+# Exceedance for bvarqu, by time period
+
+```{r, echo = FALSE, fig.dim=c(12,12)}
+bvardat <- keep_exceed |> .d(source == "bvar_qu") |> 
+  .d(, yrsec := ifelse(target_year %in% 1999:2005, "1999-2005", "")) |>
+  .d(, yrsec2 := ifelse(target_year %in% 2006:2012, "2006-2012", "")) |>
+  #.d(, yrsec3 := ifelse(target_year %in% 2009:2012, "2009-2012", "")) |>
+  .d(, yrsec := paste0(yrsec, yrsec2)) |>
+  .d(quantile %in% c(0.1, 0.25, 0.75, 0.9)) |>
+  .d(, meanexc_below := mean(below_ci), by = c("target", "horizon", "grouped", "quantile", "yrsec")) |>  
+  .d(, meanexc_above := mean(above_ci), by = c("target", "horizon", "grouped", "quantile", "yrsec")) |>  
+  .d(, meanexc_below := ifelse(is.na(meanexc_below), meanexc_above, meanexc_below)) |>
+  .d(, .(target, horizon, grouped, yrsec, quantile, meanexc_below)) |> 
+  unique() |>
+  setnames("meanexc_below", "exc")
+
+
+qpathplot <- function(scoredat, quantl){
+  
+  if(quantl > 0.5){
+    lineh <- 1-quantl
+  } else {
+    lineh <- quantl
+  }
+  
+  pldat <- scoredat |>
+    .d(quantile == quantl)
+  
+  qplot <- ggplot(pldat, 
+           aes(x = horizon,
+               y = exc,
+               color = yrsec)) +
+    scale_alpha_manual(values = c("directional" = 0.4, "absolute" = 1)) +
+      #scale_color_brewer(palette = "Set2") +
+      geom_line(lwd = 1.2) +
+      geom_point(size = 2)  +
+    scale_color_met_d("Egypt") +
+      xlab("Forecast Horizon") +
+      theme_uqimf() +
+    geom_hline(aes(yintercept = lineh), linetype = "dashed") +
+  facet_wrap(~target )
+  
+  return(qplot)
+}
+
+plotlist <- vector(mode = "list", 4)
+qus <- c(0.1, 0.25, 0.75, 0.9)
+textqus <- c("BELOW", "BELOW", "ABOVE", "ABOVE")
+
+for(i in seq_along(qus)){
+  
+  plotlist[[i]] <- qpathplot(bvardat, qus[i]) +
+    ggtitle(paste0("Exceedance at Quantile Level q = ", qus[i], ". Proportion of observations that fell ", textqus[i], " the respective predicted quantile values"))
+}
+
+ ovr_plot <- 
+    (plotlist[[1]]) /
+    (plotlist[[2]]) /
+   (plotlist[[3]]) /
+   (plotlist[[4]]) +
+    plot_layout(guides = "collect", 
+                heights = c(0.2, 0.2, 0.2, 0.2)) &
+      plot_annotation(tag_levels = 'I')  &
+      theme(legend.position = 'bottom', 
+            legend.box="vertical", legend.margin=margin()) 
+
+ovr_plot
+```
+
