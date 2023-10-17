@@ -149,3 +149,39 @@ plot_target_label <- function(){
   return(ptl)
 }
 
+
+plot_country_label <- function(){
+
+  pcl <- c(`CAN` = "Canada",
+           `DEU` = "Germany",
+           `FRA` = "France",
+           `GBR` = "United Kingdom",
+           `ITA` = "Italy",
+           `JPN` = "Japan",
+           `USA` = "United States")
+
+  return(pcl)
+}
+
+#' @title
+#'
+#' @description
+#' Function to generate a list of quantiles and alpha values for geom_linerange
+#'
+qu_lvls <- function(cis){
+
+  qus <- ci_to_quantiles(cis, "directional") #always directional
+
+  n_qus <- length(qus)
+
+  no_pairs <- floor(n_qus/2)
+
+
+  alpha_vals <- seq(0.5, 0.75, length.out = no_pairs)
+
+  #inner and outer quantile levels
+  lapply(seq_along(1:no_pairs),
+         function(ind) c(qus[ind], qus[(n_qus)-(ind-1)], alpha_vals[ind]))
+
+
+}
