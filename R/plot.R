@@ -229,3 +229,84 @@ horizon_path_plot <- function(score_data,
   return(path_plot)
 
 }
+
+#' Plot for the shiny app. See here("scripts", "plots", "plot_shiny-vis.R") for usage
+#'
+#' @return single country plot
+#' @export
+#' Note to self: currently used in manuscript.Rmd
+#'
+shinyplot <- function(realized_series,
+                      linerange_data,
+                      labels_currentyear,
+                      labels_nextyear,
+                      plot_country,
+                      colorscale,
+                      cis){
+
+  qus_list <- qu_lvls(cis) |>
+    lapply(as.list)
+
+  qus_list[[1]][[4]] <- "50% Interval"
+  qus_list[[2]][[4]] <- "80% Interval"
+
+  print(qus_list)
+  minval <- min(realized_series$true_value) - 0.5
+
+  ggplot() +
+    geom_line(
+      aes(x = target_year, y = true_value),
+      color = colorscale[plot_country],
+      data = realized_vals |> .d(country == plot_country),
+      lwd = 0.75) +
+    geom_point(
+      aes(x = target_year, y = true_value),
+      color = colorscale[plot_country],
+      data = realized_vals |> .d(country == plot_country),
+      size = 0.95) +
+    ggtitle(paste0("Actual Series, with forecast for year ", 2023)) +
+    ylab(plot_target_label()[trgt]) +
+    ylim(minval, 9.5) +
+    xlab("Target Year") +
+    ggtitle(plot_country_label()[plot_country]) +
+    scale_color_met_d("Hokusai1") +
+    lapply(qus_list, function(qupr){
+      geom_linerange(
+        aes(x = target_year,
+            ymin = get(paste0("quantile", qupr[[1]])),
+            ymax = get(paste0("quantile", qupr[[2]])),
+            alpha = qupr[[4]]),
+        color = colorscale[plot_country],
+        data = linerange_dat |> .d(country == plot_country),
+        lwd = 2.15)
+    }) +
+
+    geom_point(
+      aes(x = target_year, y = prediction),
+      color = colorscale[plot_country],,
+      data = point_forecasts |> .d(country == plot_country),
+      size = 2.5
+    ) +
+
+    geom_line(
+      aes(x = target_year, y = prediction),
+      color = colorscale[plot_country],
+      data = dashed_line |> .d(country == plot_country),
+      linetype = "dashed"
+    ) +
+    geom_label(data=labeldat_2022 |> .d(country == plot_country), aes(x=x, y=y, label=label),
+               color = colorscale[plot_country],
+               size=3.25 , angle=45, fontface="bold") +
+    geom_label(data=labeldat_2023 |> .d(country == plot_country), aes(x=x, y=y, label=label),
+               color = colorscale[plot_country],
+               size=3.25 , angle=45, fontface="bold") +
+    theme_uqimf() %+replace%
+    theme(
+      plot.title = element_text(hjust = 0.5,
+                                vjust = 3)) +
+    scale_alpha_manual(name = "",
+                       breaks = c(qus_list[[1]][[4]], qus_list[[2]][[4]]),
+                       values = c("50% Interval" = 0.8, "80% Interval" = 0.4),
+                       guide = guide_legend(override.aes = list(color = "black") ))
+
+}

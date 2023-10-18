@@ -69,80 +69,25 @@ labeldat_2023 <- linerange_dat |>
 
 colors <- met.brewer("Hokusai1", 7)
 names(colors) <- unique(qufcs$country)
-qus_list <- qu_lvls(cis)
-shinyplot <- function(realized_series,
-                      linerange_data,
-                      labels_currentyear,
-                      labels_nextyear,
-                      plot_country,
-                      colorscale){
-  ggplot() +
-    geom_line(
-      aes(x = target_year, y = true_value),
-      color = colorscale[plot_country],
-      data = realized_vals |> .d(country == plot_country),
-      lwd = 0.75) +
-    geom_point(
-      aes(x = target_year, y = true_value),
-      color = colorscale[plot_country],
-      data = realized_vals |> .d(country == plot_country),
-      size = 0.95) +
-    ggtitle(paste0("Actual Series, with forecast for year ", 2023)) +
-    ylab(plot_target_label()[trgt]) +
-    ylim(-0.5, 9.5) +
-    xlab("Target Year") +
-    ggtitle(plot_country_label()[plot_country]) +
-    scale_color_met_d("Hokusai1") +
-    theme_uqimf() %+replace%
-    theme(legend.position = "none",
-          plot.title = element_text(hjust = 0.5,
-                                    vjust = 3)) +
 
-    lapply(qus_list, function(qupr){
-      geom_linerange(
-        aes(x = target_year,
-            ymin = get(paste0("quantile", qupr[1])),
-            ymax = get(paste0("quantile", qupr[2]))),
-        color = colorscale[plot_country],
-        data = linerange_dat |> .d(country == plot_country),
-        lwd = 2.15, alpha = qupr[3], show.legend = TRUE)
-    }) +
-
-    geom_point(
-      aes(x = target_year, y = prediction),
-      color = colorscale[plot_country],,
-      data = point_forecasts |> .d(country == plot_country),
-      size = 2.5
-    ) +
-
-    geom_line(
-      aes(x = target_year, y = prediction),
-      color = colorscale[plot_country],
-      data = dashed_line |> .d(country == plot_country),
-      linetype = "dashed"
-    ) +
-    geom_label(data=labeldat_2022 |> .d(country == plot_country), aes(x=x, y=y, label=label),
-               color = colorscale[plot_country],
-               size=3.25 , angle=45, fontface="bold") +
-    geom_label(data=labeldat_2023 |> .d(country == plot_country), aes(x=x, y=y, label=label),
-               color = colorscale[plot_country],
-               size=3.25 , angle=45, fontface="bold")
-
-}
 
 plotlist <- lapply(as.list(unique(qufcs$country)),
-                   function(pltc) shinyplot(realized_vals, linerange_dat, labeldat_2022, labeldat_2023, pltc, colors))
+                   function(pltc) shinyplot(realized_vals, linerange_dat, labeldat_2022, labeldat_2023, pltc, colors, cis))
 
 
+spacer <- 150
+spacer2 <- 150
 
-design <- "AAAAAAAA
-          #BBBBBB#
-          #CCCCCC#"
+design <- "122
+           345
+           678"
 
+text2 <- wrap_elements(grid::textGrob("Here we'll place some explanatory text and possibly also the legend"))
 
-wrap_elements(full = plotlist[[1]] + plotlist[[2]] + plotlist[[3]]) +
-wrap_elements(plotlist[[4]] + plotlist[[5]]) +
-  wrap_elements(plotlist[[6]]+ plotlist[[7]]) +
-  plot_layout(design = design)
-
+pdf(here("comeonnnnn.pdf"), width =9, height = 9)
+plotlist[[1]] + text2 + plotlist[[2]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+
+  plot_layout(guides = "collect",
+              design = design) &
+  theme(legend.position='bottom')
+dev.off()
 
