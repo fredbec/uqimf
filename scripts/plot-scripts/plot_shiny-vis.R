@@ -7,6 +7,8 @@ devtools::load_all()
 .d <- `[`
 
 trgt <- "pcpi_pch"
+cis <- c(0.5, 0.8)
+qus <- c(0.1, 0.25, 0.75, 0.9)
 
 qufcs <- fread(here("quantile_forecasts", "quantile_forecasts.csv"))
 
@@ -15,7 +17,7 @@ linerange_dat <- qufcs |>
   .d(error_method == "absolute") |>
   .d(method == "rolling window") |>
   .d(target == trgt) |>
-  .d(quantile %in% c(0.1, 0.25, 0.75, 0.9)) |>
+  .d(quantile %in% qus) |>
   .d(,quantile := paste0("quantile", quantile)) |>
   .d(,fltr := target_year - horizon) |>
   .d(fltr == 2021.5) |>
@@ -43,34 +45,44 @@ dashed_line <- rbind(point_forecasts, realized_vals |> copy() |> setnames("true_
 
 
 ###########################################################################
+cols <- paste0("quantile", qus)
+
 labeldat_2022 <- linerange_dat |>
   .d(target_year == 2022) |>
   .d(, x := 2016.25) |>
   .d(, y := 8.2) |>
-  .d(, label := paste0("2022\n", "50% PI: ", round(quantile0.25, 1), " - ", round(quantile0.75, 1), "\n",
-                       "80% PI: ", round(quantile0.1, 1), " - ", round(quantile0.9, 1)))
+  .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
+  .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
+  .d(, label := paste0("2022\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
+                       "80% PI: ", quantile0.1, " - ", quantile0.9))
 
 labeldat_2023 <- linerange_dat |>
   .d(target_year == 2023) |>
   .d(, x := 2016.75) |>
   .d(, y := 5.0) |>
-  .d(, label := paste0("2023\n", "50% PI: ", round(quantile0.25, 1), " - ", round(quantile0.75, 1), "\n",
-                       "80% PI: ", round(quantile0.1, 1), " - ", round(quantile0.9, 1)))
+  .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
+  .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
+  .d(, label := paste0("2023\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
+                       "80% PI: ", quantile0.1, " - ", quantile0.9))
 ###########################################################################
 
+colors <- met.brewer("Hokusai1", 7)
+names(colors) <- unique(qufcs$country)
 
-qus <- qu_lvls(c(0.5, 0.8))
+
+qus_list <- qu_lvls(cis)
 
 ggplot() +
   geom_line(
     aes(x = target_year, y = true_value,
         group = country, color = country),
-    data = realized_vals) +
+    data = realized_vals,
+    lwd = 0.75) +
   geom_point(
     aes(x = target_year, y = true_value,
         group = country, color = country),
     data = realized_vals,
-    size = 0.85) +
+    size = 0.95) +
   ggtitle(paste0("Actual Series, with forecast for year ", 2023)) +
   ylab("True value") +
   ylim(-0.5, 9.5) +
@@ -81,9 +93,10 @@ ggplot() +
   xlab("Target Year") +
 
   scale_color_met_d("Hokusai1") +
-  theme_uqimf() +
+  theme_uqimf() %+replace%
+  theme(legend.position = "none")+
 
-  lapply(qus, function(qupr){
+  lapply(qus_list, function(qupr){
     geom_linerange(
       aes(x = target_year,
           ymin = get(paste0("quantile", qupr[1])),
@@ -96,7 +109,7 @@ ggplot() +
   geom_point(
     aes(x = target_year, y = prediction, color = country),
     data = point_forecasts,
-    size = 2
+    size = 2.5
   ) +
 
   geom_line(
