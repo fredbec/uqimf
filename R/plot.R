@@ -250,7 +250,6 @@ shinyplot <- function(realized_series,
   qus_list[[1]][[4]] <- "50% Interval"
   qus_list[[2]][[4]] <- "80% Interval"
 
-  print(qus_list)
   minval <- min(realized_series$true_value) - 0.5
 
   ggplot() +
@@ -296,17 +295,17 @@ shinyplot <- function(realized_series,
     ) +
     geom_label(data=labeldat_2022 |> .d(country == plot_country), aes(x=x, y=y, label=label),
                color = colorscale[plot_country],
-               size=3.25 , angle=45, fontface="bold") +
+               size=3.75 , angle=45, fontface="bold") +
     geom_label(data=labeldat_2023 |> .d(country == plot_country), aes(x=x, y=y, label=label),
                color = colorscale[plot_country],
-               size=3.25 , angle=45, fontface="bold") +
+               size=3.75 , angle=45, fontface="bold") +
     theme_uqimf() %+replace%
     theme(
       plot.title = element_text(hjust = 0.5,
                                 vjust = 3)) +
     scale_alpha_manual(name = "",
                        breaks = c(qus_list[[1]][[4]], qus_list[[2]][[4]]),
-                       values = c("50% Interval" = 0.8, "80% Interval" = 0.4),
+                       values = c("50% Interval" = 0.7, "80% Interval" = 0.25),
                        guide = guide_legend(override.aes = list(color = "black") ))
 
 }
