@@ -26,7 +26,7 @@ linerange_dat <- qufcs |>
   dcast(country + target + target_year + horizon ~ quantile, value.var = "prediction")
 
 
-point_forecasts <- fread(here("data", "point_forecasts.csv")) |>
+point_fcs <- fread(here("data", "point_forecasts.csv")) |>
   .d(source == "IMF") |>
   .d(target == trgt) |>
   .d(,fltr := target_year - horizon) |>
@@ -42,7 +42,7 @@ realized_vals <- qufcs |>
   unique()
 
 
-dashed_line <- rbind(point_forecasts, realized_vals |> copy() |> setnames("true_value", "prediction") |> .d(target_year > 2020))
+dashed_line <- rbind(point_fcs, realized_vals |> copy() |> setnames("true_value", "prediction") |> .d(target_year > 2020))
 
 
 ###########################################################################
@@ -72,7 +72,7 @@ names(colors) <- unique(qufcs$country)
 
 
 plotlist <- lapply(as.list(unique(qufcs$country)),
-                   function(pltc) shinyplot(realized_vals, linerange_dat, labeldat_2022, labeldat_2023, pltc, colors, cis))
+                   function(pltc) shinyplot(realized_vals, linerange_dat, point_fcs, labeldat_2022, labeldat_2023, pltc, colors, cis))
 
 
 spacer <- 150

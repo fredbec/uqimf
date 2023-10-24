@@ -238,17 +238,23 @@ horizon_path_plot <- function(score_data,
 #'
 shinyplot <- function(realized_series,
                       linerange_data,
+                      point_forecasts,
+                      future_realized,
                       labels_currentyear,
                       labels_nextyear,
                       plot_country,
                       colorscale,
-                      cis){
+                      cis,
+                      ylimmax = 9.5){
 
+  .d <- `[`
+
+  trgt <- unique(realized_series$target)
   qus_list <- qu_lvls(cis) |>
     lapply(as.list)
 
-  qus_list[[1]][[4]] <- "50% Interval"
-  qus_list[[2]][[4]] <- "80% Interval"
+  qus_list[[1]][[4]] <- "80% Interval"
+  qus_list[[2]][[4]] <- "50% Interval"
 
   minval <- min(realized_series$true_value) - 0.5
 
@@ -256,16 +262,16 @@ shinyplot <- function(realized_series,
     geom_line(
       aes(x = target_year, y = true_value),
       color = colorscale[plot_country],
-      data = realized_vals |> .d(country == plot_country),
+      data = realized_series |> .d(country == plot_country),
       lwd = 0.75) +
     geom_point(
       aes(x = target_year, y = true_value),
       color = colorscale[plot_country],
-      data = realized_vals |> .d(country == plot_country),
+      data = realized_series |> .d(country == plot_country),
       size = 0.95) +
     ggtitle(paste0("Actual Series, with forecast for year ", 2023)) +
     ylab(plot_target_label()[trgt]) +
-    ylim(minval, 9.5) +
+    ylim(minval, ylimmax) +
     xlab("Target Year") +
     ggtitle(plot_country_label()[plot_country]) +
     scale_color_met_d("Hokusai1") +
@@ -276,8 +282,9 @@ shinyplot <- function(realized_series,
             ymax = get(paste0("quantile", qupr[[2]])),
             alpha = qupr[[4]]),
         color = colorscale[plot_country],
-        data = linerange_dat |> .d(country == plot_country),
+        data = linerange_data |> .d(country == plot_country),
         lwd = 2.15)
+
     }) +
 
     geom_point(
@@ -290,7 +297,7 @@ shinyplot <- function(realized_series,
     geom_line(
       aes(x = target_year, y = prediction),
       color = colorscale[plot_country],
-      data = dashed_line |> .d(country == plot_country),
+      data = future_realized |> .d(country == plot_country),
       linetype = "dashed"
     ) +
     geom_label(data=labeldat_2022 |> .d(country == plot_country), aes(x=x, y=y, label=label),
@@ -304,8 +311,8 @@ shinyplot <- function(realized_series,
       plot.title = element_text(hjust = 0.5,
                                 vjust = 3)) +
     scale_alpha_manual(name = "",
-                       breaks = c(qus_list[[1]][[4]], qus_list[[2]][[4]]),
-                       values = c("50% Interval" = 0.7, "80% Interval" = 0.25),
+                       breaks = c("50% Interval", "80% Interval"),
+                       values = c("50% Interval" = 0.6, "80% Interval" = 0.4),
                        guide = guide_legend(override.aes = list(color = "black") ))
 
 }
