@@ -1,0 +1,60 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage{babel}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[a4paper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\usepackage{natbib}
+\bibliographystyle{abbrvnat}
+
+\usepackage[colorlinks=false, allcolors=blue]{hyperref}
+
+\title{PAVA-Reordering \\ Horizon Monotonicity Violations}
+\author{Rike Becker}
+\date{October 23, 2023}
+
+\begin{document}
+\maketitle
+\noindent
+This is an outline for how the PAVA-Algorithm would apply in our case. Main reference is \cite{pavaref2008}, which contains the most accessible explanation of the PAVA-Algorithm that I could find. \bigskip \\ 
+\noindent
+We want to obtain central prediction intervals of level $\alpha \in \{0.5, 0.8\}$, based on quantile forecasts $q^{\tau}_{t, h}$ for a quantity $y_{t}$. $\tau \in (0,1)$ is the quantile level, $t \in \{1,...T\}$ is target year, $h \in \{2, 8, 14, 20\}$ indexes the forecast horizon (monthly units). The length of the corresponding central prediction intervals should be monotic with respect to $h$, that is, \\
+\begin{align}\label{eq:constraint}
+  c^{\alpha}_{t,h} &\leq  c^{\alpha}_{t,h+1}, \quad \textrm{for all } t,h; \quad \textrm{where} \\ 
+ c^{\alpha}_{t,h} &:= q^{1-\alpha/2}_{t,h} - q^{\alpha/2}_{t,h}
+ \end{align}
+Assuming we have a minimal information set $\mathcal{A}_{0}$ consisting only of past forecast-observation pairs $(\hat{y}_{t,h}, y_t)_{t = 1}^T$ and further assuming (some sort of) stationarity in the series of forecast errors $\hat{e} = y_t - \hat{y}_{t,h}$, the optimal $\tau-$quantile forecast in terms of the weighted interval score should be the respective $\tau-$quantile in the set of past forecast errors 
+\begin{align}\label{eq:solution}
+ \mathcal{E}_{t, h} = \{\hat{e}_{t^*, h}  | t-R \leq t^* < t \},
+\end{align}
+where we denote the value of the quantile with $q^{\tau, \mathcal{E}}_{t, h}$.\footnote{If we set R = 21, we can extract quantiles directly from the order statistics, simplifying the question of which interpolation method would be optimal.}\\ 
+Of course, while there is a natural tendency for the quantiles obtained from \eqref{eq:solution} to fulfill constraint \eqref{eq:constraint}, there is no guarantee for this and we practically observe a considerable proportion of violations in our setting. \medskip \\
+I would propose that applying the pool-adjacent-violators algorithm as detailed in section 3.1. in \cite{pavaref2008} to this problem would look like the following:\footnote{For a given $t$ and $\alpha$ - respective indices dropped for simplicity.}\\ 
+The initial solution is simply $q_h^{(0)} := q_h^{\mathcal{E}}$. The index for the blocks is $r = 1, . . . , B$ where at the initial step we have $B := 4$. Then:
+\begin{enumerate}
+\item Merge $q^{(l)}-$values from blocks $r$ and $r+1$ into block $r$ if $c_{r+1}^{(l)}<c_{r}^{(l)}$
+\item Choose $q_{r}^{(l+1)}$ such that our loss function is optimized.\footnote{I would suspect that in terms of the WIS, this would amount to taking an average of the respective quantiles.} 
+\item Go back to 1. in case of any further violations. 
+\end{enumerate}
+Basically, we would simply merge horizons if they don't uphold the natural ordering for a given $\alpha$ and set the respective quantiles to the same (average) value.\bigskip\\ 
+\noindent
+\textbf{Some things to note/discuss:}
+\begin{enumerate}
+	\item To my (albeit relatively new) knowledge of the algorithm, it is unusual that the violators are not registered on the same level that they are treated. That is, here we check for violators on the level of the central interval lengths, but we treat them directly on the quantiles. 
+	\item This is inherently a "univariate" method with respect to the horizon monotonicity constraint. We of course have a second monotonicity constraint with respect to the quantile levels, that is, we require $q^{\tau} \leq q^{\tau'}$ for $\tau < \tau'$ (note that this constraint is again formulated for the quantiles, not for the length of the central intervals).\\ 
+	This could simply be accounted for with a step 3., where we either (a) automatically pool all other quantiles in block $r$ or (b) do so in cases where quantile ordering is not upheld across that block. 
+	\item Note that this document was formulated for the \textit{directional} error method. This is due to the fact that I suspect that the quantiles of \eqref{eq:solution} are the optimal solution in that case only. In the case of absolute error treatment, choosing the new pooled value in step 2. of the algorithm could perhaps not be theoretically motivated in terms of a loss function, at least not in a way that is immediately obvious to me.\footnote{I would still argue in favor of absolute error treatment however, as it empirically shows much better coverage levels.} \\ 
+	At least, in the case of absolute errors, we would diagnose and treat violations on the same level (that is, length of the central intervals).
+\end{enumerate}
+\bibliographystyle{IEEEannot}
+\bibliography{biblio}
+
+\end{document}
