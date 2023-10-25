@@ -15,14 +15,14 @@ window_length <- specs$window_length
 #extract truth and horizon values from WEO forecasts
 #horizon is not coded explicitly in benchmark forecasts
 hordat <- data.table::fread(
-  here("weodat.csv")
+  here("data", "weodat.csv")
 ) |>
   .d(, .(target_year, forecast_year, forecast_season, horizon)) |>
   unique() |>
   setnames("forecast_season", "season")
 
 truth <- data.table::fread(
-  here("weodat.csv")
+  here("data", "weodat.csv")
 ) |>
   .d(, .(country, target, target_year, tv_0.5, tv_1, tv_1.5, tv_2)) |>
   .d(!is.na(get(paste0("tv_", tv_release)))) |>
@@ -59,7 +59,7 @@ benchmark_fc <- hordat[fcdat, on = c("target_year", "forecast_year", "season")] 
 
 
 #read in WEO forecasts, process the same way and merge with benchmarks
-weodat <- fread(here("weodat.csv")) |>
+weodat <- fread(here("data", "weodat.csv")) |>
   .d(, source := "IMF") |>
   .d(order(source, target, country, forecast_year, horizon)) |>
   .d(, .(source, target, country, forecast_year, horizon, target_year,
@@ -98,4 +98,4 @@ bvar_fc <- truth[bvar_fc, on = c("target", "target_year", "country") ]  |>
 #save data
 data.table::fwrite(benchmark_fc, here("benchmarks", "point_benchmarks_processed.csv"))
 data.table::fwrite(bvar_fc, here("benchmarks", "quantile_benchmarks_processed.csv"))
-data.table::fwrite(weodat, here("point_forecasts.csv"))
+data.table::fwrite(weodat, here("data", "point_forecasts.csv"))

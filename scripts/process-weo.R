@@ -14,4 +14,4 @@ weodat <- data.table::fread(here("WEOforecasts_tidy.csv")) |>
   setnames("ISOAlpha_3Code", "country")
 
 
-data.table::fwrite(weodat, here("weodat.csv"))
+data.table::fwrite(weodat, here("data", "weodat.csv"))
