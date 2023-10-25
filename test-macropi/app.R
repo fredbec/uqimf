@@ -193,41 +193,50 @@ server <- function(input, output) {
 
   #######################################Global Settings####################################
 
-  design <- "122
-               345
-               678"
+  patchwork_layout <-
+    "122
+    345
+    678"
 
+  #read in data
+  qufcs <- read.csv("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/forecasts/forecasts_Spring2022.csv") |>
+    setDT()
+  realized_vals <- read.csv("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/extra-data/historicvalues_Spring2022.csv")|>
+    setDT()
+  point_fcs <- read.csv("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/extra-data/pointforecasts_Spring2022.csv") |>
+    setDT()
+
+  cols <- paste0("quantile", qus)
+  cis <- c(0.5, 0.8)
+  qus <- c(0.1, 0.25, 0.75, 0.9)
+
+  colors <- met.brewer("Hokusai1", 7)
+  names(colors) <- unique(qufcs$country)
 
   #######################################Inflation#####################################
   infl <- reactive({
-    cis <- c(0.5, 0.8)
-    qus <- c(0.1, 0.25, 0.75, 0.9)
     ylimmax <- 9.5
-
-
-    qufcs <- read.csv("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/forecasts/forecasts_Spring2022.csv")
+    trgt <- "inflation"
 
     linerange_dat <- qufcs |>
-      setDT() |>
-      .d(target == "inflation") |>
+      .d(target == trgt) |>
       .d(,quantile := paste0("quantile", quantile)) |>
       .d(,season_helper := ifelse(forecast_season == "S", 0.5, 0)) |>
       .d(,horizon := (target_year - forecast_year) + season_helper) |>
       .d(, .(country, target, target_year, horizon, quantile, prediction)) |>
       dcast(country + target + target_year + horizon ~ quantile, value.var = "prediction")
 
-    realized_vals <- read.csv("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/extra-data/historicvalues_Spring2022.csv")|>
-      setDT() |>
-      .d(target == "inflation")
-    point_fcs <- read.csv("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/extra-data/pointforecasts_Spring2022.csv") |>
-      setDT() |>
-      .d(target == "inflation")
+    realized_vals_infl <- realized_vals |>
+      .d(target == trgt)
+    point_fcs_infl <- point_fcs |>
+      .d(target == trgt)
 
-    dashed_line <- rbind(point_fcs, realized_vals |> copy() |> setnames("true_value", "prediction") |> .d(target_year > 2020))
-
-
-    ###########################################################################
-    cols <- paste0("quantile", qus)
+    dashed_line <- rbind(point_fcs_infl,
+                         realized_vals_infl |>
+                           copy() |>
+                           setnames("true_value", "prediction") |>
+                           .d(target_year > 2020)
+                         )
 
     labeldat_2022 <- linerange_dat |>
       .d(target_year == 2022) |>
@@ -247,17 +256,15 @@ server <- function(input, output) {
       .d(, label := paste0("2023\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
                            "80% PI: ", quantile0.1, " - ", quantile0.9))
     ###########################################################################
-    colors <- met.brewer("Hokusai1", 7)
-    names(colors) <- unique(qufcs$country)
 
     plotlist <- lapply(as.list(unique(qufcs$country)),
-                       function(pltc) shinyplot(realized_vals, linerange_dat, point_fcs, dashed_line, labeldat_2022, labeldat_2023, pltc, colors, cis) + ylab("inflation"))
+                       function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, labeldat_2022, labeldat_2023, pltc, colors, cis) + ylab(trgt))
 
     text2 <- wrap_elements(grid::textGrob("Here we'll place some explanatory text and possibly also the legend"))
 
     plotlist[[1]] + text2 + plotlist[[2]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+
       plot_layout(guides = "collect",
-                  design = design) &
+                  design = patchwork_layout) &
       theme(legend.position='bottom')
   })
 
@@ -268,37 +275,31 @@ server <- function(input, output) {
   )
 
   #  #######################################GDP#####################################
-  gdp <- reactive({
-    cis <- c(0.5, 0.8)
-    qus <- c(0.1, 0.25, 0.75, 0.9)
+  gdp <-  reactive({
     ylimmax <- 14.5
-
-
-    qufcs <- read.csv("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/forecasts/forecasts_Spring2022.csv")
+    trgt <- "gdp_growth"
 
     linerange_dat <- qufcs |>
-      setDT() |>
-      .d(target == "gdp_growth") |>
+      .d(target == trgt) |>
       .d(,quantile := paste0("quantile", quantile)) |>
       .d(,season_helper := ifelse(forecast_season == "S", 0.5, 0)) |>
       .d(,horizon := (target_year - forecast_year) + season_helper) |>
       .d(, .(country, target, target_year, horizon, quantile, prediction)) |>
       dcast(country + target + target_year + horizon ~ quantile, value.var = "prediction")
 
-    realized_vals <- read.csv("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/extra-data/historicvalues_Spring2022.csv")|>
-      setDT() |>
-      .d(target == "gdp_growth")
-    point_fcs <- read.csv("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/extra-data/pointforecasts_Spring2022.csv") |>
-      setDT() |>
-      .d(target == "gdp_growth")
+    realized_vals_infl <- realized_vals |>
+      .d(target == trgt)
+    point_fcs_infl <- point_fcs |>
+      .d(target == trgt)
 
-    dashed_line <- rbind(point_fcs, realized_vals |> copy() |> setnames("true_value", "prediction") |> .d(target_year > 2020))
+    dashed_line <- rbind(point_fcs_infl,
+                         realized_vals_infl |>
+                           copy() |>
+                           setnames("true_value", "prediction") |>
+                           .d(target_year > 2020)
+    )
 
-
-    ###########################################################################
-    cols <- paste0("quantile", qus)
-
-    labeldat_2022_gdp <- linerange_dat |>
+    labeldat_2022 <- linerange_dat |>
       .d(target_year == 2022) |>
       .d(, x := 2016.25) |>
       .d(, y := ylimmax - 1.85) |>
@@ -307,7 +308,7 @@ server <- function(input, output) {
       .d(, label := paste0("2022\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
                            "80% PI: ", quantile0.1, " - ", quantile0.9))
 
-    labeldat_2023_gdp <- linerange_dat |>
+    labeldat_2023 <- linerange_dat |>
       .d(target_year == 2023) |>
       .d(, x := 2016.75) |>
       .d(, y := 6.0) |>
@@ -316,18 +317,15 @@ server <- function(input, output) {
       .d(, label := paste0("2023\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
                            "80% PI: ", quantile0.1, " - ", quantile0.9))
     ###########################################################################
-    colors <- met.brewer("Hokusai1", 7)
-    names(colors) <- unique(qufcs$country)
 
     plotlist <- lapply(as.list(unique(qufcs$country)),
-                       function(pltc) shinyplot(realized_vals, linerange_dat, point_fcs, dashed_line, labeldat_2022_gdp, labeldat_2023_gdp, pltc, colors, cis, ylimmax = ylimmax) + ylab("gdp_growth"))
-
+                       function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, labeldat_2022, labeldat_2023, pltc, colors, cis, ylimmax) + ylab(trgt))
 
     text2 <- wrap_elements(grid::textGrob("Here we'll place some explanatory text and possibly also the legend"))
 
     plotlist[[1]] + text2 + plotlist[[2]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+
       plot_layout(guides = "collect",
-                  design = design) &
+                  design = patchwork_layout) &
       theme(legend.position='bottom')
   })
 
