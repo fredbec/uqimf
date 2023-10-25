@@ -19,7 +19,7 @@ cis100 <- specs$ci_levels_eval_su #for passing to scoring function
 #for scoring crps values
 #as these are scored directly on the point forecasts and not on the extracted
 #quantile forecasts
-fcdat <- data.table::fread(here("point_forecasts.csv"))|>
+fcdat <- data.table::fread(here("data", "point_forecasts.csv"))|>
   .d(target_year <= max_year)
 
 

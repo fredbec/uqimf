@@ -18,7 +18,7 @@ cis <- specs$ci_levels_make
 combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"))
 
 
-fcdat <- data.table::fread(here("point_forecasts.csv"))
+fcdat <- data.table::fread(here("data", "point_forecasts.csv"))
 
 #make quantile forecasts for all combinations in combs
 qufcs <- lapply(1:nrow(combs),
