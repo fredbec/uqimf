@@ -137,7 +137,21 @@ empFC <- function(weodat,
 
     #get empirical quantiles
     quSet <- weodat |>
-      .d(target_year %in% yearset) |>
+      #####This block is for not incorrectly sampling target_years when horizon >=1
+      #e.g. when horizon = 1, this means making a forecast for e.g. 2020 in fall
+      #of 2019, so in a real-time setting you wouldn't have access to the resolution
+      #of the horizon-1 forecast for 2019 (so you need your error sample to start in 2018)
+      #this code is set so that the window methods honor this, but the leave-one-out
+      #method doesnt't (since it has access to the future anyways)
+      .d(,target_method := method) |>
+      .d(,helper_horizon := ifelse(target_method == "leave-one-out",
+                                   0, #no shift in loo method
+                                   horizon)) |>
+      .d(, effective_target_year := target_year + floor(helper_horizon)) |>
+      .d(effective_target_year %in% yearset) |>
+      .d(, c("target_method", "helper_horizon", "effective_target_year") := NULL) |>
+      #####And now back to your regularly scheduled program
+      #.d(target_year %in% yearset) |>
       empQU(error_fct = error_fct,
             quantiles = quantiles,
             tv_release = tv_release) |>

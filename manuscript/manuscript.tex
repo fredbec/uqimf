@@ -5,7 +5,6 @@
 \documentclass[
 ]{article}
 \usepackage{amsmath,amssymb}
-\usepackage{lmodern}
 \usepackage{setspace}
 \usepackage{iftex}
 \ifPDFTeX
@@ -13,9 +12,13 @@
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
 \else % if luatex or xetex
-  \usepackage{unicode-math}
+  \usepackage{unicode-math} % this also loads fontspec
   \defaultfontfeatures{Scale=MatchLowercase}
   \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
 \fi
 % Use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
@@ -69,12 +72,14 @@
 \usepackage{booktabs}
 \usepackage{caption}
 \usepackage{longtable}
+\usepackage{colortbl}
+\usepackage{array}
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
 \IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
-\urlstyle{same} % disable monospaced font for URLs
+\urlstyle{same}
 \hypersetup{
   pdftitle={IMF and Benchmark Forecasts},
   hidelinks,
@@ -214,41 +219,41 @@ Some notes:
 \begin{longtable}{l|rrr}
 \toprule
 \multicolumn{1}{l}{} & IMF & ar & bvar \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 \multicolumn{4}{l}{horizon = 0} \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 expanding window\_interval\_score & 0.115 & 0.123 & 0.122 \\ 
 expanding window\_sample\_crps & 0.087 & 0.092 & 0.091 \\ 
 leave-one-out\_interval\_score & 0.112 & 0.123 & 0.123 \\ 
 leave-one-out\_sample\_crps & 0.088 & 0.099 & 0.100 \\ 
 rolling window\_interval\_score & 0.119 & 0.128 & 0.126 \\ 
 rolling window\_sample\_crps & 0.094 & 0.097 & 0.098 \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 \multicolumn{4}{l}{horizon = 0.5} \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 expanding window\_interval\_score & 0.258 & 0.272 & 0.296 \\ 
 expanding window\_sample\_crps & 0.182 & 0.208 & 0.241 \\ 
 leave-one-out\_interval\_score & 0.257 & 0.257 & 0.276 \\ 
 leave-one-out\_sample\_crps & 0.180 & 0.217 & 0.230 \\ 
 rolling window\_interval\_score & 0.261 & 0.266 & 0.288 \\ 
 rolling window\_sample\_crps & 0.191 & 0.201 & 0.235 \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 \multicolumn{4}{l}{horizon = 1} \\ 
-\midrule
-expanding window\_interval\_score & 0.448 & 0.737 & 0.590 \\ 
+\midrule\addlinespace[2.5pt]
+expanding window\_interval\_score & 0.447 & 0.740 & 0.595 \\ 
 expanding window\_sample\_crps & 0.327 & 0.504 & 0.426 \\ 
 leave-one-out\_interval\_score & 0.443 & 0.746 & 0.587 \\ 
 leave-one-out\_sample\_crps & 0.302 & 0.448 & 0.400 \\ 
-rolling window\_interval\_score & 0.451 & 0.739 & 0.591 \\ 
+rolling window\_interval\_score & 0.458 & 0.744 & 0.601 \\ 
 rolling window\_sample\_crps & 0.333 & 0.514 & 0.434 \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 \multicolumn{4}{l}{horizon = 1.5} \\ 
-\midrule
-expanding window\_interval\_score & 0.495 & 1.044 & 0.800 \\ 
+\midrule\addlinespace[2.5pt]
+expanding window\_interval\_score & 0.503 & 1.051 & 0.812 \\ 
 expanding window\_sample\_crps & 0.346 & 0.627 & 0.602 \\ 
 leave-one-out\_interval\_score & 0.488 & 1.021 & 0.756 \\ 
 leave-one-out\_sample\_crps & 0.337 & 0.583 & 0.577 \\ 
-rolling window\_interval\_score & 0.494 & 1.041 & 0.779 \\ 
+rolling window\_interval\_score & 0.506 & 1.043 & 0.790 \\ 
 rolling window\_sample\_crps & 0.347 & 0.632 & 0.570 \\ 
 \bottomrule
 \end{longtable}
@@ -264,41 +269,41 @@ rolling window\_sample\_crps & 0.347 & 0.632 & 0.570 \\
 \begin{longtable}{l|rrr}
 \toprule
 \multicolumn{1}{l}{} & IMF & ar & bvar \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 \multicolumn{4}{l}{horizon = 0} \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 expanding window\_interval\_score & 0.241 & 0.301 & 0.298 \\ 
 expanding window\_sample\_crps & 0.178 & 0.209 & 0.204 \\ 
 leave-one-out\_interval\_score & 0.235 & 0.297 & 0.295 \\ 
 leave-one-out\_sample\_crps & 0.183 & 0.219 & 0.214 \\ 
 rolling window\_interval\_score & 0.240 & 0.302 & 0.297 \\ 
 rolling window\_sample\_crps & 0.178 & 0.211 & 0.204 \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 \multicolumn{4}{l}{horizon = 0.5} \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 expanding window\_interval\_score & 0.416 & 0.540 & 0.493 \\ 
 expanding window\_sample\_crps & 0.298 & 0.383 & 0.358 \\ 
 leave-one-out\_interval\_score & 0.406 & 0.532 & 0.482 \\ 
 leave-one-out\_sample\_crps & 0.310 & 0.408 & 0.377 \\ 
 rolling window\_interval\_score & 0.416 & 0.554 & 0.504 \\ 
 rolling window\_sample\_crps & 0.297 & 0.405 & 0.373 \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 \multicolumn{4}{l}{horizon = 1} \\ 
-\midrule
-expanding window\_interval\_score & 0.837 & 1.090 & 0.942 \\ 
+\midrule\addlinespace[2.5pt]
+expanding window\_interval\_score & 0.846 & 1.094 & 0.947 \\ 
 expanding window\_sample\_crps & 0.640 & 0.822 & 0.763 \\ 
 leave-one-out\_interval\_score & 0.833 & 1.083 & 0.933 \\ 
 leave-one-out\_sample\_crps & 0.634 & 0.759 & 0.709 \\ 
-rolling window\_interval\_score & 0.851 & 1.122 & 0.970 \\ 
+rolling window\_interval\_score & 0.858 & 1.121 & 0.973 \\ 
 rolling window\_sample\_crps & 0.663 & 0.875 & 0.815 \\ 
-\midrule
+\midrule\addlinespace[2.5pt]
 \multicolumn{4}{l}{horizon = 1.5} \\ 
-\midrule
-expanding window\_interval\_score & 1.045 & 1.288 & 1.102 \\ 
+\midrule\addlinespace[2.5pt]
+expanding window\_interval\_score & 1.063 & 1.297 & 1.113 \\ 
 expanding window\_sample\_crps & 0.790 & 0.937 & 0.897 \\ 
 leave-one-out\_interval\_score & 1.030 & 1.292 & 1.109 \\ 
 leave-one-out\_sample\_crps & 0.765 & 0.882 & 0.849 \\ 
-rolling window\_interval\_score & 1.056 & 1.312 & 1.143 \\ 
+rolling window\_interval\_score & 1.075 & 1.313 & 1.150 \\ 
 rolling window\_sample\_crps & 0.831 & 0.985 & 0.949 \\ 
 \bottomrule
 \end{longtable}
