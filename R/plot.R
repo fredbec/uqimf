@@ -300,10 +300,10 @@ shinyplot <- function(realized_series,
       data = future_realized |> .d(country == plot_country),
       linetype = "dashed"
     ) +
-    geom_label(data=labeldat_2022 |> .d(country == plot_country), aes(x=x, y=y, label=label),
+    geom_label(data=labels_currentyear |> .d(country == plot_country), aes(x=x, y=y, label=label),
                color = colorscale[plot_country],
                size=3.75 , angle=45, fontface="bold") +
-    geom_label(data=labeldat_2023 |> .d(country == plot_country), aes(x=x, y=y, label=label),
+    geom_label(data=labels_nextyear |> .d(country == plot_country), aes(x=x, y=y, label=label),
                color = colorscale[plot_country],
                size=3.75 , angle=45, fontface="bold") +
     theme_uqimf() %+replace%

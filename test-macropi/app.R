@@ -24,9 +24,9 @@ ui <- fluidPage(
 
            # Output: Tabset w/ plot, summary, and table ----
            tabsetPanel(type = "tabs",
-                       tabPanel("Inflation", plotOutput(outputId = "allcplot_inflation",
+                       tabPanel("Spring 2022 Forecasts - Inflation", plotOutput(outputId = "allcplot_inflation",
                                                    height = 800, width = 800)),
-                       tabPanel("GDP Growth", plotOutput(outputId = "allcplot_gdp",
+                       tabPanel("Spring 2022 Forecasts - GDP Growth", plotOutput(outputId = "allcplot_gdp",
                                                       height = 800, width = 800))
            )
     )
@@ -191,14 +191,17 @@ server <- function(input, output) {
 
   }
 
-  #######################################FUNS#####################################
+  #######################################Global Settings####################################
+
+  design <- "122
+               345
+               678"
 
 
   #######################################Inflation#####################################
   infl <- reactive({
     cis <- c(0.5, 0.8)
     qus <- c(0.1, 0.25, 0.75, 0.9)
-    inflation <- "inflation"
     ylimmax <- 9.5
 
 
@@ -244,21 +247,11 @@ server <- function(input, output) {
       .d(, label := paste0("2023\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
                            "80% PI: ", quantile0.1, " - ", quantile0.9))
     ###########################################################################
-
     colors <- met.brewer("Hokusai1", 7)
     names(colors) <- unique(qufcs$country)
 
-
     plotlist <- lapply(as.list(unique(qufcs$country)),
                        function(pltc) shinyplot(realized_vals, linerange_dat, point_fcs, dashed_line, labeldat_2022, labeldat_2023, pltc, colors, cis) + ylab("inflation"))
-
-
-    spacer <- 150
-    spacer2 <- 150
-
-    design <- "122
-               345
-               678"
 
     text2 <- wrap_elements(grid::textGrob("Here we'll place some explanatory text and possibly also the legend"))
 
@@ -323,21 +316,12 @@ server <- function(input, output) {
       .d(, label := paste0("2023\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
                            "80% PI: ", quantile0.1, " - ", quantile0.9))
     ###########################################################################
-
     colors <- met.brewer("Hokusai1", 7)
     names(colors) <- unique(qufcs$country)
-
 
     plotlist <- lapply(as.list(unique(qufcs$country)),
                        function(pltc) shinyplot(realized_vals, linerange_dat, point_fcs, dashed_line, labeldat_2022_gdp, labeldat_2023_gdp, pltc, colors, cis, ylimmax = ylimmax) + ylab("gdp_growth"))
 
-
-    spacer <- 150
-    spacer2 <- 150
-
-    design <- "122
-               345
-               678"
 
     text2 <- wrap_elements(grid::textGrob("Here we'll place some explanatory text and possibly also the legend"))
 
