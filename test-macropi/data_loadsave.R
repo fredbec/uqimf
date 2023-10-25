@@ -9,6 +9,9 @@ devtools::load_all()
 
 cis <- c(0.5, 0.8)
 qus <- c(0.1, 0.25, 0.75, 0.9)
+filter_yr <- 2023
+vis_begin_yr <- 2015
+release <- "Fall2023"
 
 qufcs <- fread(here("quantile_forecasts", "quantile_forecasts.csv")) |>
   .d(source == "IMF") |>
@@ -22,11 +25,11 @@ qufcs <- fread(here("quantile_forecasts", "quantile_forecasts.csv")) |>
 
 qufcs_to_save <- qufcs |>
   .d(, fltr := target_year - horizon) |>
-  .d(fltr == 2021.5) |>
+  .d(fltr == filter_yr) |>
   .d(, .(country, target, forecast_year, forecast_season, target_year, quantile, prediction))
 
 realized_vals <- qufcs |>
-  .d(target_year > 2013) |>
+  .d(target_year > vis_begin_yr) |>
   .d(, .(country, target, target_year, true_value)) |>
   .d(!is.na(true_value)) |>
   unique()
@@ -34,11 +37,11 @@ realized_vals <- qufcs |>
 point_forecasts <- fread(here("data", "point_forecasts.csv")) |>
   .d(source == "IMF") |>
   .d(,fltr := target_year - horizon) |>
-  .d(fltr == 2021.5) |>
+  .d(fltr == filter_yr) |>
   .d(, target := ifelse(target == "ngdp_rpch", "gdp_growth", "inflation")) |>
   .d(, .(country, target, target_year, prediction))
 
 
-data.table::fwrite(qufcs_to_save, file = here("test-macropi", "forecasts", "forecasts_Spring2022.csv"))
-data.table::fwrite(realized_vals, file = here("test-macropi", "extra-data", "historicvalues_Spring2022.csv"))
-data.table::fwrite(point_forecasts, file = here("test-macropi", "extra-data", "pointforecasts_Spring2022.csv"))
+data.table::fwrite(qufcs_to_save, file = here("test-macropi", "forecasts", paste0("forecasts_", release, ".csv")))
+data.table::fwrite(realized_vals, file = here("test-macropi", "extra-data", paste0("historicvalues_", release, ".csv")))
+data.table::fwrite(point_forecasts, file = here("test-macropi", "extra-data", paste0("pointforecasts_", release, ".csv")))
