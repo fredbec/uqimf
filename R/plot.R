@@ -240,8 +240,7 @@ shinyplot <- function(realized_series,
                       linerange_data,
                       point_forecasts,
                       future_realized,
-                      labels_currentyear,
-                      labels_nextyear,
+                      labeldat_list,
                       plot_country,
                       colorscale,
                       cis,
@@ -300,12 +299,12 @@ shinyplot <- function(realized_series,
       data = future_realized |> .d(country == plot_country),
       linetype = "dashed"
     ) +
-    geom_label(data=labels_currentyear |> .d(country == plot_country), aes(x=x, y=y, label=label),
-               color = colorscale[plot_country],
-               size=3.75 , angle=45, fontface="bold") +
-    geom_label(data=labels_nextyear |> .d(country == plot_country), aes(x=x, y=y, label=label),
-               color = colorscale[plot_country],
-               size=3.75 , angle=45, fontface="bold") +
+    lapply(labeldat_list, function(labeldat){
+      geom_label(data = labeldat |> .d(country == plot_country),
+                 aes(x = x, y = y, label = label),
+                 color = colorscale[plot_country],
+                 size=3.75 , angle=45, fontface="bold")
+    }) +
     theme_uqimf() %+replace%
     theme(
       plot.title = element_text(hjust = 0.5,
