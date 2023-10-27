@@ -6,7 +6,10 @@ library(patchwork)
 #source(here("test-macropi", "shiny-plot-deploy-function.R"))
 
 .d <- `[`
-
+release_season <- "Fall"
+release_year <- 2023
+release <- paste0(release_season, release_year)
+release_title <- paste(release_season, release_year)
 
 
 # Define UI for app that draws a histogram ----
@@ -24,9 +27,9 @@ ui <- fluidPage(
 
            # Output: Tabset w/ plot, summary, and table ----
            tabsetPanel(type = "tabs",
-                       tabPanel("Spring 2022 Forecasts - Inflation", plotOutput(outputId = "allcplot_inflation",
+                       tabPanel(paste0(release_title, " Forecasts - Inflation"), plotOutput(outputId = "allcplot_inflation",
                                                    height = 800, width = 800)),
-                       tabPanel("Spring 2022 Forecasts - GDP Growth", plotOutput(outputId = "allcplot_gdp",
+                       tabPanel(paste0(release_title, " Forecasts - GDP Growth"), plotOutput(outputId = "allcplot_gdp",
                                                       height = 800, width = 800))
            )
     )
@@ -199,16 +202,17 @@ server <- function(input, output) {
     678"
 
   #read in data
-  qufcs <- read.csv("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/forecasts/forecasts_Spring2022.csv") |>
+  qufcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/forecasts/forecasts_", release, ".csv")) |>
     setDT()
-  realized_vals <- read.csv("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/extra-data/historicvalues_Spring2022.csv")|>
+  realized_vals <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/extra-data/historicvalues_", release, ".csv"))|>
     setDT()
-  point_fcs <- read.csv("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/extra-data/pointforecasts_Spring2022.csv") |>
+  point_fcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/extra-data/pointforecasts_", release, ".csv")) |>
     setDT()
 
-  cols <- paste0("quantile", qus)
   cis <- c(0.5, 0.8)
   qus <- c(0.1, 0.25, 0.75, 0.9)
+  cols <- paste0("quantile", qus)
+
 
   colors <- met.brewer("Hokusai1", 7)
   names(colors) <- unique(qufcs$country)
@@ -238,27 +242,26 @@ server <- function(input, output) {
                            .d(target_year > 2020)
                          )
 
-    labeldat_2022 <- linerange_dat |>
-      .d(target_year == 2022) |>
-      .d(, x := 2016.25) |>
+    labeldat_cy <- linerange_dat |>
+      .d(target_year == release_year) |>
+      .d(, x := release_year - 5.25) |>
       .d(, y := ylimmax - 1.3) |>
       .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
       .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
-      .d(, label := paste0("2022\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
+      .d(, label := paste0(release_year, "\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
                            "80% PI: ", quantile0.1, " - ", quantile0.9))
-
-    labeldat_2023 <- linerange_dat |>
-      .d(target_year == 2023) |>
-      .d(, x := 2016.75) |>
+    labeldat_ny <- linerange_dat |>
+      .d(target_year == (release_year + 1)) |>
+      .d(, x := release_year - 4.75) |>
       .d(, y := 5.0) |>
       .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
       .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
-      .d(, label := paste0("2023\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
+      .d(, label := paste0((release_year + 1), "\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
                            "80% PI: ", quantile0.1, " - ", quantile0.9))
     ###########################################################################
 
     plotlist <- lapply(as.list(unique(qufcs$country)),
-                       function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, labeldat_2022, labeldat_2023, pltc, colors, cis) + ylab(trgt))
+                       function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, labeldat_cy, labeldat_ny, pltc, colors, cis) + ylab(trgt))
 
     text2 <- wrap_elements(grid::textGrob("Here we'll place some explanatory text and possibly also the legend"))
 
@@ -299,27 +302,27 @@ server <- function(input, output) {
                            .d(target_year > 2020)
     )
 
-    labeldat_2022 <- linerange_dat |>
-      .d(target_year == 2022) |>
-      .d(, x := 2016.25) |>
+    labeldat_cy <- linerange_dat |>
+      .d(target_year == release_year) |>
+      .d(, x := release_year - 5.25) |>
       .d(, y := ylimmax - 1.85) |>
       .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
       .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
-      .d(, label := paste0("2022\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
+      .d(, label := paste0(release_year, "\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
                            "80% PI: ", quantile0.1, " - ", quantile0.9))
 
-    labeldat_2023 <- linerange_dat |>
-      .d(target_year == 2023) |>
-      .d(, x := 2016.75) |>
+    labeldat_ny <- linerange_dat |>
+      .d(target_year == (release_year + 1)) |>
+      .d(, x := release_year - 4.75) |>
       .d(, y := 6.0) |>
       .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
       .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
-      .d(, label := paste0("2023\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
+      .d(, label := paste0((release_year + 1), "\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
                            "80% PI: ", quantile0.1, " - ", quantile0.9))
     ###########################################################################
 
     plotlist <- lapply(as.list(unique(qufcs$country)),
-                       function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, labeldat_2022, labeldat_2023, pltc, colors, cis, ylimmax) + ylab(trgt))
+                       function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, labeldat_cy, labeldat_ny, pltc, colors, cis, ylimmax) + ylab(trgt))
 
     text2 <- wrap_elements(grid::textGrob("Here we'll place some explanatory text and possibly also the legend"))
 
