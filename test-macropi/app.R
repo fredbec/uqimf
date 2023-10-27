@@ -83,8 +83,8 @@ server <- function(input, output) {
 
   plot_target_label <- function(){
 
-    ptl <- c(`pcpi_pch` = "Inflation",
-             `ngdp_rpch` = "Real GDP Growth")
+    ptl <- c(`inflation` = "Inflation rate (in %)",
+             `gdp_growth` = "Real GDP growth rate (in %)")
 
     return(ptl)
   }
@@ -117,8 +117,7 @@ server <- function(input, output) {
                         linerange_data,
                         point_forecasts,
                         future_realized,
-                        labels_currentyear,
-                        labels_nextyear,
+                        labeldat_list,
                         plot_country,
                         colorscale,
                         cis,
@@ -177,12 +176,12 @@ server <- function(input, output) {
         data = future_realized |> .d(country == plot_country),
         linetype = "dashed"
       ) +
-      geom_label(data=labels_currentyear |> .d(country == plot_country), aes(x=x, y=y, label=label),
-                 color = colorscale[plot_country],
-                 size=3.75 , angle=45, fontface="bold") +
-      geom_label(data=labels_nextyear |> .d(country == plot_country), aes(x=x, y=y, label=label),
-                 color = colorscale[plot_country],
-                 size=3.75 , angle=45, fontface="bold") +
+      lapply(labeldat_list, function(labeldat){
+        geom_label(data = labeldat |> .d(country == plot_country),
+                   aes(x = x, y = y, label = label),
+                   color = colorscale[plot_country],
+                   size=3.75 , angle=45, fontface="bold")
+      }) +
       theme_uqimf() %+replace%
       theme(
         plot.title = element_text(hjust = 0.5,
@@ -221,6 +220,7 @@ server <- function(input, output) {
   infl <- reactive({
     ylimmax <- 9.5
     trgt <- "inflation"
+    ylabel <- "Inflation rate (in %)"
 
     linerange_dat <- qufcs |>
       .d(target == trgt) |>
@@ -242,26 +242,20 @@ server <- function(input, output) {
                            .d(target_year > 2020)
                          )
 
-    labeldat_cy <- linerange_dat |>
-      .d(target_year == release_year) |>
-      .d(, x := release_year - 5.25) |>
-      .d(, y := ylimmax - 1.3) |>
+    labeldat_80_cy <- linerange_dat |>
+      copy() |>
       .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
       .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
-      .d(, label := paste0(release_year, "\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
-                           "80% PI: ", quantile0.1, " - ", quantile0.9))
-    labeldat_ny <- linerange_dat |>
-      .d(target_year == (release_year + 1)) |>
-      .d(, x := release_year - 4.75) |>
-      .d(, y := 5.0) |>
-      .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
-      .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
-      .d(, label := paste0((release_year + 1), "\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
-                           "80% PI: ", quantile0.1, " - ", quantile0.9))
+      .d(, .(country, target, target_year, quantile0.1, quantile0.9)) |>
+      dcast(country + target ~ target_year, value.var = c("quantile0.1", "quantile0.9")) |>
+      .d(, x := 2023 - 4.75) |>
+      .d(, y := ylimmax - 1.85) |>
+      .d(, label := paste0("80% Prediction Interval:", "\n", "2023: ", quantile0.1_2023, "% to ", quantile0.9_2023 , "%", "\n",
+                           "2024: ", quantile0.1_2024, "% to ", quantile0.9_2024 , "%"))
     ###########################################################################
 
     plotlist <- lapply(as.list(unique(qufcs$country)),
-                       function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, labeldat_cy, labeldat_ny, pltc, colors, cis) + ylab(trgt))
+                       function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, list(labeldat_80_cy), pltc, colors, cis))
 
     text2 <- wrap_elements(grid::textGrob("Here we'll place some explanatory text and possibly also the legend"))
 
@@ -302,27 +296,20 @@ server <- function(input, output) {
                            .d(target_year > 2020)
     )
 
-    labeldat_cy <- linerange_dat |>
-      .d(target_year == release_year) |>
-      .d(, x := release_year - 5.25) |>
-      .d(, y := ylimmax - 1.85) |>
+    labeldat_80_cy <- linerange_dat |>
+      copy() |>
       .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
       .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
-      .d(, label := paste0(release_year, "\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
-                           "80% PI: ", quantile0.1, " - ", quantile0.9))
-
-    labeldat_ny <- linerange_dat |>
-      .d(target_year == (release_year + 1)) |>
-      .d(, x := release_year - 4.75) |>
-      .d(, y := 6.0) |>
-      .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
-      .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
-      .d(, label := paste0((release_year + 1), "\n", "50% PI: ", quantile0.25, " - ", quantile0.75, "\n",
-                           "80% PI: ", quantile0.1, " - ", quantile0.9))
+      .d(, .(country, target, target_year, quantile0.1, quantile0.9)) |>
+      dcast(country + target ~ target_year, value.var = c("quantile0.1", "quantile0.9")) |>
+      .d(, x := 2023 - 4.75) |>
+      .d(, y := ylimmax - 7.25) |>
+      .d(, label := paste0("80% Prediction Interval:", "\n", "2023: ", quantile0.1_2023, "% to ", quantile0.9_2023 , "%", "\n",
+                           "2024: ", quantile0.1_2024, "% to ", quantile0.9_2024 , "%"))
     ###########################################################################
 
     plotlist <- lapply(as.list(unique(qufcs$country)),
-                       function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, labeldat_cy, labeldat_ny, pltc, colors, cis, ylimmax) + ylab(trgt))
+                       function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, list(labeldat_80_cy), pltc, colors, cis))
 
     text2 <- wrap_elements(grid::textGrob("Here we'll place some explanatory text and possibly also the legend"))
 
@@ -331,6 +318,7 @@ server <- function(input, output) {
                   design = patchwork_layout) &
       theme(legend.position='bottom')
   })
+
 
   output$allcplot_gdp<- renderPlot(
 
