@@ -28,9 +28,9 @@ ui <- fluidPage(
            # Output: Tabset w/ plot, summary, and table ----
            tabsetPanel(type = "tabs",
                        tabPanel(paste0(release_title, " Forecasts - Inflation"), plotOutput(outputId = "allcplot_inflation",
-                                                   height = 800, width = 800)),
+                                                   height = 1000, width = 1000)),
                        tabPanel(paste0(release_title, " Forecasts - GDP Growth"), plotOutput(outputId = "allcplot_gdp",
-                                                      height = 800, width = 800))
+                                                      height = 1000, width = 1000))
            )
     )
   )
@@ -159,7 +159,7 @@ server <- function(input, output) {
               alpha = qupr[[4]]),
           color = colorscale[plot_country],
           data = linerange_data |> .d(country == plot_country),
-          lwd = 2.15)
+          lwd = 3)
 
       }) +
 
@@ -167,7 +167,7 @@ server <- function(input, output) {
         aes(x = target_year, y = prediction),
         color = colorscale[plot_country],,
         data = point_forecasts |> .d(country == plot_country),
-        size = 2.5
+        size = 2
       ) +
 
       geom_line(
@@ -201,11 +201,11 @@ server <- function(input, output) {
     678"
 
   #read in data
-  qufcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/forecasts/forecasts_", release, ".csv")) |>
+  qufcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/forecasts/forecasts_", release, ".csv")) |>
     setDT()
-  realized_vals <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/extra-data/historicvalues_", release, ".csv"))|>
+  realized_vals <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/extra-data/historicvalues_", release, ".csv"))|>
     setDT()
-  point_fcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/extra-data/pointforecasts_", release, ".csv")) |>
+  point_fcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/extra-data/pointforecasts_", release, ".csv")) |>
     setDT()
 
   cis <- c(0.5, 0.8)
@@ -259,7 +259,7 @@ server <- function(input, output) {
 
     text2 <- wrap_elements(grid::textGrob("Here we'll place some explanatory text and possibly also the legend"))
 
-    plotlist[[1]] + text2 + plotlist[[2]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+
+    plotlist[[2]] + text2 + plotlist[[1]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+
       plot_layout(guides = "collect",
                   design = patchwork_layout) &
       theme(legend.position='bottom')
