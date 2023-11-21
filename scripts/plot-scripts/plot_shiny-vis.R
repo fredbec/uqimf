@@ -72,7 +72,14 @@ names(colors) <- unique(qufcs$country)
 
 
 plotlist <- lapply(as.list(unique(qufcs$country)),
-                   function(pltc) shinyplot(realized_vals, linerange_dat, point_fcs, labeldat_2022, labeldat_2023, pltc, colors, cis))
+                   function(pltc) shinyplot(realized_series = realized_vals,
+                                            linerange_data = linerange_dat,
+                                            point_forecasts = point_fcs,
+                                            future_realized = dashed_line,
+                                            labeldat_list = list(labeldat_2022, labeldat_2023),
+                                            plot_country =  pltc,
+                                            colorscale = colors,
+                                            cis = cis))
 
 
 spacer <- 150
