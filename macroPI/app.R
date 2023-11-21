@@ -2,6 +2,7 @@ library(data.table)
 library(ggplot2)
 library(MetBrewer)
 library(patchwork)
+library(ggpubr)
 
 #source(here("test-macropi", "shiny-plot-deploy-function.R"))
 
@@ -136,7 +137,7 @@ server <- function(input, output) {
 
     ggplot() +
       geom_line(
-        aes(x = target_year, y = true_value),
+        aes(x = target_year, y = true_value, linetype = "Realized Series"),
         color = colorscale[plot_country],
         data = realized_series |> .d(country == plot_country),
         lwd = 0.75) +
@@ -144,6 +145,7 @@ server <- function(input, output) {
         aes(x = target_year, y = true_value),
         color = colorscale[plot_country],
         data = realized_series |> .d(country == plot_country),
+        pch = 3,
         size = 0.95) +
       ggtitle(paste0("Actual Series, with forecast for year ", 2023)) +
       ylab(plot_target_label()[trgt]) +
@@ -164,42 +166,64 @@ server <- function(input, output) {
       }) +
 
       geom_point(
-        aes(x = target_year, y = prediction),
-        color = colorscale[plot_country],,
-        data = point_forecasts |> .d(country == plot_country),
-        size = 2
+        aes(x = target_year, y = prediction, shape = "IMF Point Forecast"),
+        color = colorscale[plot_country],
+        data = point_forecasts |> .d(country == plot_country)
       ) +
 
       geom_line(
-        aes(x = target_year, y = prediction),
+        aes(x = target_year, y = prediction, linetype = "Projection"),
         color = colorscale[plot_country],
-        data = future_realized |> .d(country == plot_country),
-        linetype = "dashed"
+        data = future_realized |> .d(country == plot_country)
       ) +
       lapply(labeldat_list, function(labeldat){
         geom_label(data = labeldat |> .d(country == plot_country),
                    aes(x = x, y = y, label = label),
                    color = colorscale[plot_country],
-                   size=3.75 , angle=45, fontface="bold")
+                   size=4.35 , angle=45, fontface="bold")
       }) +
       theme_uqimf() %+replace%
       theme(
+        legend.position = "right",
+        legend.text=element_text(size=12),
         plot.title = element_text(hjust = 0.5,
                                   vjust = 3)) +
       scale_alpha_manual(name = "",
                          breaks = c("50% Interval", "80% Interval"),
                          values = c("50% Interval" = 0.6, "80% Interval" = 0.4),
-                         guide = guide_legend(override.aes = list(color = "black") ))
+                         guide = guide_legend(override.aes = list(color = "grey30") )) +
+
+      scale_shape_manual(name = "",
+                         breaks = c("IMF Point Forecast"),
+                         values = c("IMF Point Forecast" = 19),
+                         guide = guide_legend(override.aes = list(color = "grey30") )) +
+      scale_linetype_manual(name = "LEGEND",
+                         breaks = c("Realized Series", "Projection"),
+                         values = c("Realized Series" = "solid", "Projection" = "dashed"),
+                         guide = guide_legend(override.aes = list(color = "grey30") ))
 
   }
 
   #######################################Global Settings####################################
 
   patchwork_layout <-
-    "122
-    345
-    678"
+    "112333
+    445566
+    778899"
 
+  displaytext <-  function(targetlabel){
+    return(paste(paste0("This site contains distributional forecasts for, ", targetlabel, ", for G7 countries"),
+                         "and current and next year's target, in the format of prediction intervals.",
+                         "",
+                         "Our distributional forecasts are constructed around the current IMF point",
+                         "forecasts and are based on past IMF point forecast errors.",
+                         "",
+                         "Our forecasts are publicly available and documented in the following Github",
+                         "repository: https://github.com/MacroPrediction/MacroPI/ ",
+                         "",
+                         "Please note that this project is not affiliated with or endorsed by the IMF.",
+                         sep = "\n"))
+  }
   #read in data
   qufcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/forecasts/forecasts_", release, ".csv")) |>
     setDT()
@@ -221,6 +245,7 @@ server <- function(input, output) {
     ylimmax <- 9.5
     trgt <- "inflation"
     ylabel <- "Inflation rate (in %)"
+    textlabel <- "CPI inflation"
 
     linerange_dat <- qufcs |>
       .d(target == trgt) |>
@@ -241,14 +266,14 @@ server <- function(input, output) {
                            setnames("true_value", "prediction") |>
                            .d(target_year > 2020)
                          )
-
+    cyear <- min(linerange_dat$target_year)
     labeldat_80_cy <- linerange_dat |>
       copy() |>
       .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
       .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
       .d(, .(country, target, target_year, quantile0.1, quantile0.9)) |>
       dcast(country + target ~ target_year, value.var = c("quantile0.1", "quantile0.9")) |>
-      .d(, x := 2023 - 4.75) |>
+      .d(, x :=  cyear - 4.55) |>
       .d(, y := ylimmax - 1.85) |>
       .d(, label := paste0("80% Prediction Interval:", "\n", "2023: ", quantile0.1_2023, "% to ", quantile0.9_2023 , "%", "\n",
                            "2024: ", quantile0.1_2024, "% to ", quantile0.9_2024 , "%"))
@@ -257,12 +282,17 @@ server <- function(input, output) {
     plotlist <- lapply(as.list(unique(qufcs$country)),
                        function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, list(labeldat_80_cy), pltc, colors, cis))
 
-    text2 <- wrap_elements(grid::textGrob("Here we'll place some explanatory text and possibly also the legend"))
+    text2 <- get_legend(plotlist[[1]])
+    text3 <- grid::textGrob(label = displaytext(textlabel),
+                            x = unit(0.10, "npc"),
+                            hjust = 0)
 
-    plotlist[[2]] + text2 + plotlist[[1]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+
+
+
+    plotlist[[2]] + text2 + text3 + plotlist[[1]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+
       plot_layout(guides = "collect",
                   design = patchwork_layout) &
-      theme(legend.position='bottom')
+      theme(legend.position='none')
   })
 
   output$allcplot_inflation <- renderPlot(
@@ -271,10 +301,11 @@ server <- function(input, output) {
 
   )
 
-  #  #######################################GDP#####################################
+  ########################################GDP#####################################
   gdp <-  reactive({
     ylimmax <- 14.5
     trgt <- "gdp_growth"
+    textlabel <- "GDP Growth"
 
     linerange_dat <- qufcs |>
       .d(target == trgt) |>
@@ -296,13 +327,14 @@ server <- function(input, output) {
                            .d(target_year > 2020)
     )
 
+    cyear <- min(linerange_dat$target_year)
     labeldat_80_cy <- linerange_dat |>
       copy() |>
       .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
       .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
       .d(, .(country, target, target_year, quantile0.1, quantile0.9)) |>
       dcast(country + target ~ target_year, value.var = c("quantile0.1", "quantile0.9")) |>
-      .d(, x := 2023 - 4.75) |>
+      .d(, x :=  cyear - 4.55) |>
       .d(, y := ylimmax - 7.25) |>
       .d(, label := paste0("80% Prediction Interval:", "\n", "2023: ", quantile0.1_2023, "% to ", quantile0.9_2023 , "%", "\n",
                            "2024: ", quantile0.1_2024, "% to ", quantile0.9_2024 , "%"))
@@ -310,13 +342,14 @@ server <- function(input, output) {
 
     plotlist <- lapply(as.list(unique(qufcs$country)),
                        function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, list(labeldat_80_cy), pltc, colors, cis))
-
-    text2 <- wrap_elements(grid::textGrob("Here we'll place some explanatory text and possibly also the legend"))
-
-    plotlist[[2]] + text2 + plotlist[[1]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+
+    text2 <- get_legend(plotlist[[1]])
+    text3 <- grid::textGrob(label = displaytext(textlabel),
+                            x = unit(0.10, "npc"),
+                            hjust = 0)
+    plotlist[[2]] + text2 + text3 + plotlist[[1]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+
       plot_layout(guides = "collect",
                   design = patchwork_layout) &
-      theme(legend.position='bottom')
+      theme(legend.position='none')
   })
 
 
