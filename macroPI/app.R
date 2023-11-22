@@ -7,24 +7,30 @@ library(ggpubr)
 #source(here("test-macropi", "shiny-plot-deploy-function.R"))
 
 .d <- `[`
-release_season <- "Fall"
-release_year <- 2023
+cmonth <- format(Sys.time(), "%m") |> as.numeric()
+cyear <- format(Sys.time(), "%Y") |> as.numeric()
+
+release_season <- ifelse(cmonth %in% 4:9, "Spring", "Fall")
+
+#in the first few months of the year, last year's release is still the current one
+release_year <- ifelse(cmonth < 4, cyear - 1, cyear)
 release <- paste0(release_season, release_year)
 release_title <- paste(release_season, release_year)
 
 
-# Define UI for app that draws a histogram ----
 ui <- fluidPage(
 
   # App title ----
-  titlePanel("IMF Empirical Quantile Forecasts"),
+  titlePanel("Simple Macroeconomic Forecast Distributions"),
 
-  # Sidebar layout with input and output definitions ----
+
+
+  #Main plot with series and forecast intervals for G7 countries
 
   fluidRow(
     column(12,
 
-           h2("Visualisation of quantile forecasts"),
+           h3("Visualisation of Forecast Distributions - G7 countries"),
 
            # Output: Tabset w/ plot, summary, and table ----
            tabsetPanel(type = "tabs",
@@ -147,7 +153,7 @@ server <- function(input, output) {
         data = realized_series |> .d(country == plot_country),
         pch = 3,
         size = 0.95) +
-      ggtitle(paste0("Actual Series, with forecast for year ", 2023)) +
+      ggtitle(paste0("Actual Series, with forecast for year ", release_year)) +
       ylab(plot_target_label()[trgt]) +
       ylim(minval, ylimmax) +
       xlab("Target Year") +
@@ -212,16 +218,19 @@ server <- function(input, output) {
     778899"
 
   displaytext <-  function(targetlabel){
-    return(paste(paste0("This site contains distributional forecasts for, ", targetlabel, ", for G7 countries"),
-                         "and current and next year's target, in the format of prediction intervals.",
+    return(paste(paste0("This site contains  distributional forecasts for ", targetlabel, " in the"),
+                         "format of prediction intervals, for G7 countries and current and next",
+                         "year's target",
                          "",
-                         "Our distributional forecasts are constructed around the current IMF point",
-                         "forecasts and are based on past IMF point forecast errors.",
+                         "Our distributional forecasts are constructed around the current IMF",
+                         "point forecasts and the methodology to create them is based on past",
+                         "IMF point forecast errors.",
                          "",
-                         "Our forecasts are publicly available and documented in the following Github",
-                         "repository: https://github.com/MacroPrediction/MacroPI/ ",
+                         "Our forecasts are publicly available and documented in the following",
+                         "Github repository: https://github.com/MacroPrediction/MacroPI/ ",
                          "",
-                         "Please note that this project is not affiliated with or endorsed by the IMF.",
+                         "Please note that this project is not affiliated with or endorsed",
+                         "by the IMF.",
                          sep = "\n"))
   }
   #read in data
@@ -264,19 +273,19 @@ server <- function(input, output) {
                          realized_vals_infl |>
                            copy() |>
                            setnames("true_value", "prediction") |>
-                           .d(target_year > 2020)
+                           .d(target_year >= release_year - 1)
                          )
-    cyear <- min(linerange_dat$target_year)
+    #cyear <- min(linerange_dat$target_year)
     labeldat_80_cy <- linerange_dat |>
       copy() |>
       .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
       .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
       .d(, .(country, target, target_year, quantile0.1, quantile0.9)) |>
       dcast(country + target ~ target_year, value.var = c("quantile0.1", "quantile0.9")) |>
-      .d(, x :=  cyear - 4.55) |>
+      .d(, x :=  release_year - 4.55) |>
       .d(, y := ylimmax - 1.85) |>
-      .d(, label := paste0("80% Prediction Interval:", "\n", "2023: ", quantile0.1_2023, "% to ", quantile0.9_2023 , "%", "\n",
-                           "2024: ", quantile0.1_2024, "% to ", quantile0.9_2024 , "%"))
+      .d(, label := paste0("80% Prediction Interval:", "\n", release_year, ": ", get(paste0("quantile0.1_", release_year)), "% to ", get(paste0("quantile0.9_", release_year)) , "%", "\n",
+                           release_year+1, ": ", get(paste0("quantile0.1_", release_year+1)), "% to ", get(paste0("quantile0.9_", release_year+1)) , "%"))
     ###########################################################################
 
     plotlist <- lapply(as.list(unique(qufcs$country)),
@@ -324,20 +333,20 @@ server <- function(input, output) {
                          realized_vals_infl |>
                            copy() |>
                            setnames("true_value", "prediction") |>
-                           .d(target_year > 2020)
+                           .d(target_year >= release_year - 1)
     )
 
-    cyear <- min(linerange_dat$target_year)
+    #cyear <- min(linerange_dat$target_year)
     labeldat_80_cy <- linerange_dat |>
       copy() |>
       .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
       .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
       .d(, .(country, target, target_year, quantile0.1, quantile0.9)) |>
       dcast(country + target ~ target_year, value.var = c("quantile0.1", "quantile0.9")) |>
-      .d(, x :=  cyear - 4.55) |>
+      .d(, x :=  release_year - 4.55) |>
       .d(, y := ylimmax - 7.25) |>
-      .d(, label := paste0("80% Prediction Interval:", "\n", "2023: ", quantile0.1_2023, "% to ", quantile0.9_2023 , "%", "\n",
-                           "2024: ", quantile0.1_2024, "% to ", quantile0.9_2024 , "%"))
+      .d(, label := paste0("80% Prediction Interval:", "\n", release_year, ": ", get(paste0("quantile0.1_", release_year)), "% to ", get(paste0("quantile0.9_", release_year)) , "%", "\n",
+                           release_year+1, ": ", get(paste0("quantile0.1_", release_year+1)), "% to ", get(paste0("quantile0.9_", release_year+1)) , "%"))
     ###########################################################################
 
     plotlist <- lapply(as.list(unique(qufcs$country)),
