@@ -14,7 +14,8 @@ empQU <- function(weodat,
                   #horizon = 1,
                   error_fct = identity,
                   tv_release = 0.5,
-                  quantiles = c(0.1, 0.25, 0.5, 0.75, 0.9)){
+                  quantiles = c(0.1, 0.25, 0.5, 0.75, 0.9),
+                  qutype = 7){
 
   .d <- `[`
 
@@ -25,8 +26,8 @@ empQU <- function(weodat,
   }
 
   #small helper function for calculating quantiles
-  calculate_quantiles <- function(x, quantiles) {
-    quantile(x, probs = quantiles)
+  calculate_quantiles <- function(x, quantiles, qutype) {
+    quantile(x, probs = quantiles, type = qutype)
   }
 
   quants <-
@@ -35,7 +36,7 @@ empQU <- function(weodat,
     .d(, error := error_fct(get(paste0("tv_", tv_release)) - prediction)) |>
     .d(!is.na(error)) |>
     .d(, {
-      quantile_vals <- calculate_quantiles(error, quantiles)
+      quantile_vals <- calculate_quantiles(error, quantiles, qutype = qutype)
       .(quantile = quantiles,
         setNames(quantile_vals, paste0("quant", quantiles)))
     }, by = c("country", "target", "horizon")) |>
@@ -55,7 +56,8 @@ empFC <- function(weodat,
                   quantiles = NULL,
                   window_length = NULL,
                   only_errorquants = FALSE,
-                  include_truevals = TRUE){
+                  include_truevals = TRUE,
+                  qutype = 7){
 
   .d <- `[`
 
@@ -154,7 +156,8 @@ empFC <- function(weodat,
       #.d(target_year %in% yearset) |>
       empQU(error_fct = error_fct,
             quantiles = quantiles,
-            tv_release = tv_release) |>
+            tv_release = tv_release,
+            qutype = qutype) |>
       .d(, target_year := target_year)
 
     if(error_method == "absolute"){

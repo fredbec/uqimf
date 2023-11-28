@@ -11,6 +11,7 @@ max_year_others <- specs$max_year_others
 min_year <- specs$min_year
 tv_release <- specs$tv_release
 window_length <- specs$window_length
+quantype <- specs$qutype
 
 cis <- specs$ci_levels_make
 
@@ -52,7 +53,8 @@ qufcs <- lapply(1:nrow(combs),
           error_method = setting[, "error_method"],
           method = setting[, "method"],
           window_length = window_length,
-          ci_levels = cis) |>
+          ci_levels = cis,
+          qutype = quantype) |>
       .d(, source := setting[, "source"]) |>
       .d(, error_method := setting[, "error_method"]) |>
       .d(, method := setting[, "method"])

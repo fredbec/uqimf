@@ -5,7 +5,7 @@ devtools::load_all()
 .d <- `[`
 
 #first check if new download is/should be available
-download <- TRUE #could be automated, but don't see the need right now
+download <- FALSE #could be automated, but don't see the need right now
 
 if(download){
   source(here("scripts", "download-data.R"))
