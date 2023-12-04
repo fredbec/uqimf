@@ -65,6 +65,10 @@ qufcs <- lapply(1:nrow(combs),
   setnames(paste0("tv_", tv_release), "true_value") #|>
   #.d(!is.na(true_value))
 
+mainfcs <- qufcs |>
+  .d(error_method == "absolute" & method == "rolling window") |>
+  empFC_pava()
+
 
 directional_expand <- qufcs |>
   .d(error_method == "directional") |>
@@ -91,3 +95,4 @@ directional_expand <- qufcs |>
 
 data.table::fwrite(qufcs, here("quantile_forecasts", "quantile_forecasts.csv"))
 data.table::fwrite(directional_expand, here("quantile_forecasts", "qufcs_directionalsymmetric.csv"))
+data.table::fwrite(mainfcs, here("quantile_forecasts", "quantile_forecasts_pava.csv"))

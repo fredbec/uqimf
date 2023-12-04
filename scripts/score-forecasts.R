@@ -30,6 +30,8 @@ combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"
 bvar_qus <- data.table::fread(here("benchmarks", "quantile_benchmarks_processed.csv")) |>
   setnames("tv_1", "true_value")|>
   .d(target_year <= max_year)
+qufcs_pava <- data.table::fread(here("quantile_forecasts", "quantile_forecasts_pava.csv")) |>
+  .d(target_year <= max_year)
 
 
 #################score CI's####################################################
@@ -57,6 +59,24 @@ scores_avgcountry <- scoreempQu(weodat_qu_sameyearset, cvg_rg = cis100,
 
 scores_cvgshort <- scoreempQu(weodat_qu_sameyearset, cvg_rg = cis100,
                      by = c("model", "error_method", "method", "target"))
+
+#################score CI's for PAVA####################################################
+weodat_qu_sameyearset_pava <- qufcs_pava |>
+  data.table::copy() |>
+  .d(target_year>=score_min_year) |>
+  .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, method, error_method, source)) |>
+  setnames("source", "model") |>
+  .d(quantile %in% qus)
+
+
+scores_pava <- scoreempQu(weodat_qu_sameyearset_pava, cvg_rg = cis100,
+                     by = c("model", "error_method", "method", "country", "target", "horizon"))
+
+scores_avgcountry_pava <- scoreempQu(weodat_qu_sameyearset_pava, cvg_rg = cis100,
+                                by = c("model", "error_method", "method", "target", "horizon"))
+
+scores_cvgshort_pava <- scoreempQu(weodat_qu_sameyearset_pava, cvg_rg = cis100,
+                              by = c("model", "error_method", "method", "target"))
 
 
 
@@ -151,6 +171,9 @@ data.table::fwrite(scores, here("scores", "ci_scores.csv"))
 data.table::fwrite(scores_allyears, here("scores", "ci_scores_allyears.csv"))
 data.table::fwrite(scores_cvgshort, here("scores", "cvg_pooled.csv"))
 data.table::fwrite(scores_avgcountry, here("scores", "ci_scores_avgcnt.csv"))
+data.table::fwrite(scores_pava, here("scores", "ci_scores_pava.csv"))
+data.table::fwrite(scores_cvgshort_pava, here("scores", "cvg_pooled_pava.csv"))
+data.table::fwrite(scores_avgcountry_pava, here("scores", "ci_scores_avgcnt_pava.csv"))
 data.table::fwrite(all_crps, here("scores", "sample_scores.csv"))
 data.table::fwrite(pp_scores, here("scores", "pointfc_scores.csv"))
 data.table::fwrite(bvar_scores, here("scores", "bvar_ci_scores.csv"))

@@ -209,4 +209,138 @@ empFC <- function(weodat,
   return(quantileFC)
 }
 
+##########NOTE: THIS FUNCTION IS HARDCODED FOR CIs 50 & 80
+empFC_pava <- function(fcdat,
+                       ci_levels = c(0.5, 0.8),
+                       qutype = 7){
 
+  .d <- `[`
+
+  qus <- ci_to_quantiles(ci_levels, "directional") |>
+    #needed because of floating point error
+    as.character() |>
+    as.numeric()
+
+
+  extra_cols <- fcdat |>
+    .d(, .(imf_pp, true_value, error, country, target, target_year, horizon,
+           source, error_method, method)) |>
+    unique()
+
+  violations <- fcdat |>
+    #filter relevant quantiles
+    .d(quantile %in% c(0.1+fperror(), 0.25, 0.75, 0.9)) |>
+    #only keep relevant variables
+    .d(, .(country, target, target_year, horizon, error_prediction,
+           source, error_method, method, quantile)) |>
+
+
+    #wide formal
+    .d(, horizon := paste0("h", 10*horizon)) |>
+    dcast(country + target + target_year + quantile +
+            error_method + method + source ~ horizon,
+          value.var = "error_prediction") |>
+
+    .d(, .(country, target, source, method, error_method, target_year, quantile, h0, h5, h10, h15)) |>
+    .d(order(country, target, target_year, error_method, method, source, quantile)) |>
+    .d(, qtype := ifelse(quantile < 0.5, 1, -1)) |>
+
+    ##Pooling for
+    .d(, viol := ifelse( qtype*h5 > qtype*h0, TRUE, FALSE)) |>
+    .d(, pool05 := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
+    .d(pool05 == TRUE, c("h0", "h5") := (h0+h5)/2) |>
+
+    .d(, viol := ifelse( qtype*h10 > qtype*h5, TRUE, FALSE)) |>
+    .d(, pool10 := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
+    .d(pool10 == TRUE, c("h5", "h10") := (h5+h10)/2) |>
+
+    #check if ordering is still upheld
+    .d(, viol := ifelse( qtype*h5 > qtype*h0, TRUE, FALSE)) |>
+    .d(, pool05twice := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
+    .d(pool05twice == TRUE, c("h0", "h5", "h10") := (h0+h5+h10)/3) |>
+
+    .d(, viol := ifelse( qtype*h15 > qtype*h10, TRUE, FALSE)) |>
+    .d(, pool15 := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
+    .d(pool15 == TRUE, c("h10", "h15") := (h10+h15)/2) |>
+
+    .d(, viol := ifelse( qtype*h10 > qtype*h5, TRUE, FALSE)) |>
+    .d(, pool10twice := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
+    .d(pool10twice == TRUE, c("h5", "h10", "h15") := (h5+h10+h15)/3) |>
+
+    #check if ordering is still upheld
+    .d(, viol := ifelse( qtype*h5 > qtype*h0, TRUE, FALSE)) |>
+    .d(, pool05thrice := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
+    .d(pool05thrice == TRUE, c("h0", "h5", "h10", "h15") := (h0+h5+h10+h15)/4) |>
+
+    .d(, .(country, target, source, method, error_method, target_year, quantile, h0, h5, h10, h15)) |>
+    melt(id.vars = c("country", "target", "source", "method", "error_method", "target_year", "quantile"),
+         variable.name = "horizon",
+         value.name = "error_prediction") |>
+    .d(,horizon := as.numeric(substr(horizon, 2, 100))/10)
+
+  fcs <- extra_cols[violations, on = c("country", "target", "target_year", "horizon",
+                                       "source", "error_method", "method")] |>
+    .d(, prediction := imf_pp + error_prediction) |>
+    .d(, .(country, target, target_year, imf_pp, horizon, true_value, error, quantile, prediction, error_prediction, source, error_method, method))
+
+
+  return(fcs)
+
+}
+
+
+
+##########NOTE: THIS FUNCTION IS HARDCODED FOR CIs 50 & 80
+##########NOTE: UNFINISHED CODE
+empFC_pava_cilength <- function(fcdat,
+                       ci_levels = c(0.5, 0.8),
+                       qutype = 7){
+
+  .d <- `[`
+
+  qus <- ci_to_quantiles(ci_levels, "directional") |>
+    #needed because of floating point error
+    as.character() |>
+    as.numeric()
+
+
+  extra_cols <- fcdat |>
+    .d(, .(imf_pp, true_value, error, country, target, target_year, horizon,
+           source, error_method, method)) |>
+    unique()
+
+  violations <- fcdat |>
+    #filter relevant quantiles
+    .d(quantile %in% qus) |>
+    #only keep relevant variables
+    .d(, .(country, target, target_year, horizon, error_prediction,
+           source, error_method, method, quantile)) |>
+
+
+    #wide formal
+    .d(, horizon := paste0("h", 10*horizon)) |>
+    dcast(country + target + target_year + quantile +
+            error_method + method + source ~ horizon,
+          value.var = "error_prediction") |>
+
+    .d(, .(country, target, source, method, error_method, target_year, quantile, h0, h5, h10, h15)) |>
+    .d(order(country, target, target_year, error_method, method, source, quantile)) |>
+    melt(measure.vars = paste0("h", c(0,5,10,15)), value.name = "error_prediction", variable.name = "horizon") |>
+    dcast(country + target + target_year + horizon +
+            error_method + method + source ~ quantile,
+          value.var = "error_prediction") |>
+    .d(, ci50 := `0.75`- `0.25`) |>
+    .d(, ci80 := `0.9` - `0.1`) |>
+    melt(measure.vars = c("0.1", "0.25", "0.75", "0.9", "ci50", "ci80"), value.name = "error_prediction", variable.name = "quantile") |>
+    dcast(country + target + target_year + quantile +
+            error_method + method + source ~ horizon,
+          value.var = "error_prediction") |>
+
+    .d(quantile %in% c("ci50", "ci80"), viol := ifelse( h0 > h5, TRUE, FALSE)) |>
+    .d(, viol := ifelse(is.na(viol), FALSE, viol)) |>
+    .d(, pool05 := any(viol), by = .(country, target, target_year, error_method, method, source))
+
+  return(violations)
+
+
+}
