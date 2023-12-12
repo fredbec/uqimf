@@ -1,0 +1,117 @@
+\documentclass{article}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\begin{document}
+\noindent
+\Large{\textbf{Pros and Cons}}\bigskip
+\normalsize
+\begin{center}
+\begin{tabular}{ p{0.5\linewidth} |p{0.5\linewidth} } 
+\multicolumn{1}{c|}{\textbf{Absolute} }& \multicolumn{1}{c}{\textbf{Directional} }\\ \hline \\[-0.8em]
+\begin{itemize}
+\item[\textbf{+}] symmetric CI's and IMF forecast as median perhaps more intuitive
+\item[\textbf{-}] interpretation of the IMF point forecast as the median might simply be wrong
+\end{itemize} & 
+\begin{itemize}
+\item[\textbf{-}]point forecast may not be contained in prediction intervals $\rightarrow$ unintuitive?
+\item[\textbf{+}] no assumptions placed on IMF point forecast's underlying functional
+\end{itemize} \\ 
+
+\begin{itemize}
+\item[\textbf{+}] coverage rates and scores are better (especially for inflation)
+\item[\textbf{+}] works well "out-of-the-box" with intuitive and easy to explain $\texttt{type = 7}$ quantile type
+\end{itemize} & 
+\begin{itemize}
+\item[\textbf{-}]especially coverage is often sub-par
+\item[$\pm$] results can be improved with $\texttt{type = 8}$ quantile type, BUT loses some interpretability as quantiles don't directly stem from order statistics
+\end{itemize} \\ 
+
+\begin{itemize}
+\item[\textbf{+}] PAVA "works" and has minimal impact: $<5\%$ of "follow-up" corrections at any step
+\end{itemize} & 
+\begin{itemize}
+\item[\textbf{-}] PAVA is simply a mess: for $39\% $ of target years, predictions are \textit{entirely} smoothed across \textit{all} horizons
+\end{itemize} \\ 
+
+\begin{itemize}
+\item[\textbf{-}] assumptions on the underlying process of the forecast errors are somewhat strong/weird
+\item[\textbf{-}] intervals aren't actually central
+\end{itemize} & 
+\begin{itemize}
+\item[\textbf{+}] math/theory is more neat
+\end{itemize} \\ 
+\end{tabular}
+\end{center}
+
+\newpage
+\noindent
+\Large{\textbf{Inflation - Scores}}\bigskip
+\normalsize
+\begin{center}
+\begin{tabular}{ cccc c  c  } 
+
+&&\multicolumn{2}{c}{\underline{absolute}}&\multicolumn{2}{c}{\underline{directional}}\\
+ && type = 7 & type = 8 & \texttt{type = 7} & type = 8\\[0.8em]
+
+\multirow{2}{4em}{h = 0} &expanding & \textbf{0.115} & \textbf{0.115}  &0.125  & 0.125 \\ 
+&rolling & \textbf{0.119}  & \textbf{0.119}  &0.133 & 0.133 \\[0.5em]
+\multirow{2}{4em}{h = 0.5} &expanding & 0.258  & 0.258  &0.256   & \textbf{\underline{0.255}}  \\ 
+&rolling & 0.261  & 0.260  &0.262  & \textbf{\underline{0.259}} \\[0.5em]
+\multirow{2}{4em}{h = 1} &expanding & \textbf{0.447}  & \textbf{0.447}  &0.507  & \underline{0.492} \\ 
+&rolling & 0.458  & \textbf{0.455}  & 0.509 & \underline{0.492} \\[0.5em]
+\multirow{2}{4em}{h = 1.5} &expanding & \textbf{0.503}  &  0.506 &0.553  & \underline{0.542} \\ 
+&rolling & \textbf{0.506}  & 0.507  &0.563  & \underline{0.546} \\ 
+\end{tabular}
+\end{center}
+\vspace{2cm}
+\Large{\textbf{GDP Growth - Scores}} \bigskip
+\normalsize
+\begin{center}
+\begin{tabular}{ cccc c  c  } 
+
+&&\multicolumn{2}{c}{\underline{absolute}}&\multicolumn{2}{c}{\underline{directional}}\\
+ && type = 7  & type = 8 & type = 7 & type = 8\\[0.8em]
+\multirow{2}{4em}{h = 0} &expanding & 0.241  &  \textbf{0.240}  &0.244  & 0.248 \\ 
+&rolling & 0.240   & \textbf{0.239}  &0.260  & \underline{0.255}\\[0.5em]
+\multirow{2}{4em}{h = 0.5} &expanding & \textbf{0.416}   & 0.417  &\textbf{0.416}  & 0.420 \\ 
+&rolling & 0.416  & 0.415  & 0.444 & \underline{0.439} \\[0.5em]
+\multirow{2}{4em}{h = 1} &expanding & 0.846   & 0.852  &0.842  & \underline{\textbf{0.831}} \\ 
+&rolling & 0.858  & \textbf{0.856}  &0.900  & \underline{0.877} \\[0.5em]
+\multirow{2}{4em}{h = 1.5} &expanding & 1.063   & 1.060  &1.071  & \underline{\textbf{1.059}} \\ 
+&rolling & 1.075   & \textbf{1.071}  &1.134  & \underline{1.098} 
+\end{tabular}
+\end{center}
+\newpage
+\noindent
+\Large{\textbf{Inflation - Coverage}}\bigskip
+\normalsize
+\begin{center}
+\begin{tabular}{ cccc c  c  } 
+
+&&\multicolumn{2}{c}{\underline{absolute}}&\multicolumn{2}{c}{\underline{directional}}\\
+ && type = 7 & type = 8 & type = 7 & type = 8\\[0.8em]
+\multirow{2}{4em}{80\%} &expanding & 0.755 & \textbf{0.781} & 0.653 & \underline{0.735}\\ 
+&rolling & 0.712  & \textbf{0.753} & 0.599 & \underline{0.681}\\[0.5em]
+\multirow{2}{4em}{50\%} &expanding & \textbf{0.431}& \textbf{0.431}  & 0.375 & \underline{0.418}\\ 
+&rolling & \textbf{0.444} & \textbf{0.444} &0.360 &\underline{0.436}\\[0.5em]
+
+\end{tabular}
+\end{center}
+\vspace{2cm}
+\Large{\textbf{GDP Growth - Coverage}}\bigskip
+\normalsize
+\begin{center}
+\begin{tabular}{ cccc c  c  } 
+
+&&\multicolumn{2}{c}{\underline{absolute}}&\multicolumn{2}{c}{\underline{directional}}\\
+ && type = 7 & type = 8 & type = 7 & type = 8\\[0.8em]
+\multirow{2}{4em}{80\%} &expanding & 0.783 & \textbf{0.801} & 0.702 & \underline{0.783}\\ 
+&rolling & 0.730  & \textbf{0.760} & 0.633 & \underline{0.747}\\[0.5em]
+\multirow{2}{4em}{80\%} &expanding & 0.554 & 0.554 & 0.457 & \underline{\textbf{0.520}}\\ 
+&rolling & 0.508  & \textbf{0.508} & 0.370 & \underline{0.434}\\[0.5em]
+
+\end{tabular}
+\end{center}
+\vspace{2cm}
+\end{document}
