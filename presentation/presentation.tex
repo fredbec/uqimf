@@ -30,11 +30,12 @@
 
 % Beginn der Präsentation
 
-\title[Simple Prediction Intervals]{Simple and Transparent Macroeconomic Distributional Forecasts}
+\title[Simple Prediction Intervals]{Simple Macroeconomic Forecast Distributions}
 \subtitle{} 
 \author[Friederike Becker, Fabian Krüger, Melanie Schienle]{Friederike Becker, Fabian Krüger, Melanie Schienle}
 
-\date[29.\,9.\,2023]{September 29, 2023}
+\date[05.\,12.\,2023]{December 5, 2023}
+
 
 % Literatur 
  
@@ -132,7 +133,7 @@
             \item contains forecasts with up to 6 years horizon and historic truth values
 		    \item publication in April (horizon for current year $\approx$ 8 months) and in October ($\approx$ 2 months)
 		\end{itemize}
-    \item publicly available publication\footnote{International Monetary Fund. 2023. \textit{World Economic Outlook: A Rocky Recovery.} Washington, DC. April.}
+    \item publicly available\footnote{International Monetary Fund. 2023. \textit{World Economic Outlook: Navigating Global Divergences.} Washington, DC. October.} in an accessible format
     \item targets: real GDP growth and CPI inflation 
     \item time range: available since 1990, giving $\sim$30 years of forecast-truth pairs %per country and forecast horizon
     \item target locations: forecasts are issued for 196 countries in total
@@ -150,10 +151,11 @@ We apply an attractively simple and cheap method. For a given country and target
     \begin{itemize}
         \item for target year $t$, horizon $h$
     \end{itemize}
-    \item ... construct sets $\mathcal{E}_{t, h} = \{\hat{e}_{t^*, h}  | t-9 \leq t^* < t \}$, containing the last nine forecast errors
+    \item ... construct sets $\mathcal{E}_{t, h} = \{\hat{e}_{t^*, h}  | t-R \leq t^* < t \}$, containing the last $R$ forecast errors
     \begin{itemize}
         \item based on \textit{absolute} errors $\hat{e}_{t,h} = |y_{t} - \hat{y}_{t, h}| $
-        \item sets are stratified by country, target and horizon
+        \item currently: $R=9$
+        %\item sets are stratified by country, target and horizon
     \end{itemize}
     \item for $\alpha \in \{0.5, 0.8\}$, compute $q^{\alpha}_{t, h} =  Q\left(\mathcal{E}_{t, h}, \alpha \right)$
     \item and compute the upper and lower endpoints of a central prediction interval as 
@@ -161,6 +163,7 @@ We apply an attractively simple and cheap method. For a given country and target
         \item $u^{\alpha}_{t,h} = \hat{y}_{t, h} + q^{\alpha}_{t, h}$ 
         \item $l^{\alpha}_{t,h} \hspace{1mm} = \hat{y}_{t, h} - q^{\alpha}_{t, h}$
     \end{itemize}
+    \item use PAVA-type reordering if intervals shrink with increasing horizon
     \item assess central interval coverage, score via the weighted interval score (WIS)\footnote{Bracher, J. et al. 2021. \textit{Evaluating
 Epidemic Forecasts in an Interval Format.} PLoS Computational Biology 17 (2)}
 \end{itemize}
@@ -196,14 +199,6 @@ Epidemic Forecasts in an Interval Format.} PLoS Computational Biology 17 (2)}
     \end{figure} 
 \end{frame}
 
-%\begin{frame}{Scores - Inflation}
-%%    \begin{figure}
- %       \centering
- %       \includegraphics[width=0.45\textwidth]{figures/scores_absolute errors_cpi.JPG} 
- %       \label{fig:enter-label}
- %   \end{figure} 
-%\end{frame}
-
 
 \begin{frame}{Calibration - Interval Coverage Levels}
 %\textit{Here, I'll instead map the colors to the different forecast sources (currently mapped to the window method), so we'll just have one plot each}
@@ -219,7 +214,6 @@ Epidemic Forecasts in an Interval Format.} PLoS Computational Biology 17 (2)}
 \begin{frame}{Increasing Uncertainty}
 %Width of Prediction Intervals, by Horizon
 %\textit{include graphic or table showing increasing uncertainty with rising horizons}\\ 
-
 \begin{columns}
 \begin{column}{0.6\textwidth}
     \begin{figure}
@@ -249,16 +243,6 @@ Spring, NY &1.3 &2.1 \\
 \end{tabular}
 \end{table}
 \vspace{1.25cm}
-%\begin{table}
-%\begin{tabular}{ l c c }
-%\multicolumn{3}{c}{\textbf{Inflation}}\\
-%%&   50\%  & 80\%\\[0.3em]
-%Fall,  SY & 0.3 & 0.6\\ 
-%Spring, SY &0.5 &1.3 \\ 
-%Fall, NY & 1.2 & 2.2\\ 
-%Spring, NY &1.9 &2.4 \\ 
-%\end{tabular}
-%\end{table}
 \end{column}
 \end{columns}
 
@@ -271,7 +255,7 @@ Spring, NY &1.3 &2.1 \\
 %\textit{include graphic or table showing increasing uncertainty with rising horizons}\\ 
 \begin{figure}
         \centering
-        \includegraphics[width=0.6\textwidth]{figures/horizon_uncc_germany2023.pdf}
+        \includegraphics[width=0.6\textwidth]{figures/horizon_uncc_germany2023_current.pdf}
         %\caption{Coverage at the 50 and 80 percent level}
         \label{fig:enter-label}
     \end{figure}
@@ -323,20 +307,19 @@ Spring, NY &1.3 &2.1 \\
 \end{frame}
 
 \begin{frame}{Making it public}
-\url{https://fredbec.shinyapps.io/macropi/}
 \begin{columns}
-\begin{column}{0.2\textwidth}
-    \begin{figure}
-        \centering
-        \includegraphics[width=\textwidth]{figures/shinycap2.png}
-        %\caption{Coverage at the 50 and 80 percent level}
-        \label{fig:enter-label}
-    \end{figure} 
+\begin{column}{0.3\textwidth}
+Shiny App: \\
+   \url{https://probability-forecasting.shinyapps.io/macropi/} \vspace{0.5cm} \\ 
+GitHub repo with our forecasts: \\
+    \url{https://github.com/MacroPrediction/MacroPI}
+    \vspace*{2cm}
 \end{column}
-\begin{column}{0.6\textwidth}
+\begin{column}{0.7\textwidth}
+\vspace*{-10mm}
     \begin{figure}
         %\centering
-        \includegraphics[width=0.7\textwidth]{figures/shinycap.jpg}
+        \includegraphics[width=0.55\textwidth]{figures/shinycap_newhost.jpg}
         %\caption{Coverage at the 50 and 80 percent level}
         \label{fig:enter-label}
     \end{figure}   
@@ -368,7 +351,7 @@ Spring, NY &1.3 &2.1 \\
 \begin{figure}
         \centering
         \includegraphics[width=0.9\textwidth]{figures/wis_cpigdp_new_directional.pdf}
-        %\caption{Coverage at the 50 and 80 percent level}
+       %\caption{Coverage at the 50 and 80 percent level}
     \end{figure}
 \end{frame}
 \begin{frame}{Directional Errors - Coverage}
