@@ -156,7 +156,7 @@ server <- function(input, output) {
       ggtitle(paste0("Actual Series, with forecast for year ", release_year)) +
       ylab(plot_target_label()[trgt]) +
       ylim(minval, ylimmax) +
-      xlab("Target Year") +
+      xlab("") +
       ggtitle(plot_country_label()[plot_country]) +
       scale_color_met_d("Hokusai1") +
       lapply(qus_list, function(qupr){
@@ -185,7 +185,7 @@ server <- function(input, output) {
       lapply(labeldat_list, function(labeldat){
         geom_label(data = labeldat |> .d(country == plot_country),
                    aes(x = x, y = y, label = label),
-                   color = colorscale[plot_country],
+                   color = "grey50",
                    size=4.35 , angle=45, fontface="bold")
       }) +
       theme_uqimf() %+replace%
@@ -193,7 +193,10 @@ server <- function(input, output) {
         legend.position = "right",
         legend.text=element_text(size=12),
         plot.title = element_text(hjust = 0.5,
-                                  vjust = 3)) +
+                                  vjust = 3,
+                                  colour = colorscale[plot_country],
+                                  size = 18,
+                                  face = "bold")) +
       scale_alpha_manual(name = "",
                          breaks = c("50% Interval", "80% Interval"),
                          values = c("50% Interval" = 0.6, "80% Interval" = 0.4),
