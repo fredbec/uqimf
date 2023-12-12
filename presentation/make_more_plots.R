@@ -11,6 +11,7 @@ library(tidyverse)
 devtools::load_all()
 .d <- `[`
 
+source(here("presentation", "wis_plot_presentation_function.R"))
 
 chosen_method <- "rolling window"
 chosen_em <- "directional"
@@ -60,8 +61,8 @@ point_scores <- data.table::fread(here("scores", "pointfc_scores.csv"))
 
 scores_cvgshort <- rbind(scores_cvgshort, bvar_scores_cvgshort)
 
-cpi_plot <- ovr_assessment_plot(wis_scores, "pcpi_pch")
-gdp_plot <- ovr_assessment_plot(wis_scores, "ngdp_rpch")
+cpi_plot <- wis_plot_pres(wis_scores, "pcpi_pch")
+gdp_plot <- wis_plot_pres(wis_scores, "ngdp_rpch")
 
 
 
