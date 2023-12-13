@@ -12,7 +12,7 @@ score_min_year <- specs$score_min_year
 tv_release <- specs$tv_release
 window_length <- specs$window_length
 
-imf_fc <- fread(here("quantile_forecasts", "quantile_forecasts.csv")) |>
+imf_fc <- fread(here("quantile_forecasts", "quantile_forecasts_pava.csv")) |>
   .d(target_year == 2023) |>
   .d(source == "IMF") |>
   .d(target == "ngdp_rpch") |>
