@@ -74,3 +74,43 @@ wis_plot_pres <- function(wis_scoredat,
 
 }
 
+
+coverage_plot_pres <- function(cvgdat_target,
+                               target_name,
+                               all_cvg){
+
+
+
+  cvgplot <- ggplot() +
+    geom_line(aes(x = pilvl,
+                  y = coverage,
+                  group = idcol),
+              data = all_cvg |> .d(target == target_name & source == "IMF"),
+              alpha = 0.4,
+              color = "gray") +
+    geom_point(aes(x = pilvl,
+                   y = coverage,
+                   color = source),
+               data = cvgdat_target,
+               size = 3) +
+    geom_line(aes(x = pilvl,
+                  y = coverage,
+                  color = source),
+              data = cvgdat_target,
+              lwd = 1.25) +
+    geom_segment(aes(x = 0, y = 0, xend = 1, yend = 1),
+                 color = "black",
+                 linetype = "dashed",
+                 data = cvgdat_target) +
+    #scale_color_brewer(palette = "Set1") +
+
+    ggtitle(plot_target_label()[target_name]) +
+
+    scale_color_met_d("Hokusai1") +
+
+    ylab("Empirical Coverage Level (Central PI)") +
+    xlab("Nominal Coverage (Central PI)") +
+    theme_uqimf()
+
+  return(cvgplot)
+}
