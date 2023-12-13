@@ -14,8 +14,7 @@ devtools::load_all()
 source(here("presentation", "presentation_plot_functions.R"))
 
 chosen_method <- "rolling window"
-chosen_em <- "directional"
-
+chosen_em <- "absolute"
 
 #############################################################################
 #############################################################################
@@ -40,7 +39,7 @@ bvar_wis_scores <- fread(here("scores", "bvar_ci_scores_avgcnt.csv")) |>
 
 wis_scores <- rbind(wis_scores, bvar_wis_scores) |>
   .d(, source := factor(source, levels = c("IMF", "bvar", "bvar_qu", "ar"),
-                        label = c("IMF", "BVAR", "BVAR - direct", "AR"))) |>
+                     label = c("IMF", "BVAR", "BVAR - direct", "AR"))) |>
   .d(method == chosen_method) |>
   .d(error_method == chosen_em)
 
@@ -51,7 +50,7 @@ gdp_plot <- wis_plot_pres(wis_scores, "ngdp_rpch")
 
 
 #paste together and save as pdf
-pdf(file = here("presentation", "figures", "wis_cpigdp_new_directional.pdf"), width = 9.5, height = 4)
+pdf(file = here("presentation", "figures", "wis_cpigdp.pdf"), width = 9.5, height = 4)
 ovr_plot <-
   (cpi_plot | gdp_plot) +
   plot_layout(guides = "collect",
@@ -122,7 +121,7 @@ plot_cpi <- coverage_plot_pres(cvgdat_cpi, "pcpi_pch", large_cvgdat)
 plot_gdp <- coverage_plot_pres(cvgdat_gdp, "ngdp_rpch", large_cvgdat)
 
 
-pdf(file = here("presentation", "figures", "coverage_directional.pdf"), width = 9.5, height = 4)
+pdf(file = here("presentation", "figures", "coverage.pdf"), width = 9.5, height = 4)
 ovr_plot <-
   (plot_cpi | plot_gdp) +
   plot_layout(guides = "collect",
