@@ -1,0 +1,171 @@
+##########
+########## 1
+
+- Hello and welcome to the presentation of our work "Simple Macroeconomic Forecast Distributions"
+- I'm happy to present this work and the potential for feedback. This is ongoing joint work with Fabian Krüger and Melanie Schienle. 
+
+
+##########
+########## 2
+
+- quick overview of what shall happen in the next XX minutes
+- first I'll introduce the setting: practice of fixed event forecasting in macroeconomics and motivate why we think it should (universally) be extended to include a measure of the underlying uncertainty
+
+- then I'll introduce the attractively simple and transparent method we're using to address this issue 
+
+- of course, walk through results and outlook
+
+
+##########
+########## 3
+
+- we find ourselves in a world where various institutions issue forecasts for annual (or quarterly, but annual is more prominent) macroeconomic targets
+
+- the most prominent targets are real GDP growth and inflation (with the latter having gained more attention in recent years)
+
+- for Germany, there is a wide array of sources, both national (e.g. Bundesbank) and international (e.g. OECD)
+
+-fixed-event: all forecast on annual target, but each on their own schedule
+
+- importantly: whenever institutions issue these forecasts (depending on the prominence of the instituion) they receive widespread media coverage
+	- this is crucial: it means that this is not just an exercise by economists for economists, these forecasts are disseminated widely and receive attention
+	- presumably, they're also relevant for real-world outcomes: GDP forecasts cited in public budget planning, inflation forecasts in collective bargaining situations (when unions negotiate with employers)
+
+
+##########
+########## 4
+- the usual practice is to issue point forecasts only
+	- now inherently, I think we can all agree, forecasts are a statement about a future as yet unrealized quantity and are thus uncertain
+	- but this uncertainty is at best just acknowledged but rarely explicitly quantified (exceptions: BoE fancharts, others)
+
+- AND this is then also how they are covered by the media
+	- to illustrate: I've brought this article by the Tagesschau from *February* 2023, stating that "Germany is avoiding rececession in 2023"
+		- strong statement in the headline, sounds very definitive 
+		- and of course, that's just how headlines are sometimes (and there is some mitigation in the rest of the article) but you read on and find out that this statement/headline is based on a point forecast of +0.2%, more than *10 months* ahead of the target.
+	- prompting the question: can we really be that sure? is that forecast "far enough" away from zero to allow for this statement?
+
+- and, next to this fixation of small deviations from zero, there are some other artefacts in reporting of these forecasts
+	- for example, forecasts with horizons of e.g. 2 months, 1 year and 2 years ahead are often mentioned in the same sentence, without any contextualization of the presumably differing levels of underlying uncertainty
+
+- Now after I just motivated that (for the sake of honest and comprehensible communication) it would be valuable to communicate and quantify uncertainty, we can ask why this isn't done
+	- you can mention extra cognitive load on the part of the forecast *user*, which is certainly valid 
+	- but from the point of the forecast *issuer*, it could seem that the extra modeling effort would be prohibitive
+		- extra modeling pipeline, distributional assumptions
+
+##########
+########## 5
+- AND THATS WHERE WE COME IN
+	- we show that you can obtain CI's directly from past forecast errors, making the method
+		- simple cheap and (very importantly) very transparent
+	-AND notwithstanding their simplicity, we show that we thus obtain  quite competitively performing distributional forecasts for GDP growth and inflation, G7 countries and current and next year targets
+
+
+##########
+########## 6
+- introduce data [it's all on the slide]
+- accessible format: no pdf files were scraped in the making of this paper
+- (we don't have access to the underlying methodology that produces their point forecast)
+
+
+##########
+########## 7
+- now to our methods, which are attractively simple and cheap
+- for a given country and target:
+	- take pairs of forecasts and realized true values
+	- target year is indexed by t, horizon (time difference between the issuing of the forecast and the realization) is indexed by h
+	- we then construct sets made of these forecast errors from the past R years
+		- these sets are based on the absolute errors (conscious choice, more perhaps later)
+		- currently: R = 9
+		- (perhaps emphasize: separate sets for each target, country, horizon. No information sharing)
+		- (perhaps mention: we give preference to choices of R that allow us to extract the quantiles directly from the order statistics)
+	- for ease of communication, we decide to issue our probabilistic forecasts in the form of 50% and 80% prediction intervals
+	- to obtain the upper and lower endpoints of these PI's, we simply take the 50% and 80% empirical quantile from these sets [circle set if laser pointer available] and add them around the current point forecast [circle point forecast]
+		- by construction, symmetric intervals around point forecast
+	- naturally, the uncertainty (length of intervals) will rise with distance to the target. If not: average across violations
+- assess quality with central interval coverage (proportion of values that fell within/outside predicted intervals) and weighted interval score
+
+
+##########
+########## 8
+- of course (especially for the scores), we also need something to compare quality to
+- given the simpleness of the method, is there an easy way to do better
+- we try two different angles (via retroactively fitted models):
+	- (1) construct alternative sets of point forecasts (same countries, horizons, targets), but use same methodology as outlined on previous slide
+		- once with a very simple AR(1) model
+		- and once wit a more complex Primiceri BVAR model
+	- (2) we use the directly generated distributional predictions obtained from the same BVAR model
+	-> so: 
+		- (1) *given* the method, can be easily obtain better point forecast to use
+		- (2) check if the method in and of itself is doing well / is valid
+	- both models trained on quarterly data. Slight informational advantage as they are fit retroactively on final quarterly data and we also evaluate on final data  (while IMF are of course real-time forecasts and don't have access to this)
+
+
+##########
+########## 9
+- now to the results
+- first: the Weighted Interval Score, decomposed into OP, UP, Dispersion 
+	- *averaged over countries, but displayed separately for the 4 horizons [wiggle with pointer] and two targets [more wiggling, note different scales]*
+	- colors are the four different PI sources, "IMF vs all others"
+	
+	- for smaller horizons (hard to see) IMF does similarly well (infl) or better (gdp)
+	- for larger horizons, especially better for inflation
+- we observe: PIs from IMF competitive in terms of scores
+
+
+##########
+########## 10
+- and what about calibration? (arguably perhaps the more important measure, at least concerning trust in these forecasts)
+
+- x-axis: nominal (desired) proportion of observations that should fall into PIs
+- y-axis: actual ..."...
+-> ideally, points should be close to the 45 degree line
+
+- for both targets, coverage is overall very good, especially for the point-forecast-extraction methods
+	- inflation: slight overconfidence for IMF, others perhaps slightly better
+		- but: remember that their intervals are also wider 
+			- "sharpeness subject to calibration"
+	- gdp: point forecasts all very similar, nearly perfect for 50%, slightly overconfident for 80%
+		- Bvar-direct more overconfident
+
+	- grey lines for each country-horizons pair for IMF, to show variability in coverage
+		- as expected, there is some variability, but deviations overall don't seem too large (and thankfully, our averaging doesn't hide something crazy like a bimodal trend or similar)
+			- not shown, but these are actually wider for other methods
+
+
+
+##########
+########## 11.1
+- Let me quickly return to the point I mentioned at the beginning of the rising uncertainty with horizon: what is the average level of uncertainty our method would assign to the different forecast horizons? 
+	- as expected, uncertainty rises on average, for both targets
+	- but further: we observe that simply in absolute terms, uncertainty is quite considerable
+		- e.g. for Spring, same year, you add and subtract 1 pp to the given point forecast for GDP growth
+			- given that GDP is often forecast on the order of 1.x, this is quite considerable
+
+##########
+########## 11.2
+- Similarly, if we return to the article from the beginning and add uncertainty to the *IMF forecast* at that time, which was also mentioned in the article and was at +0.1%,
+	- (- they don't cite the exact publication of where this number stems from (which seems like another potential lesson in transparity, but I digress)
+	- we see that a considerable part of both the 50% and the 80% interval is actually below zero
+	- so we can't yet say with a high level of confidence that "GDP growth will be above zero"
+
+##########
+########## 12
+- Robustness Checks: even with a simple method such as ours, there were of course some design choices
+	- most important: if we apply this method to the directly calculated errors (not absolute), we get similar scores, but worse coverage 
+		(- philosophically, do we just regard the size of the error as informative, or also its direction?
+		- this can produce some undesired artifacts if the lower quantile is positive or the upper quantile is negative, because then the point forecsat won't lie in the respective central prediction interval
+			- which is not necessarily an issue because it is not defined which functional these point forecasts are.
+			- but it would raise some eyebrows)
+	- window method doesn't make a big difference, so we stick to rolling windows, as we deem it as 'cleaner' and more interpretable
+		- our methodology would not be exact anymore, since we're working on such a small sample, sometimes we'll be taking the fifth value, other times we're interpolating between the 5th and the 6th, and so forth
+	- score oderings robust to using another scoring rule
+
+
+##########
+########## 13
+Summing up: [it's all on the slide]
+
+
+
+
+
