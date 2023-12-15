@@ -4,7 +4,7 @@ library(data.table)
 #set project wide specifications
 
 min_year <- 1990
-window_length <- 9
+window_length <- 11
 
 specs <- list(
   tv_release = 1,
