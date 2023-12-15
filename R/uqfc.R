@@ -221,15 +221,31 @@ empFC_pava <- function(fcdat,
     as.character() |>
     as.numeric()
 
-
+  #to merge again later
   extra_cols <- fcdat |>
     .d(, .(imf_pp, true_value, error, country, target, target_year, horizon,
            source, error_method, method)) |>
     unique()
 
-  violations <- fcdat |>
-    #filter relevant quantiles
-    .d(quantile %in% c(0.1+fperror(), 0.25, 0.75, 0.9)) |>
+  #sometimes there is a floating point error that I can't quite figure out
+  #so here's a bit of lazy code to address it
+  fcdat_update <- fcdat |>
+    .d(quantile %in% c(0.1, 0.25, 0.75, 0.9))
+
+  if(length(unique(fcdat_update$quantile))<4){
+    message("addressing floating point error")
+
+    fcdat_update <-  fcdat |>
+      .d(quantile %in%  c(0.1 + fperror(), 0.25, 0.75, 0.9))
+  }
+
+  #check again if all quantiles are there
+  if(length(unique(fcdat_update$quantile))<4){
+    stop("quantiles missing. Probably floating point error in filtering")
+  }
+
+  violations <- fcdat_update |>
+
     #only keep relevant variables
     .d(, .(country, target, target_year, horizon, error_prediction,
            source, error_method, method, quantile)) |>
@@ -243,34 +259,21 @@ empFC_pava <- function(fcdat,
 
     .d(, .(country, target, source, method, error_method, target_year, quantile, h0, h5, h10, h15)) |>
     .d(order(country, target, target_year, error_method, method, source, quantile)) |>
+
+    #define helper variable: upper quantiles will need to be smaller with rising horizon to
+    #constitute a violation, lower quantiles similarly need to be bigger
+    #this variable will be used so the same comparison can be performed for both
+    #quantile types (see next line of code)
     .d(, qtype := ifelse(quantile < 0.5, 1, -1)) |>
 
     ##Pooling for
-    .d(, viol := ifelse( qtype*h5 > qtype*h0, TRUE, FALSE)) |>
-    .d(, pool05 := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
-    .d(pool05 == TRUE, c("h0", "h5") := (h0+h5)/2) |>
+    .d(, viol := ifelse( qtype*h10 > qtype*h0, TRUE, FALSE)) |>
+    .d(, poolH := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
+    .d(poolH == TRUE, c("h0", "h10") := (h0+h10)/2) |>
 
-    .d(, viol := ifelse( qtype*h10 > qtype*h5, TRUE, FALSE)) |>
-    .d(, pool10 := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
-    .d(pool10 == TRUE, c("h5", "h10") := (h5+h10)/2) |>
-
-    #check if ordering is still upheld
-    .d(, viol := ifelse( qtype*h5 > qtype*h0, TRUE, FALSE)) |>
-    .d(, pool05twice := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
-    .d(pool05twice == TRUE, c("h0", "h5", "h10") := (h0+h5+h10)/3) |>
-
-    .d(, viol := ifelse( qtype*h15 > qtype*h10, TRUE, FALSE)) |>
-    .d(, pool15 := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
-    .d(pool15 == TRUE, c("h10", "h15") := (h10+h15)/2) |>
-
-    .d(, viol := ifelse( qtype*h10 > qtype*h5, TRUE, FALSE)) |>
-    .d(, pool10twice := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
-    .d(pool10twice == TRUE, c("h5", "h10", "h15") := (h5+h10+h15)/3) |>
-
-    #check if ordering is still upheld
-    .d(, viol := ifelse( qtype*h5 > qtype*h0, TRUE, FALSE)) |>
-    .d(, pool05thrice := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
-    .d(pool05thrice == TRUE, c("h0", "h5", "h10", "h15") := (h0+h5+h10+h15)/4) |>
+    .d(, viol := ifelse( qtype*h15 > qtype*h5, TRUE, FALSE)) |>
+    .d(, poolS := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
+    .d(poolS == TRUE, c("h5", "h15") := (h5+h15)/2) |>
 
     .d(, .(country, target, source, method, error_method, target_year, quantile, h0, h5, h10, h15)) |>
     melt(id.vars = c("country", "target", "source", "method", "error_method", "target_year", "quantile"),
