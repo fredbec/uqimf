@@ -164,6 +164,8 @@
 ##########
 ########## 13
 Summing up: [it's all on the slide]
+	- and actually, referring to the fact that these forecasts are mostly well calibrated and score relatively well, it appears that these point forecasts are actually a valuable source of distributional forecasts in their own right
+		- we're still not saying that we can't do better (in fact, we plan to attempt to do better)
 
 
 

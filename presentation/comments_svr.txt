@@ -1,0 +1,41 @@
+- Ist unklar was "Unsicherheit" ist bzw. wie man kommuniziert was dadurch abgedeckt ist
+	- also Unsicherheit unter gewissen Annahmen oder Unsicherheit die alle möglichen Szenarien mit einberechnet
+	- within model vs. outside model perspective bzw. unconditional vs. conditional
+
+- Neue Learnings
+	- SVR hat anscheinend bis 2020 auch Prognoseunsicherheit ausgegeben
+	- IMF gibt anscheinend auch seit letztem Jahr in einem besonderen "Kasten" Unsicherheit aus
+
+
+- "Kritik" an Motivation
+	- gibt kein Appetit für Unsicherheitsprognosen
+	- könnte von den Medien sehr verzerrend aufgegriffen werden
+
+- "Kritik" an Modell
+	- unconditional vs conditional Prognoseunsicherheit
+	- sind zu sehr darauf angewiesen dass Prognosen ungefähr "gleich richtig" sind über Zeitraum
+	- Prognoseintervalle werden verzerrt wenn ich Krisenjahre drin habe/nicht drin habe
+
+- Man könnte vielleicht noch andere Benchmarks ausprobieren
+	- Random Walk
+	- etwas das in Komplexittät zwischen BVAR und AR liegt
+		- dynamische Faktormodele
+		- medium-sized bvar
+
+- Missverständisse
+	- wie kann unser Modell unconditional Unsicherheit ausgeben wenn es conditional auf den Bedingungen der letzten Jahre ist
+	- gab anscheinend den Eindruck dass ich das Modell "overselle"
+		- bzw zu schlechte Benchmarks verwende
+		- bzw behaupte "Modell sei nicht zu schlagen"
+	- was ist Unsicherheit?
+		- gebe ich die nicht schon an wenn ich Vorhersagen von 200 verschiedenen Modellen average?
+		- "wird doch schon gemacht"
+	- generell war es teilweise schwer eine "common language" zu finden
+
+- 
+
+
+
+
+
+

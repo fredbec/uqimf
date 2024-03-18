@@ -1,0 +1,313 @@
+ggf. definiere 
+	- Verteilungsvorhersagen (probabilistische Vorhersagen)
+	- forecasts als Vorhersagen
+
+
+##############################################################
+Warum Verteilungsvorhersagen?
+##############################################################
+- erkläre warum sinnvoll
+- kritisiere was an aktueller Berichterstattung suboptimal
+- gibt Beispiele wo es schon gut funktioniert (Wetter, Covid)
+##############################################################
+
+- aktuelles Setting: viele Punktvorhersagen, keine einfach verfügbaren und ---explizit quantifizierten--- probabilistischen Vorhersagen
+
+- Warum sinnvoll?
+	- besseres decision making
+		- z.B. 
+	- noch wichtiger eigentlich: Vertrauen in Vorhersagen
+	- accountability (calibration ist ein harter benchmark)
+
+- Nur zu sagen "Vorhersagen sind mit Unsicherheit behaftet" verwässert Vorhersagen. Insbesondere kann man den Punkt machen, dass dadurch kurzfristigere Vorhersagen abgewertet werden. Wenn ich im November sage "deutsche Wirtschaft wird schrumpfen" aufgrund einer Vorhersage von -0.4%, dann wird das schon stimmen . 
+
+- Es macht einen gerade nicht unglaubwürdig bzw. gesteht "Schwäche" ein wenn man Unsicherheit einräumt und explizit kommuniziert
+
+
+Beispiele für probabilistische Vorhersagen
+	- Wetter
+	- Covid-19
+	- VaR
+
+
+KONKRETE FOLIENFOLGE
+- Overview:
+	- ich werde relativ viel Zeit damit verbringen zu argumentieren dass wir Punktvorhersagen grundsätzlich um Quantifizierung der unterliegenden Unsicherheit erweitern sollten
+		- gerade hierzu freue ich mich auch auf Input, Diskussion, etc. aus der direkten Domainperspektive
+	- dann stelle ich unsere Methodik vor wie wir dieses Problem adressieren
+	- und stelle unsere Resultate und einen Outlook vor
+
+
+- Small Note on Terminology
+	- ich will das nur am Anfang direkt einmal erwähnen damit keine Verwirrung aufkommt
+	- Vorhersagen, forecast
+	- probabilistich bzw Verteilungsvorhersagen
+		- also insbesondere meine ich mit Verteilungsvorhersagen keine Vorhersagen zu Einkommensverteilung o.Ä.
+		- sondern Vorhersagen im Format einer Wahrscheinlichkeitsverteilung, mehr dazu gleich 
+
+
+- an economists favorite pastime 
+	- es existieren Punktvorhersagen von vielen verschiedenen Institutionen für jährliche makroökonomische Zielvariablen
+		- die prominentesten forecast Variablen sind dabei sicherlich das (reale) Wirtschaftswachstum sowie Inflation
+		- Quellen in Deutschland 
+	- grundsätzlich kann man sagen, dass diese Vorhersagen weit verbreitet werden und viel Aufmerksamkeit 
+		- keine Exercise nur von Ökonomen für andere Ökonomen, wobei sie in der Community selbst natürlich nochmal mehr AUfmerksamkeit kriegen und das auch relevant ist, sondern sind auch für die breite Öffentlichkeit relevant
+		- weiterhin relevant für Entscheidungsträger und Entscheidungen 
+			- Prognosen fürs Wirtschaftswachstum werden zitiert in Haushaltsplanungen
+			- Prognosen für Inflation werden vielfach zitiert in (großen) Tarifverhandlungen
+
+
+- why should we explicitly quantify uncertainty
+- Wir machen jetzt eben den Punkt: es sollte mehr etabliert werden probabilistische Vorhersagen zu machen und in den Fokus der Kommunikation zu legen, zusätzlich zu den weit verbreiteten Punktvorhersagen. In meinem ersten Teil des Vortrags wird es jetzt auch um das Warum? und Wie? gehen, bevor ich dann zu unserer Lösung dafür komme.
+Also, erstmal ganz allgemein: Warum sollten wir Unsicherheit explizit quantifizieren
+	- Werde auf die einzelnen Punkte noch im Detail eingehen, aber erstmal als Anfang
+	- Erst einmal: es ist einfach ehrlicher und auch transparenter es nicht nur implizit einzugestehen dass Unsicherheit (natürlich) gegeben ist sondern diese explizit zu quantifizieren 
+		- ermöglicht Personen einzusehen wie viel Unsicherheit (z.B. bei einer Inflationsvorhersage von 4%: wie wahrscheinlich ist es dass wir über 6% haben werden)
+	- Dann: ermöglicht es Entscheidungsträgern bessere Entscheidungen zu fällen, insbesondere adverse Resultate können besser eingezogen werden (Wahrscheinlichkeit für Inflation >5% usw.)
+	- Evaluation ist einfacher und man ist accountable
+		- Punktvorhersagen sind nie exakt richtig 
+			- das ist einfach so und dementsprechend kann man nicht gut belangt werden wenn man falsch liegt 
+		- wenn aber meine probabilistische Vorhersage immer sagt Rezession 40% und wir in 15 Jahren nie eine Rezession haben, ist das eine objektiv schlechte Vorhersage (es sei denn es gibt sehr sehr gute Fründe dafür)
+		- absolute Evaluation
+	- Das waren jetzt erst einmal nur allgemeine Gründe
+
+
+- can we really be that sure
+	- bringt uns zu dieser Frage: Können wir uns wirklich so sicher sein
+		- unserer Punkt: aktuelles Treatment von Vorhersagen und deren Unsicherheit ist sowohl in den Medien (und somit für die breite Öffentlichkeit) als auch innerhalb der COmmunity unzulänglich
+		- es gibt viele Punktvorhersagen, aber keine einfach verfügbaren und ---explizit quantifizierten--- probabilistischen Vorhersagen
+
+	- gängige Praxis ist nämlich nur Punktprognosen zu veröffentlichen
+		- da diese Prognosen ein Statement über eine noch nicht realisierte Variable in der Zukunft sind, unterliegt dieser natürlich Unsicherheit
+		- Unsicherheit wird gängerweise eingeräumt, aber (fast) nie explizit quantifiziert
+			- was ich mit quantifiziert genau meine, darauf komme ich noch einmal zurück (volle Verteilung oder nur gängige Intervalle)
+			- gibt Ausnahmen, z.B. BoE Fancharts oder die Fed veröffentlicht jetzt auch quartalsweise Vorhersagen
+
+	- die Praxis NUR Punktprognosen zu veröffentlichen führt unserer Meinung nach zu Artefakten in der Wiedergabe dieser Prognosen, weil man eben nur die Punktprognose verfügbar hat
+		- gerade in letzter Zeit in Deutschland relevant: starke Konzentration auf Prognosewerte, die entweder knapp über 0 oder knapp unter null liegen 
+
+		- Vorhersagen mit verschiedenen Prognosehorizonen werden ohne weiteren Kontextualisierung nebeneinander genannt 
+			- hier ist unser Argument dass dies das Vertrauen in Vorhersagen auch tendenziell eher schwächt. Wenn ich bei beiden nur sage "es gibt Unsicherheit" wertet das eine Vorhersage von einem oder anderthalb Jahre in die Zukunft (die ja gut und gerne mal einen %Punkt oder mehr abweichen können, dazu kommen wir ja später noch) auf und wertet den von 2 Monaten in die Zukunft unnötig ab.
+				- anders gesagt: wenn ich im November 23 Vorhersagen für 23, 24 und 25 mache - ist einer fast schon Definition, eins ein begründeter Guess und einer Wahrsagerei. Wird aber alles im gleichen Satz gesagt und wahrscheinlich auch so wahrgenommen
+			- hier wäre es unserer Meinung nach auch besser dies einfach mit konkret weiter werdenden Intervallen bzw. Prognoseverteilungen zu kommunizieren
+
+		- manchmal werden Prognosen auch gar nicht veröffentlicht, da Unsicherheit "zu groß" 	
+			- suggeriert möglicherweise eine binäre Sicht auf Unsicherheit: einmal grundsätzlich da und "unter Kontrolle" und einmal "zu groß"
+
+	- Artikel Tagesschau
+		- Beispiel Tagesschau Artikel von vor ca. einem Jahr, war damals sogar eine Eilmeldung
+		- Hier wird eben getitelt "Deutschland vermeidet 2023 Rezession", was wie ich finde (oder wie wir finden) eine gewisse Sicherheit in dieser Prognose suggeriert
+		- wenn man dann weiterliest, gibt es natürlich erst einmal etwas Abschwächung ("nur Prognose"), aber es stellt sich eben heraus, dass die Vorhersage zu dem Zeitpunkt bei +0,2% lag, was nunmal ja recht nahe an Null und somit an dem Bereich von "unter Null" und somit gerade der betitelten Rezession liegt
+		- und da stellt sich nun einmal die Frage: kann man sich wirklich so sicher sein? Ist so eine Schlagzeile gerechtfertigt, die man ja schließlich durch das Herausgeben von nur Punktprognosen "provoziert", gegeben dass wir so nahe an Null sind?
+		- und ich möchte jetzt auch nicht zu sehr darauf herumreiten dass die Vorhersage falsch lag, weil es ja nun einmal in der Natur der Vorhersagen liegt manchmal falsch zu sein
+			- aber wäre es nicht besser gewesen zu titeln: Wirtschaftsleistung Deutschland ungefähr Null; leichtes Wachstum genau so wahrscheinlich wie eine "leichte" Rezession?
+
+
+	- Argument: Verteilungsvorhersagen sind unpraktikabel, sowohl für "Produzenten" von forecasts als auch für die user bzw "konsumenten"
+
+
+- Werde mich erst einmal dem zweiten Punkt also der cognitive load widmen 
+
+
+#########################################################
+Wie Verteilungsvorhersagen?
+##############################################################
+- gängige Formate und warum wir unseres wählen
+- sharpness st calibration & scoring rules
+##############################################################
+
+- Formate
+- Beispiele
+- Wie evaluieren 
+
+
+Formate
+	- volle Wahrscheinlichkeitsverteilung: hat am meisten Information und ist auch analytisch schön (kann man gut aggregieren), aber
+		- schwer zu vermitteln
+		- schwer zu erstellen (braucht Verteilungsannahme etc)
+	- Histogramme: awkward, 
+		- einfach zu vermitteln
+	- Samples: cool
+		- schwer zu vermitteln
+	- Quantile bzw. Prognoseintervalle
+		- gegeben dass 10% und 90% Quantil, habe ich ein zentrales 80% Prognoseintervall
+
+	- sind nicht unbedingt alles entweder oder: man kann zum Beispiel von hier nach hier kommen und gegeben MCMC von hier nach hier und gegeben ein paar Annahmen von hier nach hier. Und das hier ist eigentlich auch das hier, halt nur nicht random samples sondern repräsentative samples
+
+	- Long story short: wir beschäftigen uns mit Prognoseintervallen. Wir sind der Meinung, dass diese am einfachsten zu vermitteln sind (ich kann einfach sagen, Inflation wird zwischen 4 und 5.3 Prozent sein) Und weil wir zusätzlich eine sehr (also wirklich sehr) einfache Methode und deswegen gut vermittelbare Methode haben darauf zu kommen. 
+
+Beispiele
+	- Wetter: auch Progoseintervall
+		- Regenwahrscheinlichkeit natürlich sowieso weit verbreitet.
+		- Raftery ProbCast
+
+		- Fokus hier: "Jedermann", Versuch das ganze eher "lightweight zu halten"
+	- Covid19
+		- besseres decision making, dies ist insbesondere für adverse outcomes (Hospitalisierungen und Tote) relevant 
+
+		- Fokus: eher "Entscheidungsträger", front facing war auch weniger kompliziert "50% und 95% Intervall"
+
+Wie evaluieren?
+Bevor ich jetzt zu unserer Arbeit uns unserer Contribution komme:
+Was macht einen guten probabilistischen Forecast aus bzw. wie kann ich ihn evaluieren?
+
+	Sharpness subject to calibration
+		- Calibration bedeutet Kalibriertheit, d.h. über eine längere Zeit müssen meine probabilistischen Statements und die realisierten Werte zueinander passen 
+		- Sharpness bedeutet einfach nur, dass meine Vorhersagen informativ sind 
+		- Beispiel: Schneevorhersage. Wenn ich weiß, dass mein Ort durschnittlich 15 Schneetage im Jahr hat, könnte ich an jedem Tag im Jahr sagen dass wir 5% Schneewahrscheinlichkeit haben. Übers Jahr gesehen wären ich damit zwar kalibriert, aber die Vorhersage wäre weder im Januar noch im Juli informativ bzw. hilfreich.
+
+	- Kalibrierung kann alleine gecheckt werden: 
+		- absolut unabdingbar um Vertrauen in Forecast sicherzustellen
+		- hier ist es eben auch wichtig dass dann auch nur 80% der Vorhersagen wirklich in mein Intervall fallen, nicht mehr
+
+	- Proper Scoring rules
+		- wie scoring functions (zB MSE), aber eben für Verteilungen
+		- etwas weniger intuitiv 
+		- "proper" ist enorm wichtig und sagt aus, dass der forecaster wirklich seinen "best guess" abgibt. Äquivalent: Man kann nicht schummeln, in dem man z.B. konsistent eine weitere Vorhersageverteilung angibt als man eigentlich erwartet
+
+
+
+
+
+
+
+#########################################################
+Wie unsere Verteilungsvorhersagen?
+##############################################################
+- IMF als Datenquelle
+- Methodik 
+- Benchmarks 
+##############################################################
+
+Ab jetzt geht es um den zweiten Punkt, bisher haben wir ja vor allem über den forecast user gesprochen, für den es unserer Meinung anch eben sinnvoll ist probailistische Vorhersagen zu erhalten
+Und nun geht es eben um den Punkt des forecast issuer: wollen anhand einen Beispiels zeigen dass es für den (also jetzt für uns) auch recht einfach sein transparente Verteilungsvorhersagen zu erhalten
+
+Unser Beitrag
+	- Wir wollen jetzt eben zeigen dass es sehr einfach und günstig sein kann Unsicherheit in der Form von Vorhersageintervallen aus existierenden und etablierten Punktvorhersagen zu extrahieren
+
+	- zeigen anhand von einem Beispiel (Vorhersagen des IWF) dass wir dadurch kompetitive probabilistische Vorhersagen erhalten, nämlich für
+		- Wirtschaftswachstum und iNlfation
+		- G7 Ländern (wo es eben noch nicht für alle Länder kompetitive Vorhersagen in dieser Form gibt)
+		- und jeweils den Vorhersagen fürs akutelle und fürs nächste Jahre
+
+
+
+Datenquelle: IWF oder IMF World Economic Outlook
+	- Survey vom IMF staff, wird zweimal im Jahr herausgegeben
+		- Forecasts mit bis zu 6 Jahren forecast horizont, wobei wir eben aktuell nur die mit bis zu zwei Jahren Horizont verwenden
+		- und publizieren auch selbst die realisierten Werte, die wir ebenfalls als wahre Werte nehmen
+		- wir dimmer zur gleichen Zeit (ungefähr) publiziert, also einmal im April und einmal im Oktober
+	- der Zugriff auf die Daten ist sehr einfach, Excel bzw. csv Datei, kann man einfach herunterladen 
+		- also top im Sinne der Transparenz
+	- Zielvariablen sind reales Wirtschaftswachstum und Inflation (und Außenhandelsbalance, wir konzentrieren und aber auf INflation und Wirtschaftswachstum)
+	- für alle Länder der Welt, wobei wir uns aber wie gesagt auf die G-7 Länder konzentrieren
+		- also Kanada, Frankreich, Italien, Japan, Deutschland, Großbritannien und die USA
+	- gibt es zuverlässig seit 30 Jahren (bis auf April 2020)
+	- ich würde sagen sie gelten grundsätzlich als etabliert: wurden vielfach in Vergleichsstuden evaluiert, z.B. von Timmermann
+		- und werden auch in Deutschland viel zitiert, gibt hier natürlich auch noch prominentere Quellen wie den SVR, aber die Tagesschau z.B. zitiert viel auch den IMF WEO
+
+
+Methodik
+	- wie gesagt, wir haben jetzt eine Methode zu Prognoseintervallen zu gelangen die gerade durch ihre Einfachheit und dadurch Kommunizierbarkeit und Transparenz besticht, wir nehmen die Quantile bzw. Intervalle nämlich direkt aus den vergangenen Forecast Fehlern
+	- etwas ausführlicher erklärt: gegeben wir haben die Vorhersagen und das direkte Counterpart die realisierten Werte des Zieljahres (die Vorhersagen gibt es dann noch verschieden Horizonte, also den vom Herbst diesen Jahres, Herbst letzten Jahres usw.)
+		- alles komplett getrennt nach Land und Zielvariable, da werden also keinerlei Informationen geteilt für ein multivariates Modell (wäre natürlich potenziell vielversprechend, den Ansatz verfolgen wir aber nicht)
+	- berechnen wir die Forecast fehler und konstruieren daraus sets bzw. Mengen ausgehen vom aktuellen Jahr, R Jahre in die Vergangenheit, also ein rolling window approach
+		- wir benutzen dafür R=11, warum erkläre ich noch
+		- also wenn wir die Vorhersagen für Spring same year 2024 machen wollen, nehmen wir die Fehler von 2023 bis inklusive 2013
+		- nehmen dafür absolute Fehler, komme ich nochmal drauf zurück
+	- und für jedes confidence level dass wir haben wollen, berechnen wir von dieser Menge das tau-Quantil
+	- und erhalten dann unser Vorhersageintervall vom Level tau indem wir diesen Quantilwert zu der aktuellen Vorhersage addieren und subtrahieren, ihn sozusagen einbetten in diesen Wert
+
+	- wir entscheiden uns dafür das ganze prägnant und mit möglichst wenig cognitive load zu gestalten, deswegen wählen wir nur das 50% und das 80% Intervall
+		- 80% als gängiges Intervall: hohes Maß an Konfidenz, aber noch aussagekräftig (höhere Intervalle werden dann oft zu breit). Dieses ist auch unser zentral kommuniziertes
+		- 50% als alternatives Intervall für interessierte Personen und als extra Check (wir "cherrypicken" nicht das 80% Intervall)
+
+	- Und jetzt erkläre ich auch kurz warum wir hier R = 11 nehmen. Das 50% und das 80% Quantil sind dann nämlich direkt aus den Ordnungsstatistiken extrapoliertbar 
+		- empirische Quantile zu berechnen (also aus einer diskreten Menge) ist nämlich nich komplett straightforward, also es gibt verschiedene Methoden das zu machen und man muss häufig aus bestehenden Werten interpolieren  
+		- den Interpolationsstep sparen wir uns und nehmen direkt (für das 80% Quantil) den 9. Wert und für das 50% Quantil den 6. Wert
+		- macht es noch einmal einfacher
+
+
+
+Methodik, cont'd
+	- implicit: Point forecast in der Mitte
+		- 1. Point forecast wird als Median interpretiert
+		- 2. Wir haben symmetrische Forecast Verteilungen
+		- liegt daran dass wir den absoluten Fehler nehmen. Der hat das zur Konsequenz, hat aber den Vorteil dass es auch sehr intuitiv ist
+		- bei direkten Fehlern (die wir auch als Alternative analysieren) ist das nicht so, hat aber auch den Nachteil dass die Punktvorhersagen dann irgendwo liegen, teilweise auch komplett außerhalb des Intervalls
+			- 80% Intervall dass den Forecast selber nicht abdeckt: nicht so optimal bzw. einfach kommunizierbar
+	- explicit: Unsicherheit soll monoton sein mit Distanz zum Ziel
+		- hier einfach zu implementieren: Länge der Intervalle soll für nähere Jahre kleiner sein. 
+		- gängige Annahme bzw. constraint im forecasting
+		- ist hier natürlicherweise meist schon gegeben (forecast Fehler für Spring anderhalb Jahre vroher sind halt meist größer als die vom Frühling gleiches Jahr)
+			- aber falls das nicht gegeben ist wird umgeordnet und gemittelt
+
+	- evaluieren tun wir 
+		- mit empirical coverage
+			- Einfach: wie viele Observationen lagen über Zeit wirklich in meinem Intervall: wie gesagt, das ist zentral. Wenn nur 20% in meinem 80% Intervall liegen, dann habe ich das viel zu eng gemacht. Gleichermaßen, wenn es 100% sind, dann zu weit und es hätte informativer sein können
+		- und weighted Interval Score
+			- hier Formel füreinzelnen Interval Score, wird separat für jedes Intervall zum LEvel tau berechnet
+			- sharpness und calibration kann mar hier gut sehen
+				- erster term sharpness: wie weit ist das Intervall
+				- zweiter term calibrateion, over und underprediction penalty: Indikatorfunktion bestraft wenn Observation außerhalb des Intervalls liegt, nochmal skaliert mit der Stärke der Abweichung
+			- kann analytisch zeigen dass proper: ich kann nicht schummeln indem ich z.B. einfach ein superbreites Intervall angebe
+				- dann währe zwar hinterer Teil Null, aber vorderer Teil würde stark zu Buche schlagen
+				- und umgekehrt genau so
+				- gesteuert wird das (macht auch intuitiv Sinn) durch das 1-tau hier. Wenn ich ein 95% Intervall geben will (also sehr hohe Konfidenz), wird non-coverage sehr stark bestraft, ich habe also eher einen Anreiz ein breites Intervall anzugeben 
+					- was wir antürlichw olllen, breitere Intervalle für höhrere KOnfidenzlevel
+			- wird dann für verschiedene Quantillevel mit weights aggregiert
+
+Benchmarks
+- brauchen natürlich irgendwas zum Vergleichen
+	- vor allem für Scores, da ist 0 zwar optimal aber auch nicht erreichbar, müssen das also in Kontext setzen
+		- nur relativ evaluierbar
+	- Kalibrierung ist zwar absolut evaluierbar (ist klar dass ich bei 50% landen sollte), aber auch da ist es hilfreich das in KOntext zu setzen
+		- wenn ich selber nur bei 45% lande, ist das in Ordnung wenn andere Methoden auch nicht besser sind
+
+- zum Vergleichen nehmen wir zweierlei:
+	 einmal die komplett gleiche Methode die Intervalle zu bauen, aber mit alternativen Punktforecasts
+		- wir bauen uns den exakt gleichen Panel datensatz (2 Variablen, 30 Jahre, 7 Länder), aber mit anderen Modellen
+		- beantwortet Frage: gegeben unserer Methode, gibt es bessere Quellen für Punktvorhersagen? Schaffen wir es leicht oder sogar besonders leicht (AR) die Vorhersagen zu schlagen
+	- einmal direkte Verteilungsvorhersagen
+		- wir bauen uns direkt Verteilungsvorhersagen aus dem gleichen BVAR Modell 
+		- bekommen die ganze Verteilung (Normalverteilung) und extrahieren daraus die jeweiligen Intervalle in dem wir die jeweiligen Quantile extrahieren
+		- beatnwortet die Frage: ist unsere Methodik die Intervalle aufgrund von den vergangenen Forecast Fehlern zu bauen, valide?
+
+- haben Vorteil, da wir sie auf finalen Daten trainieren (OECD Daten) und auch nachträglich gefitted und getuned wurden
+- Klasse der Zeitreihenmodelle gut abgedeckt
+
+- scheint uns ehrlich eine valide Vergleichsgröße zu sein
+
+#########################################################
+Ergebnisse
+##############################################################
+- IMF-extrahierte Verteilungsvorhersagen im Intervallformat sind kompetitiv
+- Coverage ist nahe nominalen Leveln
+- Absolute Fehler sind besser als directional fehler 
+##############################################################
+
+Uns geht es nicht darum besser zu sein als die Baselines, selbst wenn es vergleichbar ist ist es schon ein Erfolg (da die anderen Modelle ja retrospektiv gefitted wurden)
+
+Für Inflation, die Weighted Interval Scores
+
+Für Wirtschaftswachstum die Weighted Interval Scores
+
+
+
+Publizieren der Prognosen
+- das ist eigentlich der wichtigste Punkt: wir wollen uns mit diesen Vorhersagen nicht verstecken
+- das was bisher passiert ist ist alles wihcti gun es handelt sihc auch um interessante Ergebnisse, aber der wirklich wichtige Teil unserer Meinung nach ist das Ganze auch zu publizieren
+
+- GitHub Repo
+	- GitHub ist eine Plattform auf der man seine Git repositories hosten kann
+	- grundsätzlich ist alles accountable, da alle changes mit Zeitstempel getrackt werden
+	- wird normalerweise für Programmierprojekte verwendet, wir nutzen es analog zum Covid-19 Forecast Hub um unsere Prognosen mit Zeitstempel accountable zu hosten
+
+- Shiny App
+	- das GitHub repo dient eher der Dokumentation 
+	- wollen noch eine zugänglichere Publikationsmöglichkeit haben, deswegen die Visualisierung in der Shiny App
+	- auf einen Blick alles, man kann oben zwischen Inflation und Wirtschaftswachtstum wechseln und sieht dann die Zeitreihen inkl. Prognose side by side für alle Länder
+
+
+Increasing Uncertainty
+	Check für Methodology, aber auch Aussage in sich selbst

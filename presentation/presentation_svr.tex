@@ -1,0 +1,658 @@
+%% Beispiel-Präsentation mit LaTeX Beamer im KIT-Design
+%% entsprechend den Gestaltungsrichtlinien vom 1. August 2020
+%%
+%% Siehe https://sdqweb.ipd.kit.edu/wiki/Dokumentvorlagen
+
+%% Beispiel-Präsentation
+\documentclass[en]{sdqbeamer} 
+\usepackage{graphicx}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=gray,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+
+\urlstyle{same}
+ 
+%% Titelbild
+\titleimage{banner_2020_kit}
+
+%% Gruppenlogo
+\grouplogo{logo_empty.jpg} 
+
+%% Gruppenname und Breite (Standard: 50 mm)
+\groupname{}
+%\groupnamewidth{50mm}
+
+% Beginn der Präsentation
+
+\title[Simple Prediction Intervals]{Simple Macroeconomic Forecast Distributions}
+%\subtitle{Einfache makroökonomische probabilistische Vorhersagen} 
+\author[Friederike Becker, Fabian Krüger, Melanie Schienle]{Friederike Becker, Fabian Krüger, Melanie Schienle}
+
+\date[28.\,02.\,2024]{February 28, 2024}
+
+
+% Literatur 
+ 
+\usepackage[citestyle=authoryear,bibstyle=numeric,hyperref,backend=biber]{biblatex}
+\addbibresource{presentation.bib}
+\bibhang1em
+
+\begin{document}
+\setbeamertemplate{caption}{\raggedright\insertcaption\par}
+ 
+%Titelseite
+\KITtitleframe
+
+%Inhaltsverzeichnis
+\begin{frame}{Overview}
+\tableofcontents
+\end{frame}
+
+\begin{frame}{Small Note on Terminology}
+Some terms are used interchangeably within the context of this presentation
+\begin{itemize}
+\item probabilistic - distributional
+\item forecast - prediction - projection 
+\end{itemize}
+\end{frame}
+
+
+\section{Setting and Motivation}
+
+
+%\subsection{Fixed-Event forecasting in Economics}
+\begin{frame}{An economist's favorite pastime}
+	\begin{itemize}
+	    \item various institutions issue forecasts for annual macroeconomic targets
+     \begin{itemize}
+        \item most prominent targets: (real) GDP growth and inflation
+        \item for Germany, sources are (among others) the Bundesbank, the ifo institute, the OECD
+         \item fixed-event forecasts: target date is fixed, forecast date is not
+     \end{itemize}
+     \item forecasts are often disseminated widely
+     \begin{itemize}
+         \item extensive media coverage, influence on political discussions
+         \item relevant for real-world outcomes (public budget planning, collective bargaining)
+     \end{itemize}
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}[t]{Why should we explicitly quantify uncertainty?}
+\begin{itemize}
+    \item more honest and transparent \smallskip
+    \item can increase trust in forecasts \smallskip
+    \item broader information base facilitates better decision making \smallskip
+    \item better evaluation and accountability
+    %\item simple and transparent method of attaching prediction intervals 
+%\item show that attaching distributional forecasts to an existing
+%\item for up to one and a half years into the future 
+%\item evaluate on years 1999-2021
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t]{Can we really be that sure?}
+
+\begin{columns}
+\begin{column}{0.45\textwidth}
+   	\begin{itemize}
+         \item usual practice: issue point forecasts only
+         \begin{itemize}
+	    \item uncertainty is at best acknowledged, rarely quantified \smallskip
+	\end{itemize}
+        %\item media reception often fixated on zero
+        \item we observe artefacts in reporting 
+        \begin{itemize}
+            \item fixation on values slightly above/below zero
+            \item different horizons are often left uncontextualized \bigskip
+        \end{itemize}
+        \item distributional forecasts supposedly require additional ...
+        \begin{itemize}
+        \item ... modeling effort (forecast issuer)
+        \item ... cognitive load (forecast user)
+        \end{itemize}
+    \end{itemize}
+    \vspace{2cm}
+\end{column}
+\begin{column}{0.55\textwidth}
+\vspace*{-2.05cm}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{figures/recession_light_underlined_green_smaller_date.jpg} 
+        \caption{Source: tagesschau.de}
+        \label{fig:enter-label}
+    \end{figure}     
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[t]{Types of probabilistic forecasts}
+
+\begin{columns}
+\begin{column}{0.39\textwidth}
+    \begin{itemize}
+\item full probability distribution
+\item histogram
+\item samples from distribution
+\item \textbf{quantiles or prediction intervals}
+\end{itemize}
+\begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{figures_svr/densityfc.pdf} 
+        \label{fig:enter-label}
+    \end{figure}
+\end{column}
+\begin{column}{0.52\textwidth}
+\vspace*{-1.55cm}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.7\textwidth]{figures_svr/CI_illustration.pdf} 
+        \label{fig:enter-label}
+    \end{figure}     
+\end{column}
+\begin{column}{0.01\textwidth}
+
+\end{column}
+\end{columns}
+\end{frame}
+
+\addtocounter{framenumber}{-1}
+\begin{frame}[t]{Example 1: Weather Forecasting}
+\begin{columns}
+\begin{column}{0.35\textwidth}
+Uncertainty is communicated via \smallskip
+    \begin{itemize}
+         \item $80\%$ prediction interval for temperature \medskip
+         \item probability for precipitation and adverse weather events
+    \end{itemize}
+    \vspace{2cm}
+\end{column}
+\begin{column}{0.65\textwidth}
+\vspace*{-.05cm}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{figures_svr/Probcast.jpg} 
+        \caption{Source: Mass, C. et al. 2009. \textit{PROBCAST}, BAMS}
+    \end{figure}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\addtocounter{framenumber}{-1}
+\begin{frame}[t]{Example 2: Forecasting Covid-19}
+\begin{columns}
+\begin{column}{0.35\textwidth}
+Uncertainty is communicated via \smallskip
+    \begin{itemize}
+         \item granular prediction intervals for Covid-19 Cases and Deaths \medskip
+         \item main prediction intervals ($50\%$, $95\%$) are highlighted
+    \end{itemize}
+    \vspace{2cm}
+\end{column}
+\begin{column}{0.65\textwidth}
+\vspace*{-.05cm}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.65\textwidth]{figures_svr/covid19.jpg} 
+        \caption{Source: https://viz.covid19forecasthub.org}
+    \end{figure}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[t]{The makings of a good probabilistic forecast}
+\vspace*{-0.25cm}
+\begin{itemize}
+\item central paradigm: \textbf{sharpness subject to calibration}\footnote{Gneiting, T. et al. 2007. \textit{Probabilistic forecasts, calibration and sharpness.} JRSS}
+\item calibration alone can be easily asserted
+\begin{itemize}
+\item most important metric for a trustworthy forecast
+\end{itemize}
+\item \textbf{proper scoring rules} check calibration and sharpness simultaneously
+\end{itemize}
+\begin{figure}
+        \centering
+        \includegraphics[width=0.61\textwidth]{figures_svr/sharp_calib.pdf} 
+    \end{figure}
+\end{frame}
+
+
+
+\section{Methods}
+\begin{frame}[t]{Contributions of this work}
+\begin{itemize}
+    \item show that attaching prediction intervals to an existing base of point forecasts can be 
+    \begin{itemize} 
+    \item simple
+    \item cheap
+    \item transparent
+    \end{itemize}   
+    \item provide competitively performing distributional forecasts for 
+    \begin{itemize}
+    \item  GDP growth and inflation
+    \item  all G-7 countries
+    \item  current and next year targets
+    \end{itemize}
+    %\item simple and transparent method of attaching prediction intervals 
+%\item show that attaching distributional forecasts to an existing
+%\item for up to one and a half years into the future 
+%\item evaluate on years 1999-2021
+\end{itemize}
+\end{frame}
+
+% \begin{flushright}
+% \includegraphics[width = 8cm]{figures/recession_light.JPG}    
+% \end{flushright}
+   
+%\subsection{Data Source: IMF World Economic Outlook}
+\begin{frame}{Data Source: IMF World Economic Outlook}
+	\begin{itemize}
+		\item survey by the IMF staff, published bi-annually
+		\begin{itemize}
+            \item contains forecasts with up to 6 years horizon and historic truth values
+		    \item publication in April (horizon for current year $\approx$ 8 months) and in October ($\approx$ 2 months)
+		\end{itemize}
+    \item publicly available\footnote{International Monetary Fund. 2023. \textit{World Economic Outlook: Navigating Global Divergences.} Washington, DC. October.} in an accessible format
+    \item targets: real GDP growth and CPI inflation 
+    \item time range: available since 1990, giving $\sim$30 years of forecast-truth pairs %per country and forecast horizon
+    \item target locations: forecasts are issued for 196 countries in total
+    %\begin{itemize}
+    %    \item forecasts for 196 countries in total are available
+    %\end{itemize}
+	\end{itemize}
+\end{frame}
+
+
+%\section{Methods}
+\begin{frame}{Methods}
+We apply an attractively simple and cheap method. For a given country and target:
+\begin{itemize}
+    \item given forecasts $\hat{y}_{t, h}$ and the realized true values $y_{t}$ ...
+    \begin{itemize}
+        \item for target year $t$, horizon $h$
+    \end{itemize}
+    \item ... construct sets $\mathcal{E}_{t, h} = \{\hat{e}^{a}_{t^*, h}  | t-R \leq t^* < t \}$, containing the last $R$ forecast errors
+    \begin{itemize}
+        \item based on \textit{absolute} errors $\hat{e}^{a}_{t,h} = |y_{t} - \hat{y}_{t, h}| $
+        \item currently: $R=11$
+        %\item sets are stratified by country, target and horizon
+    \end{itemize}
+    \item for each desired confidence level $\tau$, compute $q^{\tau}_{t, h} =  Q\left(\mathcal{E}_{t, h}, \tau \right)$
+    \begin{itemize}
+    \item  for conciseness, we choose $\tau  \in \{0.5, 0.8\}$
+    \end{itemize}
+    \item and compute the upper and lower endpoints of a central prediction interval as 
+    \begin{itemize}
+        \item $u^{\tau}_{t,h} = \hat{y}_{t, h} + q^{\tau}_{t, h}$ 
+        \item $l^{\tau}_{t,h} \hspace{1mm} = \hat{y}_{t, h} - q^{\tau}_{t, h}$
+    \end{itemize}
+    %\item use PAVA-type reordering if intervals shrink with increasing horizon
+    
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Methods, continued}
+\begin{itemize}
+\item Notwithstanding the method's simplicity, the following constraints are imposed
+\begin{itemize}
+    \item point forecast lies at the center of each prediction interval  
+    \item intervals are reordered if their length does not increase with distance to target 
+\end{itemize}
+\item as an alternative, ``directional'' errors are also considered \bigskip
+\item assess central interval coverage and score via the weighted interval score (WIS)\footnote{Bracher, J. et al. 2021. \textit{Evaluating
+Epidemic Forecasts in an Interval Format.} PLoS Computational Biology 17 (2)}
+\begin{equation*} \label{eq:interval_score}
+IS_{\tau}(F, y) = (u-l) + \frac{2}{1-\tau}(l - y)1(y < l) + \frac{2}{1-\tau}(y - u)1(y > u).
+\end{equation*}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Benchmarks}
+    We compare with benchmarks:
+\begin{enumerate}
+    \item same methodology, alternative point forecasts
+    \begin{itemize}
+        \item autoregressive (AR) model
+        \item Primiceri Bayesian vector autoregressive (BVAR) model\footnote{Primiceri, G. 2005. \textit{Time Varying Structural Vector Autoregressions and Monetary Policy.} Review of Economic Studies 72.}
+    \end{itemize}
+    \item directly generated distributional forecasts
+    \begin{itemize}
+        \item obtained from the BVAR model
+    \end{itemize}
+\end{enumerate}
+\begin{itemize}
+    \item trained on quarterly data, with slight informational advantage
+\end{itemize}
+
+\end{frame}
+
+\section{Results}
+\begin{frame}{Scores - Inflation}
+%\textit{I'll make the figures, incl. legends, nicer and also remove (the reason for) the joke about the devoured overprediction}
+
+\begin{columns}
+\begin{column}{0.35\textwidth}
+    \begin{itemize}
+         \item IMF-based forecasts perform relatively well 
+         \begin{itemize}
+         \item more so at long horizons\medskip
+         \end{itemize}
+         \item overprediction contributes most to scores
+    \end{itemize}
+    \vspace{2cm}
+\end{column}
+\begin{column}{0.65\textwidth}
+\vspace*{-.95cm}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{figures_svr/svr_wis_pcpi_pch_absolute_rollingwindow.pdf} 
+        \label{fig:enter-label}
+    \end{figure} 
+\end{column}
+\end{columns}
+\end{frame}
+
+
+
+\begin{frame}{Scores - GDP Growth}
+%\textit{I'll make the figures, incl. legends, nicer and also remove (the reason for) the joke about the devoured overprediction}
+\begin{columns}
+\begin{column}{0.35\textwidth}
+    \begin{itemize}
+         \item IMF-based forecasts perform slightly better 
+         \begin{itemize}
+         \item across all horizons\medskip
+         \end{itemize}
+         \item dispersion and overprediction contribute most to scores
+    \end{itemize}
+    \vspace{2cm}
+\end{column}
+\begin{column}{0.65\textwidth}
+\vspace*{-.95cm}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{figures_svr/svr_wis_ngdp_rpch_absolute_rollingwindow.pdf} 
+        \label{fig:enter-label}
+    \end{figure} 
+\end{column}
+\end{columns}
+\end{frame}
+
+
+
+
+%\begin{frame}{Calibration - Interval Coverage Levels}
+%\textit{Here, I'll instead map the colors to the different forecast sources (currently mapped to the window method), so we'll just have one plot each}
+    %Coverage at the 50\% and 80\% central interval: \\ 
+
+%    \begin{figure}
+%        \centering
+%        \includegraphics[width=0.9\textwidth]{figures/coverage.pdf}
+%        %\caption{Coverage at the 50 and 80 percent level}
+%        \label{fig:enter-label}
+%    \end{figure}
+%\end{frame}
+
+\begin{frame}{Calibration - Interval Coverage Levels - Inflation}
+%\textit{Here, I'll instead map the colors to the different forecast sources (currently mapped to the window method), so we'll just have one plot each}
+    %Coverage at the 50\% and 80\% central interval: \\ 
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.98\textwidth]{figures_svr/svr_coverage_pcpi_pch_absolute_rollingwindow.pdf}
+        %\caption{Coverage at the 50 and 80 percent level}
+        \label{fig:enter-label}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Calibration - Interval Coverage Levels - GDP Growth}
+%\textit{Here, I'll instead map the colors to the different forecast sources (currently mapped to the window method), so we'll just have one plot each}
+    %Coverage at the 50\% and 80\% central interval: \\ 
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.98\textwidth]{figures_svr/svr_coverage_ngdp_rpch_absolute_rollingwindow.pdf}
+        %\caption{Coverage at the 50 and 80 percent level}
+        \label{fig:enter-label}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Increasing Uncertainty}
+%Width of Prediction Intervals, by Horizon
+%\textit{include graphic or table showing increasing uncertainty with rising horizons}\\ 
+\begin{columns}
+\begin{column}{0.6\textwidth}
+    \begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{figures/horizon_uncc_new.pdf}
+        %\caption{Coverage at the 50 and 80 percent level}
+        \label{fig:enter-label}
+    \end{figure}
+\end{column}
+\begin{column}{0.4\textwidth}
+\centering
+\textbf{Average length of intervals}
+\begin{table}
+\begin{tabular}{ l c c }
+&   50\%  & 80\%\\[0.3em]
+\multicolumn{3}{c}{\textbf{GDP Growth}}\\
+Fall,  SY & 0.5 & 1.1\\ 
+Spring, SY &1.2 &2.1 \\ 
+Fall, NY & 1.9 & 3.5\\ 
+Spring, NY &2.2 &4.0 \\[0.3em] 
+\multicolumn{3}{c}{\textbf{Inflation}}\\
+%&   50\%  & 80\%\\[0.3em]
+Fall,  SY & 0.3 & 0.5\\ 
+Spring, SY &0.6 &1.1 \\ 
+Fall, NY & 1.1 & 1.8\\ 
+Spring, NY &1.3 &2.1 \\ 
+\end{tabular}
+\end{table}
+\vspace{1.25cm}
+\end{column}
+\end{columns}
+
+
+%\textit{relate back to article shown in the beginning, which also mentions IMF forecast of 0.1 percent $\rightarrow$ almost 50\% of any predictive intervals at this time would actually be below zero}
+\end{frame}
+\addtocounter{framenumber}{-1}
+\begin{frame}{Will Germany avoid recession?}
+%Width of Prediction Intervals, by Horizon
+%\textit{include graphic or table showing increasing uncertainty with rising horizons}\\ 
+\begin{figure}
+        \centering
+        \includegraphics[width=0.6\textwidth]{figures/horizon_uncc_germany2023_current.pdf}
+        %\caption{Coverage at the 50 and 80 percent level}
+        \label{fig:enter-label}
+    \end{figure}
+
+
+%\textit{relate back to article shown in the beginning, which also mentions IMF forecast of 0.1 percent $\rightarrow$ almost 50\% of any predictive intervals at this time would actually be below zero}
+\end{frame}
+
+
+\begin{frame}{Robustness Checks / Alternative Methods}
+\begin{itemize}
+    \item error extraction method: absolute vs. directional errors
+    \begin{itemize}
+    \item similar scores, worse calibration \hyperlink{errorextraction}{\beamerbutton{link}}
+    \end{itemize}
+    \item window method: rolling vs. expanding window
+    \begin{itemize}
+    \item slightly improved coverage and scores, at the cost of interpretability \hyperlink{extractionmethod}{\beamerbutton{link}}
+    \end{itemize}
+    \item potential dependency of results on quantile extraction \\
+    \begin{itemize}
+        \item ordering between forecasts remains the same with sample-based CRPS \hyperlink{samplecrps}{\beamerbutton{link}}
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+
+\section{Outlook}
+
+\begin{frame}{Summing up}
+\begin{itemize}
+\item Attaching distributional forecasts via past forecast errors to an existing base of point forecasts is
+    \begin{itemize}
+        \item cheap
+        \item competitive
+        \item transparent
+    \end{itemize}
+\item Uncertainty around point forecasts is often substantial, making its communication necessary
+\item IMF forecasts are valuable source for distributional forecasts in their own right \bigskip \\
+\item     Outlook
+    \begin{itemize}
+        \item scale to more countries and forecast sources
+        \item implement alternative method that  utilizes the cross-section dimension%, e.g. via Hierarchical Bayesian Modeling
+        \item make forecasts easily and publicly accessable via shiny app
+    \end{itemize}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Making it public}
+\begin{columns}
+\begin{column}{0.3\textwidth}
+Shiny App: \\
+   \url{https://probability-forecasting.shinyapps.io/macropi/} \vspace{0.5cm} \\ 
+GitHub repo with our forecasts: \\
+    \url{https://github.com/MacroPrediction/MacroPI}
+    \vspace*{2cm}
+\end{column}
+\begin{column}{0.7\textwidth}
+\vspace*{-10mm}
+    \begin{figure}
+        %\centering
+        \includegraphics[width=0.55\textwidth]{figures/shinycap_newhost.jpg}
+        %\caption{Coverage at the 50 and 80 percent level}
+        \label{fig:enter-label}
+    \end{figure}   
+\end{column}
+\end{columns}
+
+\end{frame}
+
+%\begin{frame}{Beispielinhalt: Literatur}
+%    Literaturzitat: \cite{klare2021jss}
+%end{frame}
+%\begin{frame}
+%        Bei Frames ohne Titel wird die Kopfzeile nicht angezeigt, und  
+%    der freie Platz kann für Inhalte genutzt werden.
+%\end{frame}
+
+%\begin{frame}[plain]
+%    Bei Frames mit Option \texttt{[plain]} werden weder Kopf- noch Fußzeile angezeigt.
+%\end{frame}
+
+%\begin{frame}[t]{Beispielinhalt}
+%    Bei Frames mit Option \texttt{[t]} werden die Inhalte nicht vertikal zentriert, sondern an der Oberkante begonnen.
+%\end{frame}
+
+%\textit{relate back to article shown in the beginning, which also mentions IMF forecast of 0.1 percent $\rightarrow$ almost 50\% of any predictive intervals at this time would actually be below zero}
+
+\addtocounter{framenumber}{-1}
+\begin{frame}{Making it Public - GitHub}
+%Width of Prediction Intervals, by Horizon
+%\textit{include graphic or table showing increasing uncertainty with rising horizons}\\ 
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.5\textwidth]{figures_svr/GitHub_Capture2.jpg}
+        %\caption{Coverage at the 50 and 80 percent level}
+        \label{fig:enter-label}
+    \end{figure}
+\end{frame}
+
+\addtocounter{framenumber}{-1}
+\begin{frame}{Making it Public - GitHub}
+%Width of Prediction Intervals, by Horizon
+%\textit{include graphic or table showing increasing uncertainty with rising horizons}\\ 
+\begin{figure}
+        \centering
+        \includegraphics[width=0.6\textwidth]{figures_svr/GitHub_Capture1.jpg}
+        %\caption{Coverage at the 50 and 80 percent level}
+        \label{fig:enter-label}
+    \end{figure}
+
+
+%\textit{relate back to article shown in the beginning, which also mentions IMF forecast of 0.1 percent $\rightarrow$ almost 50\% of any predictive intervals at this time would actually be below zero}
+\end{frame}
+
+\appendix
+\beginbackup
+\begin{frame}{WIS}
+\begin{equation}
+WIS_{\tau_{0:K}}(F,y) = \frac{1}{K + 1/2}\left(w_{0}|y-m| + \sum_{k=1}^{K}\left(w_k IS_{\tau_{k}}(F, y)\right)\right), 
+\vspace*{5.5mm}
+\end{equation}
+\hspace*{3cm} with $w_k = (1-\tau)/2$
+\end{frame}
+\begin{frame}{Directional Errors - Scores}
+\label{errorextraction}
+\begin{figure}
+        \centering
+        \includegraphics[width=0.9\textwidth]{figures/wis_cpigdp_directional.pdf}
+       %\caption{Coverage at the 50 and 80 percent level}
+    \end{figure}
+\end{frame}
+\begin{frame}{Directional Errors - Coverage}
+\begin{figure}
+        \centering
+        \includegraphics[width=0.9\textwidth]{figures/coverage_directional.pdf}
+        %\caption{Coverage at the 50 and 80 percent level}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Expanding Window - Scores}
+\label{extractionmethod}
+\begin{figure}
+        \centering
+        \includegraphics[width=0.9\textwidth]{figures/wis_cpigdp_expandingwindow.pdf}
+        %\caption{Coverage at the 50 and 80 percent level}
+    \end{figure}
+\end{frame}
+\begin{frame}{Expanding Window - Coverage}
+\begin{figure}
+        \centering
+        \includegraphics[width=0.9\textwidth]{figures/coverage_expandingwindow.pdf}
+        %\caption{Coverage at the 50 and 80 percent level}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{CRPS by sample}
+\label{samplecrps}
+\begin{figure}
+        \centering
+        \includegraphics[width=0.7\textwidth]{figures/crpssample.png}
+        %\caption{Coverage at the 50 and 80 percent level}
+    \end{figure}
+\end{frame}
+
+
+
+%\begin{frame}{Literatur}
+%\begin{exampleblock}{Backup-Teil}
+%    Folien, die nach \texttt{\textbackslash beginbackup} eingefügt werden, zählen nicht in die Gesamtzahl der Folien.
+%\end{exampleblock}
+
+%\printbibliography
+%\end{frame}
+
+%\section{Farben}
+%% ----------------------------------------
+%% | Test-Folie mit definierten Farben |
+%% ----------------------------------------
+%% ----------------------------------------
+%% | /Test-Folie mit definierten Farben |
+%% ----------------------------------------
+\backupend
+
+\end{document}
+ 
