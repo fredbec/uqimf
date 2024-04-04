@@ -28,7 +28,7 @@ qufcs <- data.table::fread(here("quantile_forecasts", "quantile_forecasts.csv"))
   .d(target_year <= max_year)
 combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"))
 bvar_qus <- data.table::fread(here("benchmarks", "quantile_benchmarks_processed.csv")) |>
-  setnames("tv_1", "true_value")|>
+  setnames(paste0("tv_", tv_release), "true_value")|>
   .d(target_year <= max_year)
 qufcs_pava <- data.table::fread(here("quantile_forecasts", "quantile_forecasts_pava.csv")) |>
   .d(target_year <= max_year)
@@ -97,7 +97,8 @@ pp_scores <- fcdat |>
 #################################Score by CRPS Sample##############################
 weodat_samples <- fcdat |>
   .d(horizon < 2) |>
-  .d(,.(country, source, target, horizon, target_year, tv_1, prediction))
+  .d(,.(country, source, target, horizon, target_year, get(paste0("tv_", tv_release)), prediction)) |>
+  data.table::setnames("V6", paste0("tv_", tv_release))
 
 
 combs_methods <- data.table::CJ(error_method = c("directional", "absolute"),
