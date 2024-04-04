@@ -13,7 +13,9 @@
 wis_plot_new <- function(wis_scoredat,
                                 trgt = c("pcpi_pch", "ngdp_rpch"),
                          xmax = NULL,
-                                plot_name = NULL){
+                                plot_name = NULL,
+                         textsize_y = 17,
+                         metcolor = "Hokusai1"){
 
   if(length(unique(wis_scoredat$error_method)) > 1){
     stop("Only one error method allowed. Prefilter data")
@@ -59,30 +61,49 @@ wis_plot_new <- function(wis_scoredat,
                                          alpha = type)) +
     geom_bar(position="stack", stat="identity") +
     facet_wrap(~ horizon,
-               labeller = as_labeller(plot_horizon_label_short(4)),
+               labeller = as_labeller(plot_horizon_label_shorter(4)),
                nrow = 1) +
     scale_alpha_discrete(range = c(0.35,1),
                          labels = c("Overprediction",
                                     "Underprediction",
                                     "Dispersion"),
                          name = "Components of the WIS") +
-    scale_x_discrete(name = "",
-                     breaks = c("IMF", "bvar", "bvar_qu", "ar"),
-                     labels = c("IMF", "BVAR", "BVAR_QU", "AR")) +
+    #scale_x_discrete(name = "",
+    #                 breaks = c("IMF", "bvar", "bvar_qu", "ar"),
+    #                 labels = c("IMF", "BVAR", "BVAR_QU", "AR")) +
 
     scale_y_continuous(name = "Weighted Interval Score", limits = c(0, xmax)) +
-    scale_fill_met_d("Hokusai1",
-                     breaks = c("IMF", "bvar", "bvar_qu", "ar"),
-                     labels = c("IMF", "BVAR", "BVAR_QU", "AR")) +
+    #scale_fill_met_d("Hokusai1",
+    #                 breaks = c("IMF", "ar", "bvar_qu", "bvar"),
+    #                 labels = c("IMF", "AR", "BVAR_QU", "BVAR")) +
+
+    scale_fill_met_d(metcolor, #breaks = c("IMF", "bvar", "ar", "bvar_qu"),
+                      labels = c("IMF", "BVAR", "AR", "BVAR - direct")) +
     xlab("") +
     theme_uqimf() %+replace%
-    theme(axis.text.x = element_text(size = 8, angle = 90, hjust = .5, vjust = .5, face = "plain"),
-          strip.text = element_text(size = 8)) +
-    ggtitle(plot_name) +
-    theme(legend.title=element_blank()) +
-    guides(fill = "none")
+    theme(axis.text.x = element_blank(),
+      #axis.text.x = element_text(size = textsize_y, angle = 90, hjust = .5, vjust = .5, face = "plain"),
+          #strip.text = element_text(size = 8),
+          axis.text.y = element_text(size = textsize_y),
+          axis.title.y = element_text(size = textsize_y, angle = 90, vjust = 2),
+          strip.text = element_text(size=textsize_y),
+          legend.text=element_text(size=textsize_y),
+          text = element_text(family = "serif"),
+          legend.title=element_blank(),
+          plot.margin = margin(t=0,b=0,r=0,l=0, unit = "pt")) +#,
+          #legend.direction = "vertical", legend.box = "vertical") +
+    ggtitle(plot_name)  #+
+    #guides(fill = "none")
 
-    return(decomp_plot)
+    decomp_plot2 <-
+      (decomp_plot) +
+
+    plot_layout(guides = "collect",
+                heights = c(1)) &
+
+    theme(legend.position = 'bottom',
+          legend.box="vertical", legend.margin=margin(7))
+    return(decomp_plot2)
 
 }
 
@@ -200,7 +221,14 @@ horizon_path_plot <- function(score_data,
                               ylab = score_rule,
                               facet = NULL,
                               title = NULL,
-                              metcolor = "Hokusai1"){
+                              withlegend = FALSE,
+                              textsize_y = 17,
+                              metcolor = "Hokusai1",
+                              lintype = "solid"){
+
+  score_data  <- score_data |>
+    .d(, source := factor(source, levels = c("IMF", "bvar", "bvar_qu", "ar"),
+                          label = c("IMF", "BVAR", "BVAR - direct", "AR")))
 
   path_plot <- ggplot(score_data,
                       aes(x = horizon,
@@ -209,14 +237,11 @@ horizon_path_plot <- function(score_data,
 
     scale_color_met_d(metcolor, breaks = c("IMF", "bvar", "ar", "bvar_qu"),
                       labels = c("IMF", "BVAR", "AR", "BVAR_QU")) +
-    geom_line() +
-    geom_point() +
+    geom_line(linetype = lintype) +
+    geom_point(size = 4.5) +
     ylab(ylab) +
     xlab("Forecast Horizon") +
-    guides(fill = "none", colour = "none") +
-    theme_uqimf() %+replace%
-    theme(legend.title=element_blank(),
-          legend.position = "none") +
+    theme_uqimf() +
     ggtitle(title)
 
   if(!is.null(facet)){
@@ -224,6 +249,26 @@ horizon_path_plot <- function(score_data,
     path_plot <- path_plot +
       facet_wrap(~ get(facet),
                  scales = "free")
+  }
+
+  if(!withlegend){
+
+    path_plot <- path_plot +
+      guides(fill = "none", colour = "none") +
+      theme_uqimf() %+replace%
+             theme(legend.title=element_blank(),
+                   legend.position = "none",
+                   axis.text.x = element_text(size = textsize_y),
+                   #strip.text = element_text(size = 8),
+                   axis.text.y = element_text(size = textsize_y),
+
+                   axis.title.x = element_text(size = textsize_y),
+                   axis.title.y = element_text(size = textsize_y, angle = 90, vjust = 2),
+                   strip.text = element_text(size=textsize_y),
+                   legend.text=element_text(size=textsize_y),
+                   text = element_text(family = "serif"),
+                   #legend.title=element_blank(),
+                   plot.margin = margin(t=40,b=4,r=20,l=20, unit = "pt"))
   }
 
   return(path_plot)
@@ -314,4 +359,217 @@ shinyplot <- function(realized_series,
                        values = c("50% Interval" = 0.6, "80% Interval" = 0.4),
                        guide = guide_legend(override.aes = list(color = "black") ))
 
+}
+
+
+
+coverage_plot_wgraylines <- function(
+    cvgdat_bysource,
+    cvgdat_byhorcnt,
+    trgt,
+    cvg_rg = c(50, 80),
+    xlim = c(0.45, 0.85),
+    offset_dashed = 0.015,
+    metcolor = "Hokusai1",
+    plot_title = NULL,
+    textsize_y = 17){
+
+  .d <- `[`
+
+  if(is.null(plot_title)){
+    plot_title <- plot_target_label()[trgt]
+  }
+
+  cvg_cols <- paste0("coverage_", cvg_rg)
+
+  source_coverage <- cvgdat_bysource |>
+    setnames("model", "source", skip_absent = TRUE) |>
+    .d(, c( "target", "error_method", "method", "source", cvg_cols), with = FALSE) |>
+    melt(id.vars = c("target", "error_method", "method", "source"),
+         variable.name = "pilvl",
+         value.name = "coverage") |>
+    .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
+    .d(, pilvl := as.numeric(pilvl)/100) |>
+    .d(, source := factor(source, levels = c("IMF", "bvar", "bvar_qu", "ar"),
+                          label = c("IMF", "BVAR", "BVAR - direct", "AR"))) |>
+    .d(target == trgt)
+
+  indiv_coverage <- cvgdat_byhorcnt |>
+    .d(target == trgt) |>
+    setnames("model", "source", skip_absent = TRUE) |>
+    .d(, c("country", "horizon", "target", "error_method", "method", "source", cvg_cols), with = FALSE) |>
+    melt(id.vars = c("country", "horizon", "target", "error_method", "method", "source"),
+         variable.name = "pilvl",
+         value.name = "coverage") |>
+    .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
+    .d(, pilvl := as.numeric(pilvl)/100) |>
+    .d(, idcol := paste0(horizon, country, method)) |>
+    .d(, country := NULL) |>
+    .d(, horizon := NULL) |>
+    .d(source == "IMF")
+
+  plot_cvg <- ggplot() +
+    geom_line(aes(x = pilvl,
+                  y = coverage,
+                  group = idcol),
+              data = indiv_coverage,
+              alpha = 0.4,
+              color = "gray60") +
+    geom_point(aes(x = pilvl,
+                   y = coverage,
+                   color = source),
+               data = source_coverage,
+               size = 3) +
+    geom_line(aes(x = pilvl,
+                  y = coverage,
+                  color = source),
+              data = source_coverage,
+              lwd = 1.25) +
+    geom_segment(aes(x = xlim[1]+offset_dashed, y = xlim[1]+offset_dashed,
+                     xend = xlim[2]-offset_dashed, yend = xlim[2]-offset_dashed),
+                 color = "black",
+                 linetype = "dashed",
+                 lwd = 1.25,
+                 data = source_coverage) +
+    scale_x_continuous(limits = xlim) +
+
+    ggtitle(plot_title) +
+
+    scale_color_met_d(metcolor, #breaks = c("IMF", "bvar", "ar", "bvar_qu"),
+                      labels = c("IMF", "BVAR", "AR", "BVAR - direct")) +
+
+    ylab("Empirical Coverage") +
+    xlab("Nominal Coverage") +
+    theme_uqimf() %+replace%
+    theme(#axis.text.x = element_blank(),
+      axis.text.x = element_text(size = textsize_y),
+      #strip.text = element_text(size = 8),
+      axis.text.y = element_text(size = textsize_y),
+
+      axis.title.x = element_text(size = textsize_y),
+      axis.title.y = element_text(size = textsize_y, angle = 90, vjust = 2),
+      strip.text = element_text(size=textsize_y),
+      legend.text=element_text(size=textsize_y),
+      text = element_text(family = "serif"),
+      legend.title=element_blank(),
+      plot.margin = margin(t=0,b=0,r=10,l=10, unit = "pt"))
+
+  return(plot_cvg)
+}
+
+
+#'@import scales
+coverage_plot_aggregate <- function(
+    cvgdat_bysource,
+    cvgdat_byhorcnt,
+    trgt,
+    cvg_rg = c(50, 80),
+    xlim = c(0.47, 0.59),
+    offset_dashed = 0.015,
+    metcolor = "Hokusai1",
+    plot_title = NULL,
+    textsize_y = 17){
+
+  .d <- `[`
+
+  if(is.null(plot_title)){
+    plot_title <- plot_target_label()[trgt]
+  }
+
+  cvg_cols <- paste0("coverage_", cvg_rg)
+
+  source_coverage <- cvgdat_bysource |>
+    setnames("model", "source", skip_absent = TRUE) |>
+    .d(, c( "target", "error_method", "method", "source", cvg_cols), with = FALSE) |>
+    melt(id.vars = c("target", "error_method", "method", "source"),
+         variable.name = "pilvl",
+         value.name = "coverage") |>
+    .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
+    .d(, pilvl := as.numeric(pilvl)/100) |>
+    .d(, source := factor(source, levels = c("IMF", "bvar", "bvar_qu", "ar"),
+                          label = c("IMF", "BVAR", "BVAR - direct", "AR"))) |>
+    .d(target == trgt) |>
+    .d(, id := .GRP, by=source) |>
+    .d(, id := pilvl + (id-2.5)*0.01) |>
+    .d(, id := ifelse(pilvl == 0.8, id - 0.24, id))
+
+  indiv_coverage <- cvgdat_byhorcnt |>
+    .d(target == trgt) |>
+    setnames("model", "source", skip_absent = TRUE) |>
+    .d(, c("country", "horizon", "target", "error_method", "method", "source", cvg_cols), with = FALSE) |>
+    melt(id.vars = c("country", "horizon", "target", "error_method", "method", "source"),
+         variable.name = "pilvl",
+         value.name = "coverage") |>
+    .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
+    .d(, pilvl := as.numeric(pilvl)/100) |>
+    .d(, idcol := paste0(horizon, country, method)) |>
+    .d(, source := factor(source, levels = c("IMF", "bvar", "bvar_qu", "ar"),
+                          label = c("IMF", "BVAR", "BVAR - direct", "AR"))) |>
+    .d(, country := NULL) |>
+    .d(, horizon := NULL) |>
+    .d(, id := .GRP, by=source) |>
+    .d(, id := pilvl + (id-2.5)*0.01) |>
+    .d(, id := ifelse(pilvl == 0.8, id - 0.24, id))
+
+  #return(indiv_coverage)
+
+  plot_cvg <- ggplot() +
+    geom_point(aes(x = id,
+                  y = coverage,
+                  group = idcol,
+                  color = source),
+              data = indiv_coverage,
+              alpha = 0.25,
+              size = 2,
+              shape = 19)+
+              #color = "gray60") +
+    geom_point(aes(x = id,
+                   y = coverage,
+                   color = source),
+               data = source_coverage,
+               size = 4.5,
+               shape = 19) +
+    geom_segment(aes(x = 0.475, y = 0.5,
+                     xend = 0.525, yend = 0.5),
+                 color = "black",
+                 linetype = "solid",
+                 #lwd = 0.75,
+                 data = source_coverage) +
+    geom_segment(aes(x = 0.535, y = 0.8,
+                     xend = 0.585, yend = 0.8),
+                 color = "black",
+                 linetype = "solid",
+                 #lwd = 0.75,
+                 data = source_coverage) +
+    #geom_segment(aes(x = 0.8-offset_dashed, y = 0.8-offset_dashed,
+    #                 xend = 0.8+offset_dashed, yend = 0.8+offset_dashed),
+    #             color = "black",
+    #             linetype = "dashed",
+    #             lwd = 0.75,
+    #             data = source_coverage) +
+    scale_x_continuous(limits = xlim,
+                       breaks = c(0.5, 0.56),
+                       labels = c("0.5", "0.8")) +
+    ggtitle(plot_title) +
+
+    scale_color_met_d(metcolor, #breaks = c("IMF", "bvar", "ar", "bvar_qu"),
+                      labels = c("IMF", "BVAR", "AR", "BVAR - direct")) +
+
+    ylab("Empirical Coverage") +
+    xlab("Nominal Coverage Level") +
+    theme_uqimf() %+replace%
+    theme(#axis.text.x = element_blank(),
+      axis.text.x = element_text(size = textsize_y),
+      #strip.text = element_text(size = 8),
+      axis.text.y = element_text(size = textsize_y),
+
+      axis.title.x = element_text(size = textsize_y),
+      axis.title.y = element_text(size = textsize_y, angle = 90, vjust = 2),
+      strip.text = element_text(size=textsize_y),
+      legend.text=element_text(size=textsize_y),
+      text = element_text(family = "serif"),
+      legend.title=element_blank(),
+      plot.margin = margin(t=0,b=0,r=10,l=10, unit = "pt"))
+
+  return(plot_cvg)
 }

@@ -141,6 +141,16 @@ plot_horizon_label_short <- function(length.out = 4){
   return(phl[1:length.out])
 }
 
+plot_horizon_label_shorter <- function(length.out = 4){
+
+  phl <- c(`0` = "FC",
+           `0.5` = "SC",
+           `1`= "FN",
+           `1.5`= "SN")
+
+  return(phl[1:length.out])
+}
+
 plot_target_label <- function(){
 
   ptl <- c(`pcpi_pch` = "Inflation",
