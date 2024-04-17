@@ -33,9 +33,9 @@ truth <- data.table::fread(
 #point forecasts
 #read in data, rename target
 fcdat <- data.table::fread(
-  here("benchmarks", "raw", "forecast_long.csv")
+  here("benchmarks", "raw", "forecasts_March2024.csv")
 ) |>
-  .d(, V1 := NULL) |>
+  .d(quantile_level == 0.5) |> #only point forecast for this dataset
   .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
   .d(, var := NULL)
 
@@ -71,14 +71,13 @@ weodat <- fread(here("data", "weodat.csv")) |>
 ################################################################################
 #quantile forecasts
 bvar_qufcs <- data.table::fread(
-  here("benchmarks", "raw", "forecast_quantiles.csv")
+  here("benchmarks", "raw", "forecasts_March2024.csv")
   ) |>
-  .d(, V1 := NULL) |>
-  .d(method == "BVAR") |> #remove Truth and IMF forecasts
+  .d(method %in% c("bvar", "bvar_ciss")) |> #remove Truth and IMF forecasts
   .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
   .d(, var := NULL) |>
   setnames("method", "source") |>
-  .d(, source := "bvar_qu")
+  .d(, source := ifelse(source == "bvar", "bvar_qu", "bvar_ciss"))
 
 bvar_fc <- hordat[bvar_qufcs, on = c("target_year", "forecast_year", "season")] |>
   .d(!is.na(horizon)) |>

@@ -117,7 +117,7 @@ all_scores <-
 bvar_wis_scores <- fread(here("scores", "bvar_ci_scores_avgcnt.csv")) |>
   data.table::copy() |>
   .d(, .(model, target, horizon, interval_score, dispersion, underprediction, overprediction)) |>
-  .d(,model := "bvar_qu") |>
+  .d(,model := ifelse(model == "bvar_qu", "bvar_qu", "bvar_ciss")) |>
   setnames("model", "source") |>
   .d(,error_method := "directional") |>
   .d(,method := "rolling window") #change later
@@ -142,7 +142,7 @@ scores_cvgshort <- fread(here("scores", "ci_scores_avgcnt.csv")) |>
 
 bvar_scores_cvgshort <- fread(here("scores", "bvar_ci_scores_avgcnt.csv")) |>
   setnames("model", "source", skip_absent = TRUE) |>
-  .d(, source := "bvar_qu") |>
+  .d(, source := ifelse(source == "bvar_qu", "bvar_qu", "bvar_ciss")) |>
   .d(, method := "rolling window") |>
   .d(, error_method := "absolute")
 
