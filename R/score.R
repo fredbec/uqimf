@@ -89,7 +89,7 @@ score_sample <- function(weodat,
 
 
   #####Input checks####
-  if (!(tv_release %in% c(0.5, 1, 1.5, 2))){
+  if (!(tv_release %in% c(0.5, 1, 1.5, 2, "oecd"))){
 
     stop("tv_release must be one of c(0.5, 1, 1.5, 2)")
   }

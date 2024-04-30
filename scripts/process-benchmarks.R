@@ -21,10 +21,19 @@ hordat <- data.table::fread(
   unique() |>
   setnames("forecast_season", "season")
 
+oecd_truth <- data.table::fread(here("oecd_data", "oecd_actuals.csv")) |>
+  setnames("var", "target") |>
+  .d(, target := ifelse(target == "cpi", "pcpi_pch", "ngdp_rpch")) |>
+  setnames("truth_oecd", "tv_oecd") |>
+  .d(target_year >= min_year)
+
+
 truth <- data.table::fread(
   here("data", "weodat.csv")
 ) |>
   .d(, .(country, target, target_year, tv_0.5, tv_1, tv_1.5, tv_2)) |>
+  .d(oecd_truth, on = c("country", "target", "target_year")) |>
+  #.d(!is.na(tv_0.5)) |>
   .d(!is.na(get(paste0("tv_", tv_release)))) |>
   unique()
 
@@ -48,7 +57,8 @@ benchmark_fc <- hordat[fcdat, on = c("target_year", "forecast_year", "season")] 
   setnames("value", "prediction") |>
   split(by = c("method")) |>
   lapply(function(dt)
-    truth[dt, on = c("target", "target_year", "country")]) |>
+    truth[dt, on = c("target", "target_year", "country")]
+    ) |>
   rbindlist(idcol = "source") |>
   .d(order(source, target, country, forecast_year, horizon)) |>
   .d(, .(source, target, country, forecast_year, horizon, target_year,
@@ -62,6 +72,11 @@ benchmark_fc <- hordat[fcdat, on = c("target_year", "forecast_year", "season")] 
 weodat <- fread(here("data", "weodat.csv")) |>
   .d(, source := "IMF") |>
   .d(order(source, target, country, forecast_year, horizon)) |>
+  split(by = c("source")) |>
+  lapply(function(dt)
+    truth[dt, on = c("target", "target_year", "country")]
+  ) |>
+  rbindlist(idcol = "source") |>
   .d(, .(source, target, country, forecast_year, horizon, target_year,
          prediction, get(paste0("tv_", tv_release)))) |>
   setnames("V8", paste0("tv_", tv_release)) |>

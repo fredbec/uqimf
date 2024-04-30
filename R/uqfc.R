@@ -20,7 +20,7 @@ empQU <- function(weodat,
   .d <- `[`
 
   #####Input checks####
-  if (!(tv_release %in% c(0.5, 1, 1.5, 2))){
+  if (!(tv_release %in% c(0.5, 1, 1.5, 2, "oecd"))){
 
     stop("tv_release must be one of c(0.5, 1, 1.5, 2)")
   }
@@ -64,7 +64,7 @@ empFC <- function(weodat,
 
 
   #####Input checks####
-  if (!(tv_release %in% c(0.5, 1, 1.5, 2))){
+  if (!(tv_release %in% c(0.5, 1, 1.5, 2, "oecd"))){
 
     stop("tv_release must be one of c(0.5, 1, 1.5, 2)")
   }
@@ -153,7 +153,7 @@ empFC <- function(weodat,
       .d(effective_target_year %in% yearset) |>
       .d(, c("target_method", "helper_horizon", "effective_target_year") := NULL) |>
       #####And now back to your regularly scheduled program
-      #.d(target_year %in% yearset) |>
+      #.d(target_year %in% yearset) |> #this was the old method
       empQU(error_fct = error_fct,
             quantiles = quantiles,
             tv_release = tv_release,
