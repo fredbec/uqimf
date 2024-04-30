@@ -195,3 +195,25 @@ qu_lvls <- function(cis){
 
 
 }
+
+#' @title
+#'
+#' @description
+#' Function to exclude instances from data table based on a list of AND-exclusions
+#' in a list instexcl
+#' used before scoring
+#'
+exclude_rows <- function(dt, instexcl) {
+  condition <- rep(TRUE, nrow(dt))  # Initialize condition to include all rows
+
+  # Iterate over the names in instexcl
+  for (var_name in names(instexcl)) {
+    # Check if the variable exists in dt
+    if (var_name %in% names(dt)) {
+      condition <- condition & (dt[[var_name]] %in% instexcl[[var_name]])
+    }
+  }
+
+  # Return the filtered data.table
+  return(dt[!condition])
+}

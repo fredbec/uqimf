@@ -95,6 +95,7 @@ pp_scores <- fcdat |>
 
 
 #################################Score by CRPS Sample##############################
+#if(FALSE){
 weodat_samples <- fcdat |>
   .d(horizon < 2) |>
   .d(,.(country, source, target, horizon, target_year, get(paste0("tv_", tv_release)), prediction)) |>
@@ -133,7 +134,7 @@ all_crps <- lapply(1:nrow(combs_methods), function(idx){
   rbindlist() |>
   .d(, .(score = mean(score)), by = c("target", "horizon", "method", "error_method", "source"))
 
-
+#}
 
 
 ####################################Score BVAR Quantile Forecasts###########################
