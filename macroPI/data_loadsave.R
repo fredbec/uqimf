@@ -9,9 +9,10 @@ devtools::load_all()
 
 cis <- c(0.5, 0.8)
 qus <- c(0.1, 0.25, 0.75, 0.9)
-filter_yr <- 2023
+filter_yr <- 2024
 vis_begin_yr <- 2015
-release <- "Fall2023"
+release <- "Spring2024"
+release_season <- "S"
 
 qufcs <- fread(here("quantile_forecasts", "quantile_forecasts.csv")) |>
   .d(source == "IMF") |>
@@ -24,8 +25,8 @@ qufcs <- fread(here("quantile_forecasts", "quantile_forecasts.csv")) |>
   .d(, target := ifelse(target == "ngdp_rpch", "gdp_growth", "inflation"))
 
 qufcs_to_save <- qufcs |>
-  .d(, fltr := target_year - horizon) |>
-  .d(fltr == filter_yr) |>
+  .d(, fltr := ceiling(target_year - horizon)) |>
+  .d(fltr == filter_yr & forecast_season  == release_season) |>
   .d(, .(country, target, forecast_year, forecast_season, target_year, quantile, prediction))
 
 realized_vals <- qufcs |>

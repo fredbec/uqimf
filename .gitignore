@@ -48,8 +48,9 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 
-# data files that are too large
+# data files that are too large or don't need to be on GitHub
 data_download/
+WEOforecasts.xlsx
 WEOforecasts_tidy.csv
 oecd_data/oecd_cpi_quarter.csv
 oecd_data/oecd_cpi_quarterly_annual.csv
@@ -69,3 +70,9 @@ presentation/figures_old
 
 #old scores
 scores/alt_scores
+
+#meeting notes
+meeting_notes/
+
+#test macropi
+test-macropi/
