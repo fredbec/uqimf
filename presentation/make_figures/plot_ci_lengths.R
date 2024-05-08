@@ -105,7 +105,7 @@ ggplot(aes(group = target), data = imf_fc) +
 }
 
 
-pdf(file = here("presentation", "figures", "horizon_uncc.pdf"), width = 5, height = 3.35)
+pdf(file = here("presentation", "figures", "horizon_uncc_new.pdf"), width = 5, height = 3.35)
 ggplot(aes(x = target_year, group = target, color = target), data = imf_fc) +
   geom_linerange(
     aes(x = target_year,
@@ -126,7 +126,7 @@ ggplot(aes(x = target_year, group = target, color = target), data = imf_fc) +
     lwd = 3
   ) +
   xlab("") +
-  scale_color_met_d("Hokusai1") +
+  scale_color_met_d("Hokusai2") +
   #geom_hline(aes(yintercept = 0), linetype = "dashed") +
   theme_uqimf() %+replace%
   theme(

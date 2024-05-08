@@ -62,6 +62,7 @@ oecd_gdp_quarterly.csv
 manuscript/manuscript_files
 manuscript.out
 manuscript.aux
+manuscript_R9.pdf
 
 #presentation files
 presentation/logos
@@ -74,5 +75,6 @@ scores/alt_scores
 #meeting notes
 meeting_notes/
 
-#test macropi
-test-macropi/
+#old simulation data
+simulations/results
+simulations/servercode
