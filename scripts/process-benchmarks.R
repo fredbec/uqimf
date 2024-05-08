@@ -10,6 +10,7 @@ source(here("specs", "specs.R"))
 min_year <- specs$min_year
 tv_release <- specs$tv_release
 window_length <- specs$window_length
+flag_imputetv05as1 <- specs$flag_imputetv05as1
 
 ###############################################################################
 #extract truth and horizon values from WEO forecasts
@@ -32,7 +33,24 @@ truth <- data.table::fread(
   here("data", "weodat.csv")
 ) |>
   .d(, .(country, target, target_year, tv_0.5, tv_1, tv_1.5, tv_2)) |>
-  .d(oecd_truth, on = c("country", "target", "target_year")) |>
+  .d(oecd_truth, on = c("country", "target", "target_year"))
+
+
+if(flag_imputetv05as1){
+  cyear <- format(Sys.Date(), "%Y") |> as.numeric()
+
+  truth <- truth |>
+    copy() |>
+    #.d(target_year == cyear - 1) |>
+    .d(is.na(tv_1) & target_year == cyear - 1,tv_1 := tv_0.5)
+
+  #truth <- truth |>
+  #  .d(target_year!= cyear - 1) |>
+  #  rbind(tv_impute)
+
+}
+
+truth <- truth |>
   #.d(!is.na(tv_0.5)) |>
   .d(!is.na(get(paste0("tv_", tv_release)))) |>
   unique()
