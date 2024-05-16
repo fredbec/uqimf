@@ -19,18 +19,18 @@ cis100 <- specs$ci_levels_eval_su #for passing to scoring function
 #for scoring crps values
 #as these are scored directly on the point forecasts and not on the extracted
 #quantile forecasts
-fcdat <- data.table::fread(here("data", "point_forecasts.csv"))|>
+fcdat <- data.table::fread(here("data", "point_forecasts_toscore.csv"))|>
   .d(target_year <= max_year)
 
 
 ####################################read in quantile forecasts########################
-qufcs <- data.table::fread(here("quantile_forecasts", "quantile_forecasts.csv")) |>
+qufcs <- data.table::fread(here("quantile_forecasts", "quantile_forecasts_toscore.csv")) |>
   .d(target_year <= max_year)
 combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"))
-bvar_qus <- data.table::fread(here("benchmarks", "quantile_benchmarks_processed.csv")) |>
+bvar_qus <- data.table::fread(here("benchmarks", "quantile_benchmarks_processed_toscore.csv")) |>
   setnames(paste0("tv_", tv_release), "true_value")|>
   .d(target_year <= max_year)
-qufcs_pava <- data.table::fread(here("quantile_forecasts", "quantile_forecasts_pava.csv")) |>
+qufcs_pava <- data.table::fread(here("quantile_forecasts", "quantile_forecasts_pava_toscore.csv")) |>
   .d(target_year <= max_year)
 
 
