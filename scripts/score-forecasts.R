@@ -106,7 +106,7 @@ combs_methods <- data.table::CJ(error_method = c("directional", "absolute"),
                                 method = c("rolling window", "expanding window", "leave-one-out"),
                                 source = c("IMF", "bvar", "ar"))
 
-
+if(FALSE){
 all_crps <- lapply(1:nrow(combs_methods), function(idx){
 
   comb_set <- combs_methods[idx,]
@@ -135,7 +135,7 @@ all_crps <- lapply(1:nrow(combs_methods), function(idx){
   .d(, .(score = mean(score)), by = c("target", "horizon", "method", "error_method", "source"))
 
 #}
-
+}
 
 ####################################Score BVAR Quantile Forecasts###########################
 bvar_qu_sameyearset <- bvar_qus |>
@@ -176,7 +176,7 @@ data.table::fwrite(scores_avgcountry, here("scores", "ci_scores_avgcnt.csv"))
 data.table::fwrite(scores_pava, here("scores", "ci_scores_pava.csv"))
 data.table::fwrite(scores_cvgshort_pava, here("scores", "cvg_pooled_pava.csv"))
 data.table::fwrite(scores_avgcountry_pava, here("scores", "ci_scores_avgcnt_pava.csv"))
-data.table::fwrite(all_crps, here("scores", "sample_scores.csv"))
+#data.table::fwrite(all_crps, here("scores", "sample_scores.csv"))
 data.table::fwrite(pp_scores, here("scores", "pointfc_scores.csv"))
 data.table::fwrite(bvar_scores, here("scores", "bvar_ci_scores.csv"))
 data.table::fwrite(bvar_scores_allyears, here("scores", "bvar_ci_scores_allyears.csv"))
