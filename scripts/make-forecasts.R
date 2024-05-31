@@ -69,6 +69,11 @@ mainfcs <- qufcs |>
   .d(error_method == "absolute" & method == "rolling window") |>
   empFC_pava()
 
+mainfcs_ew <- qufcs |>
+  .d(error_method == "absolute" & method == "expanding window") |>
+  empFC_pava()
+
+mainfcs <- rbind(mainfcs, mainfcs_ew)
 
 directional_expand <- qufcs |>
   .d(error_method == "directional") |>
