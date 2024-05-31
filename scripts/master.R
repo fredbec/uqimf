@@ -7,6 +7,9 @@ devtools::load_all()
 #first check if new download is/should be available
 download <- FALSE #could be automated, but don't see the need right now
 
+#set token that master file started to "started but not finished"
+saveRDS("started master, but did not finish. Check if something is wrong.", here("currentscorestate.RDS"))
+
 if(download){
   source(here("scripts", "download-data.R"))
 }
@@ -17,3 +20,6 @@ source(here("scripts", "make-forecasts.R"))
 source(here("scripts", "exclude-from-scoring.R"))
 source(here("scripts", "score-forecasts.R"))
 
+
+#set token that master file started to "started but not finished"
+saveRDS(specs$scoreset, here("currentscorestate.RDS"))
