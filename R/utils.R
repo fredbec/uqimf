@@ -143,10 +143,10 @@ plot_horizon_label_short <- function(length.out = 4){
 
 plot_horizon_label_shorter <- function(length.out = 4){
 
-  phl <- c(`0` = "FC",
-           `0.5` = "SC",
-           `1`= "FN",
-           `1.5`= "SN")
+  phl <- c(`0` = "Fall,\nCurrent",
+           `0.5` = "Spring\nCurrent",
+           `1`= "Fall,\nNext",
+           `1.5`= "Spring,\nNext")
 
   return(phl[1:length.out])
 }

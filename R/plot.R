@@ -1,3 +1,4 @@
+
 #' Plot decomposition of WIS by horizon and forecast source
 #'
 #' @param score_data score data that includes WIS values, prefiltered! by desired
@@ -11,9 +12,10 @@
 #' @export
 #'
 wis_plot_new <- function(wis_scoredat,
-                                trgt = c("pcpi_pch", "ngdp_rpch"),
+                         manual_scale = NULL,
+                         trgt = c("pcpi_pch", "ngdp_rpch"),
                          xmax = NULL,
-                                plot_name = NULL,
+                         plot_name = NULL,
                          textsize_y = 17,
                          metcolor = "Hokusai1"){
 
@@ -31,6 +33,12 @@ wis_plot_new <- function(wis_scoredat,
 
   if(is.null(plot_name)){
     plot_name <- plot_target_label()[trgt]
+  }
+
+  if(is.null(manual_scale)){
+    manual_scale <- met.brewer(metcolor, 4)
+    names(manual_scale) <- unique(wis_scoredat$source)
+
   }
 
   decomp_data <- wis_scoredat |>
@@ -73,16 +81,12 @@ wis_plot_new <- function(wis_scoredat,
     #                 labels = c("IMF", "BVAR", "BVAR_QU", "AR")) +
 
     scale_y_continuous(name = "Weighted Interval Score", limits = c(0, xmax)) +
-    #scale_fill_met_d("Hokusai1",
-    #                 breaks = c("IMF", "ar", "bvar_qu", "bvar"),
-    #                 labels = c("IMF", "AR", "BVAR_QU", "BVAR")) +
 
-    scale_fill_met_d(metcolor, #breaks = c("IMF", "bvar", "ar", "bvar_qu"),
-                      labels = c("IMF", "BVAR", "AR", "BVAR - direct")) +
+    scale_fill_manual(values = manual_scale) +
     xlab("") +
     theme_uqimf() %+replace%
     theme(axis.text.x = element_blank(),
-      #axis.text.x = element_text(size = textsize_y, angle = 90, hjust = .5, vjust = .5, face = "plain"),
+          #axis.text.x = element_text(size = textsize_y, angle = 90, hjust = .5, vjust = .5, face = "plain"),
           #strip.text = element_text(size = 8),
           axis.text.y = element_text(size = textsize_y),
           axis.title.y = element_text(size = textsize_y, angle = 90, vjust = 2),
@@ -91,22 +95,21 @@ wis_plot_new <- function(wis_scoredat,
           text = element_text(family = "serif"),
           legend.title=element_blank(),
           plot.margin = margin(t=0,b=0,r=0,l=0, unit = "pt")) +#,
-          #legend.direction = "vertical", legend.box = "vertical") +
+    #legend.direction = "vertical", legend.box = "vertical") +
     ggtitle(plot_name)  #+
-    #guides(fill = "none")
+  #guides(fill = "none")
 
-    decomp_plot2 <-
-      (decomp_plot) +
+  decomp_plot2 <-
+    (decomp_plot) +
 
     plot_layout(guides = "collect",
                 heights = c(1)) &
 
     theme(legend.position = 'bottom',
           legend.box="vertical", legend.margin=margin(7))
-    return(decomp_plot2)
+  return(decomp_plot2)
 
 }
-
 
 
 #' Plot proportions of 'monotonic horizon uncertainty' violators
@@ -223,8 +226,15 @@ horizon_path_plot <- function(score_data,
                               title = NULL,
                               withlegend = FALSE,
                               textsize_y = 17,
+                              manual_scale = NULL,
                               metcolor = "Hokusai1",
                               lintype = "solid"){
+
+  if(is.null(manual_scale)){
+    manual_scale <- met.brewer(metcolor, 4)
+    names(manual_scale) <- unique(score_data$source)
+
+  }
 
   score_data  <- score_data |>
     .d(, source := factor(source, levels = c("IMF", "bvar", "bvar_qu", "ar"),
@@ -235,8 +245,7 @@ horizon_path_plot <- function(score_data,
                           y = get(score_rule),
                           color = source)) +
 
-    scale_color_met_d(metcolor, breaks = c("IMF", "bvar", "ar", "bvar_qu"),
-                      labels = c("IMF", "BVAR", "AR", "BVAR_QU")) +
+    scale_color_manual(values = manual_scale) +
     geom_line(linetype = lintype) +
     geom_point(size = 4.5) +
     ylab(ylab) +
@@ -466,6 +475,7 @@ coverage_plot_aggregate <- function(
     cvg_rg = c(50, 80),
     xlim = c(0.47, 0.59),
     offset_dashed = 0.015,
+    manual_scale = NULL,
     metcolor = "Hokusai1",
     plot_title = NULL,
     textsize_y = 17){
@@ -474,6 +484,11 @@ coverage_plot_aggregate <- function(
 
   if(is.null(plot_title)){
     plot_title <- plot_target_label()[trgt]
+  }
+
+  if(is.null(manual_scale)){
+    manual_scale <- met.brewer(metcolor, 4)
+    names(manual_scale) <- unique(cvgdat_bysource$source)
   }
 
   cvg_cols <- paste0("coverage_", cvg_rg)
@@ -486,12 +501,14 @@ coverage_plot_aggregate <- function(
          value.name = "coverage") |>
     .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
     .d(, pilvl := as.numeric(pilvl)/100) |>
-    .d(, source := factor(source, levels = c("IMF", "bvar", "bvar_qu", "ar"),
-                          label = c("IMF", "BVAR", "BVAR - direct", "AR"))) |>
+    #.d(, source := factor(source, levels = c("IMF", "bvar", "bvar_qu", "ar"),
+    #                      label = c("IMF", "BVAR", "BVAR - direct", "AR"))) |>
     .d(target == trgt) |>
+    .d(order(source)) |>
     .d(, id := .GRP, by=source) |>
     .d(, id := pilvl + (id-2.5)*0.01) |>
     .d(, id := ifelse(pilvl == 0.8, id - 0.24, id))
+
 
   indiv_coverage <- cvgdat_byhorcnt |>
     .d(target == trgt) |>
@@ -503,16 +520,17 @@ coverage_plot_aggregate <- function(
     .d(, pilvl := gsub("^.*?coverage_","",pilvl)) |>
     .d(, pilvl := as.numeric(pilvl)/100) |>
     .d(, idcol := paste0(horizon, country, method)) |>
-    .d(, source := factor(source, levels = c("IMF", "bvar", "bvar_qu", "ar"),
-                          label = c("IMF", "BVAR", "BVAR - direct", "AR"))) |>
+    #.d(, source := factor(source, levels = c("IMF", "bvar", "bvar_qu", "ar"),
+    #                      label = c("IMF", "BVAR", "BVAR - direct", "AR"),
+    #                      ordered = TRUE)) |>
     .d(, country := NULL) |>
     .d(, horizon := NULL) |>
+    .d(order(source)) |>
     .d(, id := .GRP, by=source) |>
     .d(, id := pilvl + (id-2.5)*0.01) |>
     .d(, id := ifelse(pilvl == 0.8, id - 0.24, id))
 
   #return(indiv_coverage)
-
   plot_cvg <- ggplot() +
     geom_point(aes(x = id,
                   y = coverage,
@@ -552,8 +570,7 @@ coverage_plot_aggregate <- function(
                        labels = c("0.5", "0.8")) +
     ggtitle(plot_title) +
 
-    scale_color_met_d(metcolor, #breaks = c("IMF", "bvar", "ar", "bvar_qu"),
-                      labels = c("IMF", "BVAR", "AR", "BVAR - direct")) +
+    scale_color_manual(values = manual_scale) +
 
     ylab("Empirical Coverage") +
     xlab("Nominal Coverage Level") +

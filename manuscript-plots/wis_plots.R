@@ -8,9 +8,11 @@ devtools::load_all()
 
 
 chosen_method <- "rolling window"
-chosen_em <- "absolute"
-chosen_target <- "pcpi_pch"
-prefix <- "ho_"
+chosen_em <- "directional"
+chosen_target <- "ngdp_rpch"
+#prefix <- "ho_"
+
+cscale <- "Hokusai3"
 
 
 #when using absolute errors, read in scores of pava corrected forecasts
@@ -46,8 +48,11 @@ wis_scores <- rbind(wis_scores, bvar_wis_scores) |>
   .d(method == chosen_method) |>
   .d(error_method == chosen_em)
 
+colors_manual <- met.brewer(cscale, 4)
+names(colors_manual) <- unique(wis_scores$source)
 
-wis_plot <- wis_plot_new(wis_scores, chosen_target, plot_name = "", textsize_y = 17, metcolor = "Hokusai3") +
+
+wis_plot <- wis_plot_new(wis_scores, manual_scale = colors_manual, chosen_target, plot_name = "", textsize_y = 17) +
   theme(axis.text.x = element_blank(),
         #axis.text.x = element_text(size = textsize_y, angle = 90, hjust = .5, vjust = .5, face = "plain"),
         #strip.text = element_text(size = 8),
