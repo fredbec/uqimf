@@ -232,18 +232,18 @@ horizon_path_plot <- function(score_data,
 
   if(is.null(manual_scale)){
     manual_scale <- met.brewer(metcolor, 4)
-    names(manual_scale) <- unique(score_data$source)
+    names(manual_scale) <- unique(score_data$model)
 
   }
 
-  score_data  <- score_data |>
-    .d(, source := factor(source, levels = c("IMF", "bvar", "bvar_qu", "ar"),
-                          label = c("IMF", "BVAR", "BVAR - direct", "AR")))
+  #score_data  <- score_data |>
+  #  .d(, source := factor(source, levels = c("IMF", "bvar", "bvar_qu", "ar"),
+  #                        label = c("IMF", "BVAR", "BVAR - direct", "AR")))
 
   path_plot <- ggplot(score_data,
                       aes(x = horizon,
                           y = get(score_rule),
-                          color = source)) +
+                          color = model)) +
 
     scale_color_manual(values = manual_scale) +
     geom_line(linetype = lintype) +
@@ -488,7 +488,7 @@ coverage_plot_aggregate <- function(
 
   if(is.null(manual_scale)){
     manual_scale <- met.brewer(metcolor, 4)
-    names(manual_scale) <- unique(cvgdat_bysource$source)
+    names(manual_scale) <- unique(cvgdat_bysource$model)
   }
 
   cvg_cols <- paste0("coverage_", cvg_rg)
