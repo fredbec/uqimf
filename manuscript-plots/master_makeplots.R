@@ -24,8 +24,8 @@ if(cstate == "train set 2001-2012"){
 cstate_truth <- readRDS("currenttruthstate.RDS")
 if(is.numeric(cstate_truth)){
   prefix <- paste0(prefix, "")
-} else if(cstate == "oecd"){
-  prefix <- paste0(cstate_truth, "oecd_")
+} else if(cstate_truth == "oecd"){
+  prefix <- paste0(prefix, "oecd_")
 } else {
   stop("something wrong here, master did not run through")
 }
