@@ -78,3 +78,7 @@ meeting_notes/
 #old simulation data
 simulations/results
 simulations/servercode
+
+
+#old app files
+test-macropi/data_loadsave.R
