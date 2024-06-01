@@ -10,11 +10,11 @@ devtools::load_all()
 cis <- c(0.5, 0.8)
 qus <- c(0.1, 0.25, 0.75, 0.9)
 filter_yr <- 2024
-vis_begin_yr <- filter_yr - 8
+vis_begin_yr <- 2016
 release <- "Spring2024"
 release_season <- "S"
 
-qufcs <- fread(here("quantile_forecasts", "quantile_forecasts_pava.csv")) |>
+qufcs <- fread(here("quantile_forecasts", "quantile_forecasts.csv")) |>
   .d(source == "IMF") |>
   .d(error_method == "absolute") |>
   .d(method == "rolling window") |>
@@ -44,6 +44,6 @@ point_forecasts <- fread(here("data", "point_forecasts.csv")) |>
   .d(, .(country, target, target_year, prediction))
 
 
-data.table::fwrite(qufcs_to_save, file = here("..", "MacroPI", "forecasts", paste0("forecasts_", release, ".csv")))
-data.table::fwrite(realized_vals, file = here("..", "MacroPI", "imf-data", paste0("historicvalues_", release, ".csv")))
-data.table::fwrite(point_forecasts, file = here("..", "MacroPI", "imf-data", paste0("pointforecasts_", release, ".csv")))
+data.table::fwrite(qufcs_to_save, file = here("..", "MacroPI_check", "MacroPI", "forecasts", paste0("forecasts_", release, ".csv")))
+data.table::fwrite(realized_vals, file = here("..", "MacroPI_check", "MacroPI", "imf-data", paste0("historicvalues_", release, ".csv")))
+data.table::fwrite(point_forecasts, file = here("..", "MacroPI_check", "MacroPI", "imf-data", paste0("pointforecasts_", release, ".csv")))

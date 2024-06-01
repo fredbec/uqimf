@@ -186,6 +186,7 @@ server <- function(input, output) {
         geom_label(data = labeldat |> .d(country == plot_country),
                    aes(x = x, y = y, label = label),
                    color = "grey50",
+                   alpha = 0.45,
                    size=4.35 , angle=45, fontface="bold")
       }) +
       theme_uqimf() %+replace%
@@ -237,12 +238,19 @@ server <- function(input, output) {
                          sep = "\n"))
   }
   #read in data
-  qufcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/forecasts/forecasts_", release, ".csv")) |>
+  qufcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/forecasts/forecasts_", release, ".csv")) |>
     setDT()
-  realized_vals <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/extra-data/historicvalues_", release, ".csv"))|>
+  realized_vals <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/imf-data/historicvalues_", release, ".csv"))|>
     setDT()
-  point_fcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/test-macropi/main/extra-data/pointforecasts_", release, ".csv")) |>
+  point_fcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/imf-data/pointforecasts_", release, ".csv"))|>
     setDT()
+  #qufcs <- data.table::fread(here("..", "MacroPI_check", "MacroPI", "forecasts", paste0("forecasts_", release, ".csv"))) |>
+  #  setDT()
+  #realized_vals <- data.table::fread(here("..", "MacroPI_check", "MacroPI", "imf-data", paste0("historicvalues_", release, ".csv"))) |>
+  #  setDT()
+  #point_fcs <- data.table::fread(  here("..", "MacroPI_check", "MacroPI", "imf-data", paste0("pointforecasts_", release, ".csv"))) |>
+  #  setDT()
+
 
   cis <- c(0.5, 0.8)
   qus <- c(0.1, 0.25, 0.75, 0.9)
@@ -294,10 +302,12 @@ server <- function(input, output) {
     plotlist <- lapply(as.list(unique(qufcs$country)),
                        function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, list(labeldat_80_cy), pltc, colors, cis))
 
+
     text2 <- get_legend(plotlist[[1]])
     text3 <- grid::textGrob(label = displaytext(textlabel),
                             x = unit(0.10, "npc"),
                             hjust = 0)
+    plotlist[[7]]
 
 
 
@@ -354,6 +364,10 @@ server <- function(input, output) {
 
     plotlist <- lapply(as.list(unique(qufcs$country)),
                        function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, list(labeldat_80_cy), pltc, colors, cis))
+
+    #print(realized_vals_infl)
+    #shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, list(labeldat_80_cy), "USA", colors, cis)
+
     text2 <- get_legend(plotlist[[1]])
     text3 <- grid::textGrob(label = displaytext(textlabel),
                             x = unit(0.10, "npc"),
