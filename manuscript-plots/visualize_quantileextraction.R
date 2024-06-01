@@ -95,8 +95,7 @@ geom_segment_arrow <- function(x, y, xend, yend = y,
 
 lrcols <- met.brewer("Hokusai2", 2)
 
-pdf(here("illustration.pdf"), width = 10.0, height = 6)
-ggplot() +
+quantvis <- ggplot() +
   geom_point(aes(x = type, y = value, color = as.factor(col)), data = errordat, size = 2.5) +
   gghighlight(value %in% c(val50, val80)) +
   scale_color_met_d("Hokusai2") +
@@ -104,7 +103,8 @@ ggplot() +
   guides(color = "none") +
   theme_uqimf() %+replace%
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        legend.position = "right") +
+        legend.position = "right",
+        text = element_text(family = "serif")) +
   geom_linerange(
     aes(x = type,
         ymin = lower80,
@@ -141,5 +141,7 @@ ggplot() +
   scale_x_continuous(breaks = c(1,2,3,4), labels = labelvec, limits = c(0.55, 4.45)) +
   ylab("") +
   xlab("")
-dev.off()
+
+
+ggsave(here("..", "uqimf-manuscript", "figures", "illustration_quantileextraction.pdf"), quantvis, width = 7, height = 5)
 
