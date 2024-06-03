@@ -13,7 +13,7 @@ wis_plot_paper <- function(chosen_method,
   }
 
   ######## WIS Data
-  scores <- fread(here("scores", "ci_scores_pava.csv"))
+  #scores <- fread(here("scores", "ci_scores_pava.csv"))
 
 
   wis_scores <- fread(here("scores", paste0("ci_scores_avgcnt", pasteon_filename, ".csv"))) |>

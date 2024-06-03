@@ -69,6 +69,3 @@ for(m in 1:nrow(all_plotcombs)){
   #source(here("manuscript-plots", "coverage_plots.R"))
 }
 
-chosen_method <- "expanding window"
-chosen_em <- "absolute"
-chosen_target <- "pcpi_pch"
