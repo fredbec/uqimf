@@ -15,7 +15,7 @@ lower80 <- c(-1.25, -1.75, -2.2)
 clowerq8 <- c(lower80[1], lower80[2], lower80[3], lower80[1], mean(lower80[2:3]), mean(lower80[2:3]))
 
 linerangedat <- data.table(
-  posx = c(1,1.35,1.7,2.6,2.95,3.3),
+  posx = c(1,1.35,1.7,2.9,3.25,3.6),
   lowerq5 = clowerq5,
   upperq5 = -clowerq5,
   lowerq8 = clowerq8,
@@ -94,18 +94,18 @@ vispava <- ggplot(aes(x = posx, color = as.factor(mycols)), data = linerangedat)
   ann_less(mean(linerangedat$posx[2:3])) +
   ann_less(mean(linerangedat$posx[4:5])) +
   ann_less(mean(linerangedat$posx[5:6])) +
-  geom_segment_arrow(linerangedat$posx[3]+ 0.15, 0, linerangedat$posx[4]-0.15)+
+  geom_segment_arrow(linerangedat$posx[3]+ 0.25, 0, linerangedat$posx[4]-0.25)+
 
-  annotate("text", x = linerangedat$posx[3] + 0.45, 0.175, label = "pool violations",
+  annotate("text", x = linerangedat$posx[3] + 0.6, 0.18, label = "pool violations",
            family = "serif", size = 7) +
 
-  annotate("text", x = linerangedat$posx[3] + 0.45, -0.175,
+  annotate("text", x = linerangedat$posx[3] + 0.6, -0.18,
            label = expression("at " * h[2] * ", " * h[3]),
            parse = TRUE,
            family = "serif", size = 7) +
 
   scale_color_met_d("Hokusai3") +
-  xlim(0.75, 3.55) +
+  xlim(0.75, 3.75) +
 
 
   guides(color = "none") +

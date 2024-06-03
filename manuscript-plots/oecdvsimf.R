@@ -39,18 +39,33 @@ allscores <- imfimf |>
                           c("Fall, Current", "Spring, Current",
                             "Fall, Next", "Spring, Next")))
 
+valposx <- 0.55
+valposy <- valposx -0.035
 
 vsplot <- ggplot(aes(x = imf, y = oecd, color = as.factor(horizon)), data = allscores) +
   geom_point() +
   geom_hline(aes(yintercept = 0)) +
   geom_vline(aes(xintercept = 0)) +
   scale_color_met_d("Hokusai3") +
-  theme_uqimf() +
+  theme_uqimf() %+replace%
+  theme(
+    text = element_text(family = "serif")) +
+  annotate("text", x = -valposx, y = valposy,
+           label = "I",
+           family = "serif", size = 5) +
+  annotate("text", x = valposx, y = valposy,
+           label = "II",
+           family = "serif", size = 5) +
+  annotate("text", x = valposx, y = -valposy,
+           label = "III",
+           family = "serif", size = 5) +
+  annotate("text", x = -valposx, y =- valposy,
+           label = "IV",
+           family = "serif", size = 5) +
   scale_x_continuous(limits =  c(-0.55, 0.55)) +
   scale_y_continuous(limits =  c(-0.55, 0.55)) +
   ylab("OECD truth") +
   xlab("IMF truth")
-
 
 ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", "oecdvsimf.pdf"),
                 vsplot, width = 5, height = 4)
