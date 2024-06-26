@@ -20,6 +20,7 @@ source(here("scripts", "encode-missing-predictions.R"))
 source(here("scripts", "make-forecasts.R"))
 source(here("scripts", "exclude-from-scoring.R"))
 source(here("scripts", "score-forecasts.R"))
+source(here("scripts", "score-bvarspecs.R"))
 
 
 #set token that master file started to "started but not finished"

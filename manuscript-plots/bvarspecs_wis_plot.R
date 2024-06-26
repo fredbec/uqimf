@@ -14,17 +14,17 @@ wis_plot_paper_bvarspecs <-
   }
 
   ######## WIS Data
-  #scores <- fread(here("scores", "ci_scores_pava.csv"))
+  #scores <- fread(here("scores", "bvarspecs", "ci_scores_pava.csv"))
 
 
-  wis_scores <- fread(here("scores", paste0("ci_scores_avgcnt", pasteon_filename, ".csv"))) |>
+  wis_scores <- fread(here("scores", "bvarspecs", paste0("ci_scores_avgcnt", pasteon_filename, ".csv"))) |>
     data.table::copy() |>
     .d(, .(model, error_method, method, target, horizon, interval_score, dispersion, underprediction, overprediction)) |>
     setnames("model", "source") |>
     .d(source == "IMF")
 
 
-  bvar_wis_scores <- fread(here("scores", "bvar_ci_scores_avgcnt.csv")) |>
+  bvar_wis_scores <- fread(here("scores", "bvarspecs", "bvar_ci_scores_avgcnt.csv")) |>
     data.table::copy() |>
     .d(, .(model, target, horizon, interval_score, dispersion, underprediction, overprediction)) |>
     setnames("model", "source") |>

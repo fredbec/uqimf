@@ -74,7 +74,7 @@ ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", paste0(prefix, "covera
 
 #############Histogram Relative Scores#################
 
-bvar_twospec <- fread(here("scores", "bvar_ci_scores.csv")) |>
+bvar_twospec <- fread(here("scores", "bvarspecs", "bvar_ci_scores.csv")) |>
   .d(model %in% c("bvar_qu", "bvar_ciss")) |>
   dcast(target + horizon  + country ~ model, value.var = "interval_score") |>
   .d(!is.na(bvar_ciss)) |> # no data for CAN, JPN

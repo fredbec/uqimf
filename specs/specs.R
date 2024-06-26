@@ -34,6 +34,16 @@ specs <- list(
       country = c("JPN"),
       target_year = 2021:2100 #2100 is just a random maximum value
     )
+
+    #only if using bvar_ciss as the benchmark model
+    #i2 = list(country = c("JPN", "CAN"))
+  ),
+
+  #exclude Japan and Canada for comparing BVAR specs, as there is no CISS
+  #data available for these models
+  instances_to_exclude_bvarspecs = list(
+
+    i1 = list(country = c("JPN", "CAN"))
   )
 )
 

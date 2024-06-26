@@ -13,10 +13,10 @@ coverage_plot_paper_bvarspecs <- function(chosen_method,
 
   ####Read and filter coverage data
   #Scores by average country
-  scores_cvgshort <- fread(here("scores", paste0("ci_scores_avgcnt", pasteon_filename, ".csv"))) |>
+  scores_cvgshort <- fread(here("scores", "bvarspecs", paste0("ci_scores_avgcnt", pasteon_filename, ".csv"))) |>
     .d(model == "IMF")
 
-  bvar_scores_cvgshort <- fread(here("scores", "bvar_ci_scores_avgcnt.csv")) |>
+  bvar_scores_cvgshort <- fread(here("scores", "bvarspecs", "bvar_ci_scores_avgcnt.csv")) |>
     #setnames("model", "source", skip_absent = TRUE) |>
     .d(, method := chosen_method) |>
     .d(, error_method := chosen_em)
@@ -29,10 +29,9 @@ coverage_plot_paper_bvarspecs <- function(chosen_method,
                           ordered = TRUE))
 
 
-
-  scores_cvgaggregate <- fread(here("scores", paste0("cvg_pooled", pasteon_filename, ".csv")))|>
+  scores_cvgaggregate <- fread(here("scores", "bvarspecs", paste0("cvg_pooled", pasteon_filename, ".csv")))|>
     .d(model == "IMF") |>
-    rbind(fread(here("scores", "bvar_cvg_pooled.csv")) |>
+    rbind(fread(here("scores", "bvarspecs", "bvar_cvg_pooled.csv")) |>
             .d(, error_method := chosen_em) |>
             .d(, method := chosen_method)) |>
     .d(error_method == chosen_em) |>
@@ -43,9 +42,9 @@ coverage_plot_paper_bvarspecs <- function(chosen_method,
 
 
   #non aggregated
-  scores <- fread(here("scores", paste0("ci_scores", pasteon_filename, ".csv"))) |>
+  scores <- fread(here("scores", "bvarspecs", paste0("ci_scores", pasteon_filename, ".csv"))) |>
     .d(model == "IMF") |>
-    rbind(fread(here("scores", "bvar_ci_scores.csv"))|>
+    rbind(fread(here("scores", "bvarspecs", "bvar_ci_scores.csv"))|>
             .d(, error_method := chosen_em) |>
             .d(, method := chosen_method)) |>
     .d(error_method == chosen_em) |>
