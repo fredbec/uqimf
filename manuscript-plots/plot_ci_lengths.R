@@ -1,5 +1,7 @@
 library(here)
 library(data.table)
+library(ggplot2)
+library(MetBrewer)
 devtools::load_all()
 
 source(here("specs", "specs.R"))
@@ -12,6 +14,16 @@ score_min_year <- specs$score_min_year
 tv_release <- specs$tv_release
 window_length <- specs$window_length
 suffix <- "_pava"
+
+
+cstate <- readRDS("currentscorestate.RDS")
+if(cstate == "train set 2001-2012"){
+  prefix <- ""
+} else if(cstate == "holdout set 2013-2023"){
+  prefix <- "ho_"
+} else {
+  stop("something wrong here, master did not run through")
+}
 
 
 imf_fc <- fread(here("quantile_forecasts", paste0("quantile_forecasts", suffix, ".csv"))) |>
@@ -103,5 +115,5 @@ legend.box.margin=margin(-15,-10,15,-10)) +
   scale_alpha_manual(name = "",
                      breaks = c("50% Interval", "80% Interval"),
                      values = c("50% Interval" = 0.8, "80% Interval" = 0.4) )
-ggsave(here("..", "uqimf-manuscript", "figures", "cilength_byhorizon.pdf"), cilengthplot, width = 4.75, height = 3.25)
+ggsave(here("..", "uqimf-manuscript", "figures", paste0(prefix, "cilength_byhorizon.pdf")), cilengthplot, width = 4.75, height = 3.25)
 
