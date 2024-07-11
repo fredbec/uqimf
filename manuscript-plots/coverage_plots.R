@@ -79,7 +79,8 @@ coverage_plot_paper <- function(chosen_method,
                linetype = "solid") +
     scale_x_continuous(breaks = c(0, 0.5, 1, 1.5),
                        labels = c("Fall,\nCurrent", "Spring,\nCurrent", "Fall,\nNext", "Spring,\nNext")) +
-    scale_y_continuous(labels = paste0(seq(0, 100, by = 25), "%"),
+    scale_y_continuous(#labels = paste0(seq(0, 100, by = 25), "%"),
+      labels = paste0(seq(0, 1, by = 0.25)),
                        breaks = seq(0,1, by = 0.25),
                        limits = c(0,1)) +
     theme(plot.margin = margin(t=0,b=0,r=plot_marg,l=plot_marg, unit = "pt"))
@@ -91,7 +92,8 @@ coverage_plot_paper <- function(chosen_method,
                linetype = "solid") +
     scale_x_continuous(breaks = c(0, 0.5, 1, 1.5),
                        labels = c("Fall,\nCurrent", "Spring,\nCurrent", "Fall,\nNext", "Spring,\nNext")) +
-    scale_y_continuous(labels = paste0(seq(0, 100, by = 25), "%"),
+    scale_y_continuous(#labels = paste0(seq(0, 100, by = 25), "%"),
+      labels = paste0(seq(0, 1, by = 0.25)),
                        breaks = seq(0,1, by = 0.25),
                        limits = c(0,1))+
     theme(plot.margin = margin(t=0,b=0,r=plot_marg,l=plot_marg, unit = "pt"))
