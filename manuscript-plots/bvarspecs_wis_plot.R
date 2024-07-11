@@ -1,3 +1,5 @@
+source(here("R", "plot.R"))
+
 wis_plot_paper_bvarspecs <-
   function(chosen_method,
            chosen_em,
