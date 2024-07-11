@@ -13,9 +13,13 @@ oecdbv <- fread(here("scores", "alt_scores", "oecd_bvar_ci_scores.csv"))|>
   .d(model == "bvar_qu")|>
   .d(,truth := "oecd") |>
   .d(, c("model", "country", "target", "horizon", "truth", "interval_score"))
+cntbv <- unique(oecdbv$country)
+
 oecdimf <- fread(here("scores", "alt_scores", "oecd_ci_scores_pava.csv"))|>
   .d(model == "IMF")|>
   .d(,truth := "oecd") |>
+  .d(country %in% cntbv) |>
+  .d(method == "rolling window") |>
   .d(, c("model", "country", "target", "horizon", "truth", "interval_score")) |>
   rbind(oecdbv) |>
   dcast(country + target + horizon + truth ~ model, value.var = "interval_score")
@@ -27,6 +31,8 @@ imfbv <- fread(here("scores", "alt_scores", "imf_bvar_ci_scores.csv")) |>
 imfimf <- fread(here("scores", "alt_scores", "imf_ci_scores_pava.csv")) |>
   .d(model == "IMF") |>
   .d(,truth := "imf") |>
+  .d(country %in% cntbv) |>
+  .d(method == "rolling window") |>
   .d(, c("model", "country", "target", "horizon", "truth", "interval_score")) |>
   rbind(imfbv) |>
   dcast(country + target + horizon + truth ~ model, value.var = "interval_score") |>
@@ -39,7 +45,12 @@ allscores <- imfimf |>
                           c("Fall, Current", "Spring, Current",
                             "Fall, Next", "Spring, Next")))
 
-valposx <- 0.55
+axislimits <- c(max(allscores$imf), max(allscores$oecd),
+                min(allscores$imf), min(allscores$oecd)) |>
+  abs() |>
+  max()
+
+valposx <- axislimits
 valposy <- valposx -0.035
 
 vsplot <- ggplot(aes(x = imf, y = oecd, color = as.factor(horizon)), data = allscores) +
@@ -52,20 +63,20 @@ vsplot <- ggplot(aes(x = imf, y = oecd, color = as.factor(horizon)), data = alls
     text = element_text(family = "serif")) +
   annotate("text", x = -valposx, y = valposy,
            label = "I",
-           family = "serif", size = 5) +
+           family = "serif", size = 7) +
   annotate("text", x = valposx, y = valposy,
            label = "II",
-           family = "serif", size = 5) +
+           family = "serif", size = 7) +
   annotate("text", x = valposx, y = -valposy,
            label = "III",
-           family = "serif", size = 5) +
+           family = "serif", size = 7) +
   annotate("text", x = -valposx, y =- valposy,
            label = "IV",
-           family = "serif", size = 5) +
-  scale_x_continuous(limits =  c(-0.55, 0.55)) +
-  scale_y_continuous(limits =  c(-0.55, 0.55)) +
+           family = "serif", size = 7) +
+  scale_x_continuous(limits =  c(-axislimits, axislimits)) +
+  scale_y_continuous(limits =  c(-axislimits, axislimits)) +
   ylab("OECD truth") +
   xlab("IMF truth")
 
-ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", "oecdvsimf.pdf"),
+ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", "ho_oecdvsimf.pdf"),
                 vsplot, width = 5, height = 4)
