@@ -9,7 +9,7 @@ devtools::load_all()
 
 set.seed(2922)
 w <- 11
-labelvec <- c("raw error\nvalues from\n previous 11 years", "error values\nabsolute transformed", "6th and 9th largest\nvalue highlighted", "predictive distribution,\nconstructed around\n a point forecast of zero")
+labelvec <- c("raw error\nvalues, from\n previous 11 years", "error values,\nabsolute transformed", "6th and 9th largest\nvalue highlighted", "predictive distribution,\nconstructed around\n a point forecast of zero")
 
 errors <- rnorm(w) |> sort()
 errors <- errors * (-1)
