@@ -17,7 +17,8 @@ wis_plot_new <- function(wis_scoredat,
                          xmax = NULL,
                          plot_name = NULL,
                          textsize_y = 17,
-                         metcolor = "Hokusai1"){
+                         metcolor = "Hokusai1",
+                         font_family = "serif"){
 
   if(length(unique(wis_scoredat$error_method)) > 1){
     stop("Only one error method allowed. Prefilter data")
@@ -59,8 +60,12 @@ wis_plot_new <- function(wis_scoredat,
                      value.name = "score",
                      variable.name = "type") |>
     # is technically already filtered out, but just to make sure
-    .d(type != "interval_score")
+    .d(type != "interval_score") |>
+    .d(,type := factor(type,
+                      levels = c("underprediction", "overprediction", "dispersion"),
+                      labels = c("Underprediction", "Overprediction", "Dispersion")))
 
+  #return(decomp_data)
 
 
   decomp_plot <- ggplot(decomp_data, aes(x = source,
@@ -72,9 +77,9 @@ wis_plot_new <- function(wis_scoredat,
                labeller = as_labeller(plot_horizon_label_shorter(4)),
                nrow = 1) +
     scale_alpha_discrete(range = c(0.35,1),
-                         labels = c("Overprediction",
-                                    "Underprediction",
-                                    "Dispersion"),
+                         #labels = c("Overprediction",
+                        #            "Underprediction",
+                        #            "Dispersion"),
                          name = "Components of the WIS") +
     #scale_x_discrete(name = "",
     #                 breaks = c("IMF", "bvar", "bvar_qu", "ar"),
@@ -92,7 +97,7 @@ wis_plot_new <- function(wis_scoredat,
           axis.title.y = element_text(size = textsize_y, angle = 90, vjust = 2),
           strip.text = element_text(size=textsize_y),
           legend.text=element_text(size=textsize_y),
-          text = element_text(family = "serif"),
+          text = element_text(family = font_family),
           legend.title=element_blank(),
           plot.margin = margin(t=0,b=0,r=0,l=0, unit = "pt")) +#,
     #legend.direction = "vertical", legend.box = "vertical") +
@@ -228,7 +233,8 @@ horizon_path_plot <- function(score_data,
                               textsize_y = 17,
                               manual_scale = NULL,
                               metcolor = "Hokusai1",
-                              lintype = "solid"){
+                              lintype = "solid",
+                              font_family = "serif"){
 
   if(is.null(manual_scale)){
     manual_scale <- met.brewer(metcolor, 4)
@@ -275,7 +281,7 @@ horizon_path_plot <- function(score_data,
                    axis.title.y = element_text(size = textsize_y, angle = 90, vjust = 2),
                    strip.text = element_text(size=textsize_y),
                    legend.text=element_text(size=textsize_y),
-                   text = element_text(family = "serif"),
+                   text = element_text(family = font_family),
                    #legend.title=element_blank(),
                    plot.margin = margin(t=40,b=4,r=20,l=20, unit = "pt"))
   }
@@ -381,7 +387,8 @@ coverage_plot_wgraylines <- function(
     offset_dashed = 0.015,
     metcolor = "Hokusai1",
     plot_title = NULL,
-    textsize_y = 17){
+    textsize_y = 17,
+    font_family = "serif"){
 
   .d <- `[`
 
@@ -459,7 +466,7 @@ coverage_plot_wgraylines <- function(
       axis.title.y = element_text(size = textsize_y, angle = 90, vjust = 2),
       strip.text = element_text(size=textsize_y),
       legend.text=element_text(size=textsize_y),
-      text = element_text(family = "serif"),
+      text = element_text(family = font_family),
       legend.title=element_blank(),
       plot.margin = margin(t=0,b=0,r=10,l=10, unit = "pt"))
 
@@ -478,7 +485,8 @@ coverage_plot_aggregate <- function(
     manual_scale = NULL,
     metcolor = "Hokusai1",
     plot_title = NULL,
-    textsize_y = 17){
+    textsize_y = 17,
+    font_family = "serif"){
 
   .d <- `[`
 
@@ -568,6 +576,10 @@ coverage_plot_aggregate <- function(
     scale_x_continuous(limits = xlim,
                        breaks = c(0.5, 0.56),
                        labels = c("0.5", "0.8")) +
+
+    scale_y_continuous(limits = c(0,1),
+                       breaks = seq(0, 1, by = 0.25),
+                       labels = paste0(seq(0, 1, by = 0.25))) +
     ggtitle(plot_title) +
 
     scale_color_manual(values = manual_scale) +
@@ -584,7 +596,7 @@ coverage_plot_aggregate <- function(
       axis.title.y = element_text(size = textsize_y, angle = 90, vjust = 2),
       strip.text = element_text(size=textsize_y),
       legend.text=element_text(size=textsize_y),
-      text = element_text(family = "serif"),
+      text = element_text(family = font_family),
       legend.title=element_blank(),
       plot.margin = margin(t=0,b=0,r=10,l=10, unit = "pt"))
 
