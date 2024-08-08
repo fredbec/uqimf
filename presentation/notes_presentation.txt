@@ -75,7 +75,7 @@
 	- target year is indexed by t, horizon (time difference between the issuing of the forecast and the realization) is indexed by h
 	- we then construct sets made of these forecast errors from the past R years
 		- these sets are based on the absolute errors (conscious choice, more perhaps later)
-		- currently: R = 9
+		- currently: R = 11
 		- (perhaps emphasize: separate sets for each target, country, horizon. No information sharing)
 		- (perhaps mention: we give preference to choices of R that allow us to extract the quantiles directly from the order statistics)
 	- for ease of communication, we decide to issue our probabilistic forecasts in the form of 50% and 80% prediction intervals

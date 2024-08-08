@@ -7,11 +7,13 @@
 \documentclass[en]{sdqbeamer} 
 \usepackage{graphicx}
 \usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{multirow}
 \hypersetup{
     colorlinks=true,
     linkcolor=gray,
     filecolor=magenta,      
-    urlcolor=cyan,
+    urlcolor=black,
     pdftitle={Overleaf Example},
     pdfpagemode=FullScreen,
     }
@@ -22,7 +24,7 @@
 \titleimage{banner_2020_kit}
 
 %% Gruppenlogo
-\grouplogo{logo_empty.jpg} 
+\grouplogo{KIT_STAT_Logo_rgb.png} 
 
 %% Gruppenname und Breite (Standard: 50 mm)
 \groupname{}
@@ -34,7 +36,7 @@
 \subtitle{} 
 \author[Friederike Becker, Fabian Krüger, Melanie Schienle]{Friederike Becker, Fabian Krüger, Melanie Schienle}
 
-\date[05.\,12.\,2023]{December 5, 2023}
+\date[30.\,07.\,2024]{July 30, 2024}
 
 
 % Literatur 
@@ -133,9 +135,9 @@
             \item contains forecasts with up to 6 years horizon and historic truth values
 		    \item publication in April (horizon for current year $\approx$ 8 months) and in October ($\approx$ 2 months)
 		\end{itemize}
-    \item publicly available\footnote{International Monetary Fund. 2023. \textit{World Economic Outlook: Navigating Global Divergences.} Washington, DC. October.} in an accessible format
-    \item targets: real GDP growth and CPI inflation 
-    \item time range: available since 1990, giving $\sim$30 years of forecast-truth pairs %per country and forecast horizon
+    \item publicly available\footnote{International Monetary Fund. 2024. \textit{World Economic Outlook Database}, available at \url{https://www.imf.org/en/Publications/WEO/weo-database/2024/April}} in an accessible format
+    \item targets: real GDP growth, CPI inflation, current account balance
+    \item time range: available since 1990, giving $>$30 years of forecast-truth pairs %per country and forecast horizon
     \item target locations: forecasts are issued for 196 countries in total
     %\begin{itemize}
     %    \item forecasts for 196 countries in total are available
@@ -151,23 +153,32 @@ We apply an attractively simple and cheap method. For a given country and target
     \begin{itemize}
         \item for target year $t$, horizon $h$
     \end{itemize}
-    \item ... construct sets $\mathcal{E}_{t, h} = \{\hat{e}_{t^*, h}  | t-R \leq t^* < t \}$, containing the last $R$ forecast errors
+    \item ... construct sets $\mathcal{E}_{t, h} = \{\hat{e}^{abs}_{t^*, h}  | t-R \leq t^* < t \}$, containing the last $R=11$ forecast errors
     \begin{itemize}
-        \item based on \textit{absolute} errors $\hat{e}_{t,h} = |y_{t} - \hat{y}_{t, h}| $
-        \item currently: $R=9$
+        \item based on \textit{absolute} errors $\hat{e}^{abs}_{t,h} = |y_{t} - \hat{y}_{t, h}| $
         %\item sets are stratified by country, target and horizon
     \end{itemize}
-    \item for $\alpha \in \{0.5, 0.8\}$, compute $q^{\alpha}_{t, h} =  Q\left(\mathcal{E}_{t, h}, \alpha \right)$
+    \item for $\tau \in \{0.5, 0.8\}$, compute $q^{\tau}_{t, h} =  Q\left(\mathcal{E}_{t, h}, \tau \right)$
+    \begin{itemize}
+        \item with $R=11$, quantiles can be taken directly from the order statistics
+    \end{itemize}
     \item and compute the upper and lower endpoints of a central prediction interval as 
     \begin{itemize}
-        \item $u^{\alpha}_{t,h} = \hat{y}_{t, h} + q^{\alpha}_{t, h}$ 
-        \item $l^{\alpha}_{t,h} \hspace{1mm} = \hat{y}_{t, h} - q^{\alpha}_{t, h}$
+        \item $u^{\tau}_{t,h} = \hat{y}_{t, h} + q^{\tau}_{t, h}$ 
+        \item $l^{\tau}_{t,h} \hspace{1mm} = \hat{y}_{t, h} - q^{\tau}_{t, h}$
     \end{itemize}
-    \item use PAVA-type reordering if intervals shrink with increasing horizon
-    \item assess central interval coverage, score via the weighted interval score (WIS)\footnote{Bracher, J. et al. 2021. \textit{Evaluating
-Epidemic Forecasts in an Interval Format.} PLoS Computational Biology 17 (2)}
+    \item assess central interval coverage, score via the interval score%\footnote{Bracher, J. et al. 2021. \textit{Evaluating
+%Epidemic Forecasts in an Interval Format.} PLoS Computational Biology 17 (2)}
 \end{itemize}
-    
+\end{frame}
+
+
+\begin{frame}{Methods - Visualized}
+\begin{figure}
+        \centering
+        \includegraphics[width=0.65\textwidth]{figures/illustration_quantileextraction.pdf} 
+        \label{fig:enter-label}
+    \end{figure} 
 \end{frame}
 
 \begin{frame}{Benchmarks}
@@ -175,40 +186,56 @@ Epidemic Forecasts in an Interval Format.} PLoS Computational Biology 17 (2)}
 \begin{enumerate}
     \item same methodology, alternative point forecasts
     \begin{itemize}
-        \item autoregressive (AR) model
-        \item Primiceri Bayesian vector autoregressive (BVAR) model\footnote{Primiceri, G. 2005. \textit{Time Varying Structural Vector Autoregressions and Monetary Policy.} Review of Economic Studies 72.}
+        \item autoregressive model ("AR")
+        \item Primiceri Bayesian vector autoregressive model\footnote{Primiceri, G. 2005. \textit{Time Varying Structural Vector Autoregressions and Monetary Policy.} Review of Economic Studies 72.} ("BVAR")
     \end{itemize}
     \item directly generated distributional forecasts
     \begin{itemize}
-        \item obtained from the BVAR model
+        \item obtained from the BVAR model ("BVAR - direct")
     \end{itemize}
 \end{enumerate}
 \begin{itemize}
-    \item trained on quarterly data, with slight informational advantage
+    \item trained on quarterly data
 \end{itemize}
 
 \end{frame}
 
 \section{Results}
-\begin{frame}{Scores }
+\begin{frame}{Scores on holdout data 2013-2023 - Inflation}
 %\textit{I'll make the figures, incl. legends, nicer and also remove (the reason for) the joke about the devoured overprediction}
     \begin{figure}
         \centering
-        \includegraphics[width=0.95\textwidth]{figures/wis_cpigdp.pdf} 
+        \includegraphics[width=0.45\textwidth]{figures/ho_wis_pcpi_pch_absolute_rollingwindow.pdf} 
+        \label{fig:enter-label}
+    \end{figure} 
+\end{frame}
+
+\begin{frame}{Scores on holdout data 2013-2023 - GDP Growth}
+%\textit{I'll make the figures, incl. legends, nicer and also remove (the reason for) the joke about the devoured overprediction}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.45\textwidth]{figures/ho_wis_ngdp_rpch_absolute_rollingwindow.pdf} 
         \label{fig:enter-label}
     \end{figure} 
 \end{frame}
 
 
-\begin{frame}{Calibration - Interval Coverage Levels}
+\begin{frame}{Calibration - on holdout data 2013-2023}
 %\textit{Here, I'll instead map the colors to the different forecast sources (currently mapped to the window method), so we'll just have one plot each}
     %Coverage at the 50\% and 80\% central interval: \\ 
-    \begin{figure}
-        \centering
-        \includegraphics[width=0.9\textwidth]{figures/coverage.pdf}
-        %\caption{Coverage at the 50 and 80 percent level}
-        \label{fig:enter-label}
-    \end{figure}
+\begin{figure}
+  \begin{subfigure}{0.385\textwidth}
+  \centering
+    \includegraphics[width=\textwidth]{figures/ho_coverage_pcpi_pch_absolute_rollingwindow.pdf} %\vspace{0.3cm}
+  \end{subfigure}
+  \hspace*{12mm}
+  %\hfill  % maximize separation between the subfigures
+  \begin{subfigure}{0.385\textwidth}
+  \centering
+    \includegraphics[width=\textwidth]{figures/ho_coverage_ngdp_rpch_absolute_rollingwindow.pdf} %\vspace{0.3cm}
+  \end{subfigure}%
+\end{figure}
+
 \end{frame}
 
 \begin{frame}{Increasing Uncertainty}
@@ -218,7 +245,7 @@ Epidemic Forecasts in an Interval Format.} PLoS Computational Biology 17 (2)}
 \begin{column}{0.6\textwidth}
     \begin{figure}
         \centering
-        \includegraphics[width=\textwidth]{figures/horizon_uncc.pdf}
+        \includegraphics[width=\textwidth]{figures/cilength_byhorizon.pdf}
         %\caption{Coverage at the 50 and 80 percent level}
         \label{fig:enter-label}
     \end{figure}
@@ -231,15 +258,15 @@ Epidemic Forecasts in an Interval Format.} PLoS Computational Biology 17 (2)}
 &   50\%  & 80\%\\[0.3em]
 \multicolumn{3}{c}{\textbf{GDP Growth}}\\
 Fall,  SY & 0.5 & 1.1\\ 
-Spring, SY &1.2 &2.1 \\ 
-Fall, NY & 1.9 & 3.5\\ 
-Spring, NY &2.2 &4.0 \\[0.3em] 
+Spring, SY &1.0 &2.1 \\ 
+Fall, NY & 1.7 & 3.3\\ 
+Spring, NY &2.1 &4.0 \\[0.3em] 
 \multicolumn{3}{c}{\textbf{Inflation}}\\
 %&   50\%  & 80\%\\[0.3em]
 Fall,  SY & 0.3 & 0.5\\ 
-Spring, SY &0.6 &1.1 \\ 
-Fall, NY & 1.1 & 1.8\\ 
-Spring, NY &1.3 &2.1 \\ 
+Spring, SY &0.6 &1.2 \\ 
+Fall, NY & 1.2 & 2.0\\ 
+Spring, NY &1.4 &2.2 \\ 
 \end{tabular}
 \end{table}
 \vspace{1.25cm}
@@ -275,9 +302,14 @@ Spring, NY &1.3 &2.1 \\
     \begin{itemize}
     \item slightly improved coverage and scores, at the cost of interpretability \hyperlink{extractionmethod}{\beamerbutton{link}}
     \end{itemize}
-    \item potential dependency of results on quantile extraction \\
+
+    \item alternative truth values from the OECD
     \begin{itemize}
-        \item ordering between forecasts remains the same with sample-based CRPS \hyperlink{samplecrps}{\beamerbutton{link}}
+    \item influences evaluation results at the shortest horizon \hyperlink{alternativetruth}{\beamerbutton{link}}
+    \end{itemize}
+    \item alternative BVAR specification
+    \begin{itemize}
+    \item similar scores and calibration \hyperlink{alternativebvar}{\beamerbutton{link}}
     \end{itemize}
 \end{itemize}
 \end{frame}
@@ -291,16 +323,17 @@ Spring, NY &1.3 &2.1 \\
 \item Attaching distributional forecasts via past forecast errors to an existing base of point forecasts is
     \begin{itemize}
         \item cheap
-        \item competitive
         \item transparent
+        \item competitive
     \end{itemize}
-\item Uncertainty around point forecasts is often substantial, making its communication necessary
-\item IMF forecasts are valuable source for distributional forecasts in their own right \bigskip \\
-\item     Outlook
+\item IMF forecasts are valuable source for distributional forecasts 
+\item Uncertainty around point forecasts is often substantial, making its communication necessary\bigskip \\
+\item Potential Extensions / Outlook
     \begin{itemize}
-        \item scale to more countries and forecast sources
-        \item implement alternative method that  utilizes the cross-section dimension%, e.g. via Hierarchical Bayesian Modeling
-        \item make forecasts easily and publicly accessable via shiny app
+        \item scale to more countries
+        %\item implement alternative method that  utilizes the cross-section dimension%, e.g. via Hierarchical Bayesian Modeling
+        \item make forecasts easily and publicly accessible via shiny app
+        \item preregistration of real-time forecasts
     \end{itemize}
 
 \end{itemize}
@@ -319,12 +352,45 @@ GitHub repo with our forecasts: \\
 \vspace*{-10mm}
     \begin{figure}
         %\centering
-        \includegraphics[width=0.55\textwidth]{figures/shinycap_newhost.jpg}
+        \includegraphics[width=0.55\textwidth]{figures/shinycap_final.jpg}
         %\caption{Coverage at the 50 and 80 percent level}
         \label{fig:enter-label}
     \end{figure}   
 \end{column}
 \end{columns}
+
+\end{frame}
+
+\begin{frame}{Making it public - Timestamped Forecast Publication I}
+
+    \begin{figure}
+        %\centering
+        \includegraphics[width=0.65\textwidth]{figures/Capture_GitHub.jpg}
+        %\caption{Coverage at the 50 and 80 percent level}
+        \label{fig:enter-label}
+    \end{figure}   
+
+\end{frame}
+
+\begin{frame}{Making it public - Timestamped Forecast Publication II}
+
+    \begin{figure}
+        %\centering
+        \includegraphics[width=0.65\textwidth]{figures/Capture_GitHubforecasts.jpg}
+        %\caption{Coverage at the 50 and 80 percent level}
+        \label{fig:enter-label}
+    \end{figure}   
+
+\end{frame}
+
+\begin{frame}{Making it public - Visualization}
+
+    \begin{figure}
+        %\centering
+        \includegraphics[width=0.85\textwidth]{figures/shinycap_enlarged.jpg}
+        %\caption{Coverage at the 50 and 80 percent level}
+        \label{fig:enter-label}
+    \end{figure}   
 
 \end{frame}
 
@@ -346,47 +412,62 @@ GitHub repo with our forecasts: \\
 
 \appendix
 \beginbackup
-\begin{frame}{Directional Errors - Scores}
+\begin{frame}{Directional Errors - Scores on years 2001-2012}
 \label{errorextraction}
-\begin{figure}
-        \centering
-        \includegraphics[width=0.9\textwidth]{figures/wis_cpigdp_directional.pdf}
-       %\caption{Coverage at the 50 and 80 percent level}
-    \end{figure}
+\begin{table}
+\begin{center}
+\begin{tabular}{lccccccc}
+ & & \multicolumn{2}{c}{Interval Score} & \multicolumn{2}{c}{50\% Cvg.} & \multicolumn{2}{c}{80\% Cvg.} \\[0.2em]
+ & Horizon & absolute & directional & absolute & directional & absolute & directional\\[0.5em]
+\multirow{4}{*}{\rotatebox[origin=c]{90}{GDP Growth}} & Fall, Current & \textbf{0.23} & 0.24 & \textbf{0.49} & 0.43 & \textbf{0.76} & 0.65\\
+ & Spring, Current & 0.41 & \textbf{0.41} & 0.56 & \textbf{0.54} & \textbf{0.76} & 0.67\\
+ & Fall, Next & 0.91 & \textbf{0.88} & \textbf{0.49} & 0.42 & \textbf{0.73} & 0.70\\
+ & Spring, Next & \textbf{1.14} & 1.15 & \textbf{0.50} & 0.40 & \textbf{0.64} & 0.55\\[1em]
+\multirow{4}{*}{\rotatebox[origin=c]{90}{Inflation}} & Fall, Current & \textbf{0.12} & 0.12 & \textbf{0.52} & 0.44 & \textbf{0.76} & 0.64\\
+ & Spring, Current & 0.26 & \textbf{0.25} & \textbf{0.43} & 0.39 & \textbf{0.75} & 0.65\\
+& Fall, Next & \textbf{0.47} & 0.50 & \textbf{0.40} & 0.31 & \textbf{0.67} & 0.54\\
+ & Spring, Next & \textbf{0.52} & 0.55 & \textbf{0.42} & 0.38 & \textbf{0.67} & 0.54\\
+
+
+\end{tabular}
+\end{center}
+\end{table}
 \end{frame}
-\begin{frame}{Directional Errors - Coverage}
-\begin{figure}
-        \centering
-        \includegraphics[width=0.9\textwidth]{figures/coverage_directional.pdf}
-        %\caption{Coverage at the 50 and 80 percent level}
-    \end{figure}
-\end{frame}
+
+
 
 \begin{frame}{Expanding Window - Scores}
 \label{extractionmethod}
-\begin{figure}
-        \centering
-        \includegraphics[width=0.9\textwidth]{figures/wis_cpigdp_expandingwindow.pdf}
-        %\caption{Coverage at the 50 and 80 percent level}
-    \end{figure}
-\end{frame}
-\begin{frame}{Expanding Window - Coverage}
-\begin{figure}
-        \centering
-        \includegraphics[width=0.9\textwidth]{figures/coverage_expandingwindow.pdf}
-        %\caption{Coverage at the 50 and 80 percent level}
-    \end{figure}
 \end{frame}
 
-
-\begin{frame}{CRPS by sample}
-\label{samplecrps}
-\begin{figure}
-        \centering
-        \includegraphics[width=0.7\textwidth]{figures/crpssample.png}
+\begin{frame}{Alternative truth value - Scores}
+\label{alternativetruth}
+    \begin{figure}
+        %\centering
+        \includegraphics[width=0.55\textwidth]{figures/oecdvsimf.pdf}
         %\caption{Coverage at the 50 and 80 percent level}
-    \end{figure}
+        \label{fig:enter-label}
+    \end{figure}   
 \end{frame}
+
+\begin{frame}{Alternative BVAR specification - Scores}
+\label{alternativebvar}
+\begin{figure}
+  \begin{subfigure}{0.45\textwidth}
+  \centering
+    \includegraphics[width=\textwidth]{figures/ho_bvarspecs_wis_pcpi_pch_absolute_rollingwindow.pdf} %\vspace{0.3cm}
+    \caption{Inflation}
+  \end{subfigure}
+  \hspace*{8mm}
+  %\hfill  % maximize separation between the subfigures
+  \begin{subfigure}{0.45\textwidth}
+  \centering
+    \includegraphics[width=\textwidth]{figures/ho_bvarspecs_wis_ngdp_rpch_absolute_rollingwindow.pdf} %\vspace{0.3cm}
+    \caption{GDP Growth}
+  \end{subfigure}%
+\end{figure}
+\end{frame}
+
 
 
 %\begin{frame}{Literatur}
