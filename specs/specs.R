@@ -57,6 +57,3 @@ source <- c("IMF", "bvar", "ar")
 combs <- data.table::CJ(source, target, error_method, method)
 data.table::fwrite(combs, here("quantile_forecasts", "setting_combinations.csv"))
 
-
-rm(min_year)
-rm(window_length)
