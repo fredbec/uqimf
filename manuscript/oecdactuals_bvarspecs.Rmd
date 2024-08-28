@@ -186,7 +186,8 @@ point_scores <- data.table::fread(here("scores", "pointfc_scores.csv"))
 wis_scores <- rbind(wis_scores, bvar_wis_scores) |>
     .d(source %in% c("IMF", "bvar_qu", "bvar_ciss"))
 scores_cvgshort <- rbind(scores_cvgshort, bvar_scores_cvgshort)|>
-    .d(source %in% c("imf", "bvar_qu", "bvar_ciss"))
+    .d(source %in% c("imf", "bvar_qu", "bvar_ciss")) |>
+  setnames("source", "model")
 
 ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_scores, trgt, window_method){
 
@@ -222,8 +223,7 @@ ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_s
     .d(, target := NULL)
   
   
-  dir_wis_plot <- wis_plot_new(decomp_data |> .d(error_method  == "directional"), trgt, xmax = xmax, plot_name = "WIS - Directional Errors", metcolor = "VanGogh2")
-  abs_wis_plot <- wis_plot_new(decomp_data |> .d(error_method  == "absolute"), trgt, xmax = xmax, plot_name = "WIS - Absolute Errors", metcolor = "VanGogh2")
+  abs_wis_plot <- wis_plot_new(decomp_data |> .d(error_method  == "absolute"), trgt = trgt, xmax = xmax, plot_name = "WIS - Absolute Errors", metcolor = "VanGogh2")
   
   c50plot <- horizon_path_plot(cvgscores, "coverage_50", "CI Coverage - 50", facet = "error_method", title = "Central Interval Coverage - alpha = 50") +
     geom_hline(aes(yintercept = 0.5)) +
@@ -240,21 +240,9 @@ ovr_assessment_plot <- function(wis_scoredat, cvg_scoredat, point_scores, crps_s
   erow <-  ggplot() + theme_void()
   
   
-  aeplot <- horizon_path_plot(point_scores |> .d(, error_method := "directional"), "meanae", "Absolute Error", title = "Point Forecast - Abs. Error")
-  
-  squeplot <- horizon_path_plot(point_scores |> .d(, error_method := "directional"), "meansque", "Squared Error", title = "Point Forecast - Squ. Error")
-  
-  crpsplot_rw <- horizon_path_plot(crps_scores_rw |>.d(, error_method := "directional"), "score", "CRPS by Sample", title = paste0("CRPS - ", window_method)) +
-    scale_y_continuous(limits = c(0.07,1.05)) 
-  
-  
-  crpsplot_loo <- horizon_path_plot(crps_scores_loo |>.d(, error_method := "directional"), "score", "CRPS by Sample", title = "CRPS - LOO") +
-    scale_y_continuous(limits = c(0.07,1.05)) 
-  
-  
-  
   ovr_plot <- 
-    (abs_wis_plot) +
+    #(abs_wis_plot) +
+    (c50plot / c80plot) +
     plot_layout(guides = "collect", 
                 heights = c(0.5, 0.5)) &
       plot_annotation(tag_levels = 'I')  &
