@@ -85,7 +85,7 @@ wis_plot_new <- function(wis_scoredat,
     #                 breaks = c("IMF", "bvar", "bvar_qu", "ar"),
     #                 labels = c("IMF", "BVAR", "BVAR_QU", "AR")) +
 
-    scale_y_continuous(name = "Average Interval Score", limits = c(0, xmax)) +
+    scale_y_continuous(name = "Interval Score", limits = c(0, xmax)) +
 
     scale_fill_manual(values = manual_scale) +
     xlab("") +
