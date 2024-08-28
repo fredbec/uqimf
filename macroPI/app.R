@@ -30,8 +30,6 @@ ui <- fluidPage(
   fluidRow(
     column(12,
 
-           h3("Visualisation of Forecast Distributions - G7 countries"),
-
            # Output: Tabset w/ plot, summary, and table ----
            tabsetPanel(type = "tabs",
                        tabPanel(paste0(release_title, " Forecasts - Inflation"), plotOutput(outputId = "allcplot_inflation",
@@ -222,7 +220,7 @@ server <- function(input, output) {
     778899"
 
   displaytext <-  function(targetlabel){
-    return(paste(paste0("This site contains  distributional forecasts for ", targetlabel, " in the"),
+    return(paste(paste0("This site contains distributional forecasts for ", targetlabel, " in the"),
                          "format of prediction intervals, for G7 countries and current and next",
                          "year's target",
                          "",
