@@ -30,7 +30,7 @@ for(m in 1:nrow(all_plotcombs)){
 
 
   filenames <- c("wis", "c80", "c50")
-  ylabs <- c("Average Interval Score", "80% Interval Coverage", "50% Interval Coverage")
+  ylabs <- c("Interval Score", "80% Interval Coverage", "50% Interval Coverage")
 
   names(filenames) <- c("interval_score", "coverage_80", "coverage_50")
   names(ylabs) <- c("interval_score", "coverage_80", "coverage_50")
