@@ -11,11 +11,12 @@ holdout <- FALSE
 specs <- list(
   scoreset = ifelse(holdout, "holdout set 2013-2023", "train set 2001-2012"),
 
+  holdout_split = 2013,
+
   tv_release = 1,
   window_length = window_length,
   score_max_year = ifelse(holdout, 2023, 2012),
-  max_year_imf = 2025, #for MAKING forecasts, won't affect scoring at all
-  max_year_others = 2025, #for MAKING forecasts, won't affect scoring at all
+  max_year_imf = 2023,
   min_year = min_year,
   score_min_year = ifelse(holdout, 2013, min_year + window_length),
   #score_min_year = min_year + window_length,
@@ -49,7 +50,7 @@ specs <- list(
 
 
 error_method <- c("directional", "absolute")
-method <- c("rolling window", "expanding window", "leave-one-out")
+method <- c("rolling window")
 target <- c("pcpi_pch", "ngdp_rpch")
 source <- c("IMF", "bvar", "ar")
 

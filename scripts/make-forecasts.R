@@ -6,9 +6,9 @@ source(here("specs", "specs.R"))
 
 .d <- `[`
 
-max_year_imf <- specs$max_year_imf
-max_year_others <- specs$max_year_others
+max_year <- specs$max_year
 min_year <- specs$min_year
+holdout_split <- specs$holdout_split
 tv_release <- specs$tv_release
 window_length <- specs$window_length
 quantype <- specs$qutype
@@ -27,25 +27,12 @@ qufcs <- lapply(1:nrow(combs),
 
     setting <- combs[idxsub]
 
-    if(setting[, "method"] == "leave-one-out"){
-
-      start_year <- min_year
-    } else {
-
-      start_year <- min_year + window_length
-    }
+    start_year <- min_year + window_length
 
     subdat <- fcdat |>
       .d(source == setting[, "source"]) |>
       .d(target == setting[, "target"]) |>
       .d(, source := NULL)
-
-    if (setting[, "source"] %in% c("bvar", "ar")) {
-      max_year <- specs$max_year_others
-    } else {
-
-      max_year <- specs$max_year_imf
-    }
 
     empFC(subdat,
           target_year = start_year:max_year,
@@ -62,18 +49,50 @@ qufcs <- lapply(1:nrow(combs),
     }
   ) |>
   rbindlist() |>
-  setnames(paste0("tv_", tv_release), "true_value") #|>
+  setnames(paste0("tv_", tv_release), "true_value") |>
+  .d(, holdout := ifelse(target_year >= holdout_split, "_ho", ""))
   #.d(!is.na(true_value))
 
-mainfcs <- qufcs |>
-  .d(error_method == "absolute" & method == "rolling window") |>
-  empFC_pava()
 
-mainfcs_ew <- qufcs |>
-  .d(error_method == "absolute" & method == "expanding window") |>
-  empFC_pava()
 
-mainfcs <- rbind(mainfcs, mainfcs_ew)
 
-data.table::fwrite(qufcs, here("quantile_forecasts", "quantile_forecasts.csv"))
-data.table::fwrite(mainfcs, here("quantile_forecasts", "quantile_forecasts_pava.csv"))
+################  save forecasts  ################
+#first, split into respective datasets
+qufcs <- qufcs |>
+  split(by = c("error_method", "holdout"))
+
+
+#then save data and do pava correction
+emptycontainer <- lapply(qufcs, function(dat){
+
+  em_suffix <- unique(dat$error_method)
+  split_suffix <- unique(dat$holdout)
+
+  #remove holdout column
+  dat <- dat |>
+    .d(, holdout := NULL)
+
+  #Absolute forecasts
+  if(em_suffix == "absolute"){
+    #pava correction for absolute forecasts
+    dat <- dat |>
+      empFC_pava()
+
+    data.table::fwrite(dat,
+                       here("quantile_forecasts",
+                            paste0("quantile_forecasts",split_suffix, ".csv")))
+
+
+    ##Directional forecasts
+  } else if (em_suffix == "directional"){
+
+    if(split_suffix == ""){
+      data.table::fwrite(dat,
+                         here("quantile_forecasts",
+                              paste0("quantile_forecasts",split_suffix, "_", em_suffix, ".csv")))
+    } else {
+      #not saved, as we're not using directional method on the holdout set
+    }
+  }
+
+})

@@ -86,8 +86,10 @@ test-macropi/data_loadsave.R
 #poster
 poster-plots
 
-#old quantile forecasts
+#old quantile forecasts (like the symmetry-corrected directional forecasts from an early stage of the analysis)
 quantile_forecasts/old
+scores/old
+scripts/old
 
 
 ##things from miscellaneous folder
