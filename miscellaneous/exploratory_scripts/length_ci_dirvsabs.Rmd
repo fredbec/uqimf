@@ -1,0 +1,136 @@
+---
+title: "Absolute vs. Directional"
+author: "Rike"
+date: "2023-11-09"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(data.table)
+```
+
+## In the limit: no difference
+```{r cars, echo = FALSE}
+n <- 10000
+dat <- rnorm(n)
+dat <- data.table(x = dat)
+ggplot(data = dat, aes(x = x)) +
+  geom_histogram(color = "steelblue4", fill = "steelblue3") +
+  theme_minimal() +
+  geom_vline(aes(xintercept = quantile(dat$x, 0.1)), color = "firebrick") + 
+  geom_vline(aes(xintercept = quantile(dat$x, 0.9)), color = "firebrick") +
+  geom_vline(aes(xintercept = quantile(abs(dat$x), 0.8)), color = "grey20") +
+  geom_vline(aes(xintercept = -1*quantile(abs(dat$x), 0.8)), color = "grey20")
+
+```
+
+## Small sample and not symmetric around zero: difference
+
+```{r, echo = FALSE}
+library(data.table)
+nits <- 100000
+n <- 9
+set.seed(45)
+res15 <- vector(mode = "list", length = nits)
+stopp <- TRUE
+par(mfrow = c(2,3)) 
+k <- 0
+resdat <- vector(mode = "list", length = 6)
+while(stopp){
+  
+  resvec <- c(NA, NA)
+  names(resvec) <- c("directional", "absolute")
+  
+  dat <- rnorm(n = n)
+  
+  resvec[1] <- quantile(dat, 0.9) - quantile(dat, 0.1)
+  resvec[2] <- 2*quantile(abs(dat), 0.8)
+  
+  if(resvec[2] > resvec[1] + 0.1){
+    resdat[[k+1]] <- dat  
+    k <- k + 1
+  }
+  if(k == 6){
+    stopp <- FALSE
+  }
+}
+
+
+dat <- data.table(x = resdat[[2]])
+ggplot(data = dat, aes(x = x)) +
+  geom_histogram(bins = 4, color = "steelblue4", fill = "steelblue3") +
+  theme_minimal() +
+  geom_vline(aes(xintercept = quantile(dat$x, 0.1)), color = "firebrick") + 
+  geom_vline(aes(xintercept = quantile(dat$x, 0.9)), color = "firebrick") +
+  geom_vline(aes(xintercept = quantile(dat$x, 0.1, type = 8)), color = "grey40") + 
+  geom_vline(aes(xintercept = quantile(dat$x, 0.9, type = 8)), color = "grey40") +
+  geom_vline(aes(xintercept = quantile(dat$x, 0.1, type = 1)), color = "chartreuse4") + 
+  geom_vline(aes(xintercept = quantile(dat$x, 0.9, type = 1)), color = "chartreuse4") +
+  geom_vline(aes(xintercept = quantile(dat$x, 0.9)), color = "firebrick") +
+  geom_vline(aes(xintercept = quantile(abs(dat$x), 0.8)), color = "red") +
+  geom_vline(aes(xintercept = -1*quantile(abs(dat$x), 0.8)), color = "red") +
+  geom_vline(aes(xintercept = quantile(abs(dat$x), 0.8, type = 8)), color = "grey10") +
+  geom_vline(aes(xintercept = -1*quantile(abs(dat$x), 0.8, type = 8)), color = "grey10") +
+  geom_vline(aes(xintercept = quantile(abs(dat$x), 0.8, type = 1)), color = "chartreuse2") +
+  geom_vline(aes(xintercept = -1*quantile(abs(dat$x), 0.8, type = 1)), color = "chartreuse2") +
+  geom_vline(aes(xintercept = 0), color = "black")
+
+
+```
+
+
+## Simulation with 9 samples from normal distribution
+
+```{r, echo = FALSE}
+nits <- 10000
+n <- 9
+
+res16 <- vector(mode = "list", length = nits)
+for(i in 1:nits){
+  
+  resvec <- c(NA, NA)
+  names(resvec) <- c("directional", "absolute")
+  
+  dat <- rnorm(n = n)
+  
+  resvec[1] <- quantile(dat, 0.9) - quantile(dat, 0.1)
+  resvec[2] <- 2* quantile(abs(dat), 0.8)
+  
+  res16[[i]] <- data.table(t(resvec))
+}
+res16 <- data.table::rbindlist(res16)
+
+res16$diff <- (res16$absolute - res16$directional) > 0
+
+```
+```{r, echo = FALSE}
+summary(res16$diff)
+```
+## Simulation with 150 samples from normal distribution
+```{r, echo = FALSE}
+nits <- 10000
+n <- 20000
+
+res16 <- vector(mode = "list", length = nits)
+for(i in 1:nits){
+  
+  resvec <- c(NA, NA)
+  names(resvec) <- c("directional", "absolute")
+  
+  dat <- rnorm(n = n)
+  
+  resvec[1] <- quantile(dat, 0.9) - quantile(dat, 0.1)
+  resvec[2] <- 2* quantile(abs(dat), 0.8)
+  
+  res16[[i]] <- data.table(t(resvec))
+}
+res16 <- data.table::rbindlist(res16)
+
+res16$diff <- (res16$absolute - res16$directional) > 0
+
+```
+```{r, echo = FALSE}
+summary(res16$diff)
+```
