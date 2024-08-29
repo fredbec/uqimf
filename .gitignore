@@ -82,3 +82,18 @@ simulations/servercode
 
 #old app files
 test-macropi/data_loadsave.R
+
+#poster
+poster-plots
+
+#old quantile forecasts
+quantile_forecasts/old
+
+
+##things from miscellaneous folder
+#old minor analysis files
+miscellaneous/exploratory_scripts/old/
+#too big
+miscellaneous/simulations/results
+#notes
+miscellaneous/misc_notes/
