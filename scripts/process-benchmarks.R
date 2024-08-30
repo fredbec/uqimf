@@ -8,6 +8,8 @@ source(here("specs", "specs.R"))
 .d <- `[`
 
 min_year <- specs$min_year
+max_year <- specs$max_year
+holdout_split <- specs$holdout_split
 tv_release <- specs$tv_release
 window_length <- specs$window_length
 flag_imputetv05as1 <- specs$flag_imputetv05as1
@@ -124,10 +126,17 @@ bvar_fc <- truth[bvar_fc, on = c("target", "target_year", "country") ]  |>
   setnames("V8", paste0("tv_", tv_release)) #|>
   #setnames(paste0("tv_", tv_release), "true_value")
 
+bvar_fc_train <- bvar_fc |>
+  copy() |>
+  .d(target_year >= min_year & target_year < holdout_split)
 
+bvar_fc_ho <- bvar_fc |>
+  copy() |>
+  .d(target_year >= holdout_split & target_year <= max_year)
 
 ################################################################################
 #save data
 data.table::fwrite(benchmark_fc, here("benchmarks", "point_benchmarks_processed.csv"))
-data.table::fwrite(bvar_fc, here("benchmarks", "quantile_benchmarks_processed.csv"))
+data.table::fwrite(bvar_fc_train, here("benchmarks", "bvar_direct_quantile_forecasts.csv"))
+data.table::fwrite(bvar_fc_ho, here("benchmarks", "bvar_direct_quantile_forecasts_ho.csv"))
 data.table::fwrite(weodat, here("data", "point_forecasts.csv"))
