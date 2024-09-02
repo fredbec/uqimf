@@ -33,7 +33,7 @@ data.table::fwrite(qufcs, here("quantile_forecasts", "toscore_quantile_forecasts
 data.table::fwrite(qufcs_directional, here("quantile_forecasts", "toscore_quantile_forecasts_directional.csv"))
 data.table::fwrite(qufcs_ho, here("quantile_forecasts", "toscore_quantile_forecasts_ho.csv"))
 data.table::fwrite(bvar_qus, here("benchmarks", "toscore_bvar_direct_quantile_forecasts.csv"))
-data.table::fwrite(bvar_qus, here("benchmarks", "toscore_bvar_direct_quantile_forecasts_ho.csv"))
+data.table::fwrite(bvar_qus_ho, here("benchmarks", "toscore_bvar_direct_quantile_forecasts_ho.csv"))
 data.table::fwrite(fcdat, here("data", "toscore_point_forecasts.csv"))
 
 
@@ -60,7 +60,7 @@ data.table::fwrite(qufcs, here("quantile_forecasts", "toscore_bvarspecs_quantile
 data.table::fwrite(qufcs_directional, here("quantile_forecasts", "toscore_bvarspecs_quantile_forecasts_directional.csv"))
 data.table::fwrite(qufcs_ho, here("quantile_forecasts", "toscore_bvarspecs_quantile_forecasts_ho.csv"))
 data.table::fwrite(bvar_qus, here("benchmarks", "toscore_bvarspecs_bvar_direct_quantile_forecasts.csv"))
-data.table::fwrite(bvar_qus, here("benchmarks", "toscore_bvarspecs_bvar_direct_quantile_forecasts_ho.csv"))
+data.table::fwrite(bvar_qus_ho, here("benchmarks", "toscore_bvarspecs_bvar_direct_quantile_forecasts_ho.csv"))
 data.table::fwrite(fcdat, here("data", "toscore_bvarspecs_point_forecasts.csv"))
 
 
