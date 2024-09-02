@@ -89,7 +89,9 @@ poster-plots
 #old quantile forecasts (like the symmetry-corrected directional forecasts from an early stage of the analysis)
 quantile_forecasts/old
 scores/old
+scores/bvarspecs/old
 scripts/old
+benchmarks/old
 
 
 ##things from miscellaneous folder

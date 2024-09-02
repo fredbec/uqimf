@@ -19,8 +19,10 @@ source(here("scripts", "process-benchmarks.R"))
 source(here("scripts", "encode-missing-predictions.R"))
 source(here("scripts", "make-forecasts.R"))
 source(here("scripts", "exclude-from-scoring.R"))
+prefix <- ""
 source(here("scripts", "score-forecasts.R"))
-source(here("scripts", "score-bvarspecs.R"))
+prefix <- "_bvarspecs"
+source(here("scripts", "score-forecasts.R"))
 
 
 #set token that master file started to "started but not finished"

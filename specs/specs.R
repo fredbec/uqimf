@@ -15,10 +15,10 @@ specs <- list(
 
   tv_release = 1,
   window_length = window_length,
-  score_max_year = ifelse(holdout, 2023, 2012),
-  max_year_imf = 2023,
+  #score_max_year = ifelse(holdout, 2023, 2012),
+  max_year = 2023,
   min_year = min_year,
-  score_min_year = ifelse(holdout, 2013, min_year + window_length),
+  #score_min_year = ifelse(holdout, 2013, min_year + window_length),
   #score_min_year = min_year + window_length,
   ci_levels_eval = c(0.5, 0.8),
   ci_levels_eval_su = c(50, 80), #for scoringutils wrapper
