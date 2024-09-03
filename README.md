@@ -8,15 +8,14 @@
 
 This repository contains the documentation, results, and code of a
 project where we produce simple macroeconomic forecast distributions for
-the G7 economies, in the form of prediction intervals. It also contains
-code to continue to produce these forecasts in real-time. See the
-documentation below for further details.
+the G7 economies. It also contains code to continue to produce these
+forecasts in real-time. See the documentation below for further details.
 
 ## Short summary of the project
 
 We generate easy-to-understand forecast intervals for output growth and
 inflation in the G7 economies, using the point forecasts published in
-the International Monetary Fund World Economic Outlook (IMF WEO). The
+the International Monetary Fund World Economic Outlook (IMF WEO). Our
 forecast intervals are generated at the 50% and 80% levels in a simple
 and transparent manner, using empirical quantiles of the past history of
 point forecast errors in the IMF WEO. For more details, please refer to
@@ -49,26 +48,37 @@ further links to a dashboard, a preregistration protocol, etc.
 
 ## Contents of this repository
 
-More details on each folder can be found further below.
+More details on each folder can be found in its own respective section
+further below.
 
-| Folder                                      | Purpose                                                                                                                   |
-|---------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
-| [`benchmarks`](benchmarks/)                 | Code and forecast data of benchmark forecasts.                                                                            |
-| [`data`](data/)                             | Processed WEO and benchmark forecast data. from `data-raw` ready to be used in the paper analysis.                        |
-| [`miscellanous`](miscellanous/)             | Files that are not relevant for the final analysis (exploratory scripts, presentation files, etc). Kept for transparency. |
-| [`oecd_data`](oecd_data/)                   | OECD truth data used for fitting benchmarks and for robustness checks.                                                    |
-| [`quantile_forecasts`](quantile_forecasts/) | The generated forecast intervals, recorded via their upper and lower endpoints.                                           |
-| [`R`](R/)                                   | R functions used in the analysis and for evaluation.                                                                      |
-| [`scores`](scores/)                         | Scores of forecasts.                                                                                                      |
-| [`scripts`](scripts/)                       | Executive scripts to produce all results.                                                                                 |
-| [`specs`](specs/)                           | Specifications and global options for the analysis.                                                                       |
+| Folder                                      | Purpose                                                                                                                                    |
+|---------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| [`benchmarks`](benchmarks/)                 | Code and forecast data of benchmark forecasts.                                                                                             |
+| [`data`](data/)                             | Processed WEO and benchmark forecast data.                                                                                                 |
+| [`miscellanous`](miscellanous/)             | Files that are not relevant for the final analysis (exploratory scripts, presentation files, etc). Kept for completeness and transparency. |
+| [`oecd_data`](oecd_data/)                   | OECD truth data used for fitting benchmarks and for robustness checks.                                                                     |
+| [`quantile_forecasts`](quantile_forecasts/) | The generated forecast intervals, recorded via their upper and lower endpoints.                                                            |
+| [`R`](R/)                                   | R functions used in the analysis and for evaluation.                                                                                       |
+| [`scores`](scores/)                         | Scores of forecasts.                                                                                                                       |
+| [`scripts`](scripts/)                       | Executive scripts to produce all results.                                                                                                  |
+| [`specs`](specs/)                           | Specifications and global options for the analysis.                                                                                        |
 
-Forecast intervals at the 50% and 80% are recorded via their upper and
-lower endpoints, that is, the 0.25 and 0.75 predictive quantiles for the
-50% interval, and the 0.1 and 0.9 predictive quantiles for the 90%
-interval.
+## General notes on naming data files
 
-The folders of this repository contain the following:
+Note that data files in this repository are generally identified with
+some “core-name”, e.g. quantile_forecasts, and then with prefixes and/or
+suffixes that further describe deviations from the default setting.
+
+- Default setting: training data (target years 2001-2012); absolute
+  error method; IMF WEO truth data; complete data before discarding
+  instances for scoring
+- “ho” suffix: holdout data (target years 2013-2023)
+- “directional” suffix: directional error method
+- “oecd” prefix: OECD truth data (used for robustness check)
+- “to_score” prefix: excludes some instances for scoring data. All
+  scores in scores/ folder are calculated based on these data versions.
+
+### R folder
 
 - `R`: All functions that the analysis is based on. Scripts that process
   data based on these functions are in `scripts`
@@ -86,63 +96,71 @@ The folders of this repository contain the following:
 
   - `utils-manuscript.R`: miscellaneous small functions for manuscript
 
-- `benchmarks`: benchmark forecasts and the scripts that generate them.
+### benchmarks folder
 
-  - `point_benchmarks_processed.csv`: point benchmark forecasts (AR and
-    BVAR model) as generated by `scripts/process-benchmarks`, see below
+- `point_benchmarks_processed.csv`: point benchmark forecasts (AR and
+  BVAR model) as generated by `scripts/process-benchmarks`, see below
 
-  - `quantile_benchmarks_processed.csv`: quantile benchmark forecasts
-    (BVAR model) as generated by `scripts/process-benchmarks`, see below
+- `quantile_benchmarks_processed.csv`: quantile benchmark forecasts
+  (BVAR model) as generated by `scripts/process-benchmarks`, see below
 
-- `data`: WEO and merged data
+### data folder
 
-  - `weodat.csv`: tidy IMF WEO data, for G7 countries only
-  - `point_forecasts.csv`: all point forecasts (weo and benchmarks),
-    generated by `scripts/process-benchmarks`, see below
+- `weodat.csv`: tidy IMF WEO data, for G7 countries only
+- `point_forecasts.csv`: all point forecasts (weo and benchmarks),
+  generated by `scripts/process-benchmarks`, see below
 
-- `manuscript`: files to write manuscript. Abandoned now, in favor of
-  `uqimf-manuscript` repository
+### oecd_data folder
 
 - `oecd_data`: contains annual and quarterly truth data for inflation
   and GDP growth, as published by the OECD. Also contains R markdown
   scripts that check (and verify) compatibility of annual OECD truth
   values with annual IMF truth values
 
-- `plots`: you get what you bargain for
+### quantile_forecasts folder
 
-- `presentation`: some files for the presentation of the project at the
-  MathSEE Symposium
+- `quantile-forecasts`: contains forecasts as produced by
+  `scripts/make-forecasts`, see below. Note that the forecast intervals
+  are identified via their upper and lower endpoints. That is, for the
+  50% interval, the 0.25 and 0.75 predictive quantiles, and for the 80%
+  interval, the 0.1 and 0.9 predictive quantiles. Also note the naming
+  data notes outlined above.
 
-- `quantile-forecasts`: contains quantile forecasts as produced by
-  `scripts/make-forecasts`, see below
+### scores folder
 
 - `scores`: Contains scores of forecasts in `quantile-forecasts` and
   BVAR benchmarks, at various levels of resolutions. Contains its own
-  Readme file to explain what scores the different files contain.
+  Readme file to explain what scores the different files contain. Also
+  note the naming data notes outlined above.
 
-- `scripts`: Contains scripts that process data based on the function in
-  `R`
+### scripts
 
-  - `toy-scripts`: small scripts to explore data
-
-  - `plot-scripts`: scripts to generate plots
+- `scripts`: Contains scripts that process data based on the functions
+  in `R`
+  - `master.R`: produces all results based on the following sub-scripts
+    (listed in the order as they appear in master.R, so not
+    alphabetical)
 
   - `download_data.R`: download IMF data
 
-  - `make-forecasts.R`: generate quantile forecasts based
-    (`data/point-forecasts.csv` to
-    `quantile_forecasts/quantile_forecasts.csv`)
+  - `process-weo.R`: short script to filter and process WEO data
 
   - `process-benchmarks.R` process benchmarks to bring into compatible
     format with `weodat.csv`. Generates file that contains point
     forecasts from all sources in long format
     (`data/point_forecasts.csv`)
 
-  - `process-weo.R`: short script to filter and process WEO data
+  - `encode-missing-predictions.R` explicitly encode missing data
+    (although we actually have no missing data, but just for
+    completenss)
 
-  - `score-forecasts.R`: score quantile forecasts, those generated here
-    and the benchmark BVAR quantile forecasts.
+  - `make-forecasts.R`: generate forecast intervals
 
+  - `exclude-from-scoring.R`: exclude any instances that are listed in
+    `specs/specs.R` from scoring
+
+  - `score-forecasts.R`: score quantile forecasts, those generated in
+    `make-forecasts.R` and the benchmark BVAR quantile forecasts.
 - `specs`: contains file to specify global settings (window length,
   etc.)
 
