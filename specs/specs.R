@@ -4,7 +4,6 @@ library(data.table)
 #set project wide specifications
 
 min_year <- 1990
-window_length <- 11
 holdout <- FALSE
 
 
@@ -14,7 +13,7 @@ specs <- list(
   holdout_split = 2013,
 
   tv_release = 1,
-  window_length = window_length,
+  window_length = 11,
   #score_max_year = ifelse(holdout, 2023, 2012),
   max_year = 2023,
   min_year = min_year,

@@ -28,6 +28,7 @@ for(m in 1:nrow(all_plotcombs)){
   chosen_score <- as.character(current_comb$chosen_score)
 
 
+  suffix <- ifelse(chosen_em == "directional", "_directional", "")
 
   filenames <- c("wis", "c80", "c50")
   ylabs <- c("Interval Score", "80% Interval Coverage", "50% Interval Coverage")
@@ -41,7 +42,7 @@ for(m in 1:nrow(all_plotcombs)){
 
     k <- window_length - 3 #only for starting counting at 1
 
-    Rdats[[k]] <- data.table::fread(here("scores", "R_value_scores", paste0("ci_scores_avgcnt", window_length, ".csv"))) |>
+    Rdats[[k]] <- data.table::fread(here("scores", "R_value_scores", paste0("ci_scores_avgcnt", suffix, "_R", window_length, ".csv"))) |>
       .d(, R:= window_length)
   }
 
