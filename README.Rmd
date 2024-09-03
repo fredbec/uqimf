@@ -13,15 +13,58 @@ knitr::opts_chunk$set(
 )
 ```
 
-# uqimf
+# Simple Macroeconomic Forecast Distributions for the G7 Economies
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-This repo contains code to generate simple and transparent prediction intervals for the IMF World Economic Outlook forecasts (see references). Central prediction intervals are generated at the 50% and 80% levels for CPI inflation and real GDP growth, based on past forecast errors. See below for documentation on which files the respective folders contain. 
+This repository contains the documentation, results, and code of a project where we produce simple macroeconomic forecast distributions for the G7 economies, in the form of prediction intervals. It also contains code to continue to produce these forecasts in real-time. See the documentation below for further details.
+
+## Short summary of the project 
+
+We generate easy-to-understand forecast intervals for output growth and inflation in the G7 economies, using the point forecasts published in the International Monetary Fund World Economic Outlook (IMF WEO). The forecast intervals are generated at the 50% and 80% levels in a simple and transparent manner, using empirical quantiles of the past history of point forecast errors in the IMF WEO. For more details, please refer to the working paper below.
+
+## Citation
+
+The working paper can be found on arXiv. Please cite this using the following:
+
+> Becker, Krüger, and Schienle. 2024 “Simple Macroeconomic Forecast Distributions for the G7 Economies” arXiv. https://doi.org/10.48550/arXiv.2408.08304.
+
+```
+@unpublished{Beckeretal_2024,
+  title={Simple Macroeconomic Forecast Distributions for the G7 Economies},
+  author={Becker, Friederike and Kr{\"u}ger, Fabian and Schienle, Melanie},
+  note={Preprint, arXiv:2408.08304},
+  year={2024}
+}
+```
+
+## Further links
+
+This repository mainly contains files for the retrospective analysis in the working paper, see above. Please visit the following repository to find the forecasts as they are published in real-time, as well as further links to a dashboard, a preregistration protocol, etc. 
+
+> https://github.com/KITmetricslab/MacroPI
 
 
-## Contents of the repository
+## Contents of this repository
+
+More details on each folder can be found further below.
+
+Folder | Purpose
+---|---
+[`benchmarks`](benchmarks/) | Code and forecast data of benchmark forecasts.
+[`data`](data/) | Processed WEO and benchmark forecast data. from `data-raw` ready to be used in the paper analysis.
+[`miscellanous`](miscellanous/) | Files that are not relevant for the final analysis (exploratory scripts, presentation files, etc). Kept for transparency.
+[`oecd_data`](oecd_data/) | OECD truth data used for fitting benchmarks and for robustness checks.
+[`quantile_forecasts`](quantile_forecasts/) | The generated forecast intervals, recorded via their upper and lower endpoints. 
+[`R`](R/) | R functions used in the analysis and for evaluation.
+[`scores`](scores/) | Scores of forecasts.
+[`scripts`](scripts/) | Executive scripts to produce all results.
+[`specs`](specs/) | Specifications and global options for the analysis.
+
+
+
+Forecast intervals at the 50% and 80% are recorded via their upper and lower endpoints, that is, the 0.25 and 0.75 predictive quantiles for the 50% interval, and the 0.1 and 0.9 predictive quantiles for the 90% interval.
 
 The folders of this repository contain the following:
 
