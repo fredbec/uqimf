@@ -1,6 +1,13 @@
 library(here)
 library(data.table)
 
+
+source(here("specs", "specs.R"))
+
+tv_release <- specs$tv_release
+global_file_prefix <- ifelse(tv_release == "oecd", "oecd_", "")
+
+
 devtools::load_all()
 .d <- `[`
 

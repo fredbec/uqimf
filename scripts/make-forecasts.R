@@ -9,7 +9,6 @@ source(here("specs", "specs.R"))
 max_year <- specs$max_year
 min_year <- specs$min_year
 holdout_split <- specs$holdout_split
-tv_release <- specs$tv_release
 window_length <- specs$window_length
 quantype <- specs$qutype
 
@@ -19,7 +18,7 @@ cis <- specs$ci_levels_make
 combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"))
 
 
-fcdat <- data.table::fread(here("data", "point_forecasts.csv"))
+fcdat <- data.table::fread(here("data", paste0(global_file_prefix, "point_forecasts.csv")))
 
 #make quantile forecasts for all combinations in combs
 qufcs <- lapply(1:nrow(combs),
@@ -80,7 +79,7 @@ emptycontainer <- lapply(qufcs, function(dat){
 
     data.table::fwrite(dat,
                        here("quantile_forecasts",
-                            paste0("quantile_forecasts",split_suffix, ".csv")))
+                            paste0(global_file_prefix, "quantile_forecasts",split_suffix, ".csv")))
 
 
     ##Directional forecasts
@@ -89,7 +88,7 @@ emptycontainer <- lapply(qufcs, function(dat){
     if(split_suffix == ""){
       data.table::fwrite(dat,
                          here("quantile_forecasts",
-                              paste0("quantile_forecasts",split_suffix, "_", em_suffix, ".csv")))
+                              paste0(global_file_prefix, "quantile_forecasts",split_suffix, "_", em_suffix, ".csv")))
     } else {
       #not saved, as we're not using directional method on the holdout set
     }

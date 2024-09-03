@@ -22,14 +22,14 @@ wis_plot_paper_bvarspecs <-
       bvar_dataset_suffix <- dataset_suffix
     }
 
-  wis_scores <- fread(here("scores", "_bvarspecs", paste0("ci_scores_avgcnt", dataset_suffix, ".csv"))) |>
+  wis_scores <- fread(here("scores", "_bvarspecs", paste0(global_file_prefix, "ci_scores_avgcnt", dataset_suffix, ".csv"))) |>
     data.table::copy() |>
     .d(, .(model, error_method, method, target, horizon, interval_score, dispersion, underprediction, overprediction)) |>
     setnames("model", "source") |>
     .d(source == "IMF")
 
 
-  bvar_wis_scores <- fread(here("scores", "_bvarspecs", paste0("bvar_ci_scores_avgcnt", bvar_dataset_suffix, ".csv"))) |>
+  bvar_wis_scores <- fread(here("scores", "_bvarspecs", paste0(global_file_prefix, "bvar_ci_scores_avgcnt", bvar_dataset_suffix, ".csv"))) |>
     data.table::copy() |>
     .d(, .(model, target, horizon, interval_score, dispersion, underprediction, overprediction)) |>
     setnames("model", "source") |>

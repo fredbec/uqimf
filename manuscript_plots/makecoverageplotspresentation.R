@@ -36,7 +36,7 @@ for(m in 1:nrow(all_plotcombs)){
                                   chosen_target = chosen_target) +
     ggtitle(plottitle) +
     theme(plot.title = element_text(hjust = 0.5, size = 20))
-  ggplot2::ggsave(here("miscellaneous", "presentation", "figures", paste0("coverage_", chosen_target,"_", dataset_suffix, ".pdf")),
+  ggplot2::ggsave(here("miscellaneous", "presentation", "figures", paste0(global_file_prefix, "coverage_", chosen_target,"_", dataset_suffix, ".pdf")),
                   cvg_plot, width = 5, height = 4.3)
 
 

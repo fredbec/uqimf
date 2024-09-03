@@ -10,12 +10,12 @@ instances_to_exclude_bvarspecs <- specs$instances_to_exclude_bvarspecs
 
 
 ####################################read in quantile forecasts########################
-qufcs <- data.table::fread(here("quantile_forecasts", "quantile_forecasts.csv"))
-qufcs_ho <- data.table::fread(here("quantile_forecasts", "quantile_forecasts_ho.csv"))
-qufcs_directional <- data.table::fread(here("quantile_forecasts", "quantile_forecasts_directional.csv"))
-bvar_qus <- data.table::fread(here("benchmarks", "bvar_direct_quantile_forecasts.csv"))
-bvar_qus_ho <- data.table::fread(here("benchmarks", "bvar_direct_quantile_forecasts_ho.csv"))
-fcdat <- data.table::fread(here("data", "point_forecasts.csv"))
+qufcs <- data.table::fread(here("quantile_forecasts", paste0(global_file_prefix, "quantile_forecasts.csv")))
+qufcs_ho <- data.table::fread(here("quantile_forecasts", paste0(global_file_prefix, "quantile_forecasts_ho.csv")))
+qufcs_directional <- data.table::fread(here("quantile_forecasts", paste0(global_file_prefix, "quantile_forecasts_directional.csv")))
+bvar_qus <- data.table::fread(here("benchmarks", paste0(global_file_prefix, "bvar_direct_quantile_forecasts.csv")))
+bvar_qus_ho <- data.table::fread(here("benchmarks", paste0(global_file_prefix, "bvar_direct_quantile_forecasts_ho.csv")))
+fcdat <- data.table::fread(here("data", paste0(global_file_prefix, "point_forecasts.csv")))
 
 for(k in 1:length(instances_to_exclude)){
 
@@ -29,20 +29,20 @@ for(k in 1:length(instances_to_exclude)){
 }
 
 
-data.table::fwrite(qufcs, here("quantile_forecasts", "toscore_quantile_forecasts.csv"))
-data.table::fwrite(qufcs_directional, here("quantile_forecasts", "toscore_quantile_forecasts_directional.csv"))
-data.table::fwrite(qufcs_ho, here("quantile_forecasts", "toscore_quantile_forecasts_ho.csv"))
-data.table::fwrite(bvar_qus, here("benchmarks", "toscore_bvar_direct_quantile_forecasts.csv"))
-data.table::fwrite(bvar_qus_ho, here("benchmarks", "toscore_bvar_direct_quantile_forecasts_ho.csv"))
-data.table::fwrite(fcdat, here("data", "toscore_point_forecasts.csv"))
+data.table::fwrite(qufcs, here("quantile_forecasts", paste0(global_file_prefix, "toscore_quantile_forecasts.csv")))
+data.table::fwrite(qufcs_directional, here("quantile_forecasts", paste0(global_file_prefix, "toscore_quantile_forecasts_directional.csv")))
+data.table::fwrite(qufcs_ho, here("quantile_forecasts", paste0(global_file_prefix, "toscore_quantile_forecasts_ho.csv")))
+data.table::fwrite(bvar_qus, here("benchmarks", paste0(global_file_prefix, "toscore_bvar_direct_quantile_forecasts.csv")))
+data.table::fwrite(bvar_qus_ho, here("benchmarks", paste0(global_file_prefix, "toscore_bvar_direct_quantile_forecasts_ho.csv")))
+data.table::fwrite(fcdat, here("data", paste0(global_file_prefix, "toscore_point_forecasts.csv")))
 
 
 ####################################read in quantile forecasts########################
-qufcs <- data.table::fread(here("quantile_forecasts", "quantile_forecasts.csv"))
-qufcs_ho <- data.table::fread(here("quantile_forecasts", "quantile_forecasts_ho.csv"))
-qufcs_directional <- data.table::fread(here("quantile_forecasts", "quantile_forecasts_directional.csv"))
-bvar_qus <- data.table::fread(here("benchmarks", "bvar_direct_quantile_forecasts.csv"))
-bvar_qus_ho <- data.table::fread(here("benchmarks", "bvar_direct_quantile_forecasts_ho.csv"))
+qufcs <- data.table::fread(here("quantile_forecasts", paste0(global_file_prefix, "quantile_forecasts.csv")))
+qufcs_ho <- data.table::fread(here("quantile_forecasts", paste0(global_file_prefix, "quantile_forecasts_ho.csv")))
+qufcs_directional <- data.table::fread(here("quantile_forecasts", paste0(global_file_prefix, "quantile_forecasts_directional.csv")))
+bvar_qus <- data.table::fread(here("benchmarks", paste0(global_file_prefix, "bvar_direct_quantile_forecasts.csv")))
+bvar_qus_ho <- data.table::fread(here("benchmarks", paste0(global_file_prefix, "bvar_direct_quantile_forecasts_ho.csv")))
 
 for(k in 1:length(instances_to_exclude_bvarspecs)){
 
@@ -56,11 +56,11 @@ for(k in 1:length(instances_to_exclude_bvarspecs)){
 }
 
 
-data.table::fwrite(qufcs, here("quantile_forecasts", "toscore_bvarspecs_quantile_forecasts.csv"))
-data.table::fwrite(qufcs_directional, here("quantile_forecasts", "toscore_bvarspecs_quantile_forecasts_directional.csv"))
-data.table::fwrite(qufcs_ho, here("quantile_forecasts", "toscore_bvarspecs_quantile_forecasts_ho.csv"))
-data.table::fwrite(bvar_qus, here("benchmarks", "toscore_bvarspecs_bvar_direct_quantile_forecasts.csv"))
-data.table::fwrite(bvar_qus_ho, here("benchmarks", "toscore_bvarspecs_bvar_direct_quantile_forecasts_ho.csv"))
-data.table::fwrite(fcdat, here("data", "toscore_bvarspecs_point_forecasts.csv"))
+data.table::fwrite(qufcs, here("quantile_forecasts", paste0(global_file_prefix, "toscore_bvarspecs_quantile_forecasts.csv")))
+data.table::fwrite(qufcs_directional, here("quantile_forecasts", paste0(global_file_prefix, "toscore_bvarspecs_quantile_forecasts_directional.csv")))
+data.table::fwrite(qufcs_ho, here("quantile_forecasts", paste0(global_file_prefix, "toscore_bvarspecs_quantile_forecasts_ho.csv")))
+data.table::fwrite(bvar_qus, here("benchmarks", paste0(global_file_prefix, "toscore_bvarspecs_bvar_direct_quantile_forecasts.csv")))
+data.table::fwrite(bvar_qus_ho, here("benchmarks", paste0(global_file_prefix, "toscore_bvarspecs_bvar_direct_quantile_forecasts_ho.csv")))
+data.table::fwrite(fcdat, here("data", paste0(global_file_prefix, "toscore_bvarspecs_point_forecasts.csv")))
 
 

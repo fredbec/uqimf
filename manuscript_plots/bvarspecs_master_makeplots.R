@@ -31,12 +31,12 @@ for(m in 1:nrow(all_plotcombs)){
 
   wis_plot <- wis_plot_paper_bvarspecs(dataset_suffix = dataset_suffix,
                                        chosen_target = chosen_target)
-  ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", paste0(prefix, "wis_", chosen_target, ".pdf")),
+  ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", paste0(global_file_prefix, prefix, "wis_", chosen_target, ".pdf")),
                   wis_plot, width = 9, height = 8)
 
   cvg_plot <- coverage_plot_paper_bvarspecs(dataset_suffix = dataset_suffix,
                                             chosen_target = chosen_target)
-  ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", paste0(prefix, "coverage_", chosen_target, ".pdf")),
+  ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", paste0(global_file_prefix, prefix, "coverage_", chosen_target, ".pdf")),
                   cvg_plot, width = 12, height = 4.3)
 
   #source(here("manuscript-plots", "coverage_plots.R"))
@@ -79,7 +79,7 @@ relwis <- ggplot(aes(x = relwis), data = bvar_twospec) +
   geom_histogram(binwidth = 0.13345, color = "steelblue4", fill = "steelblue3") +
   theme_uqimf() +
   xlab("Relative WIS: (BVAR - CISS) / (BVAR - direct)")
-ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", paste0(prefix, "relativeWIS_", ".pdf")),
+ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", paste0(global_file_prefix, prefix, "relativeWIS_", ".pdf")),
                 relwis, width = 7, height = 4)
 
 #inflation only
@@ -87,7 +87,7 @@ relwis <- ggplot(aes(x = relwis), data = bvar_twospec |> copy() |> .d(target == 
   geom_histogram(binwidth = 0.13345, color = "steelblue4", fill = "steelblue3") +
   theme_uqimf() +
   xlab("Relative WIS: (BVAR - CISS) / (BVAR - direct)")
-ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", paste0(prefix, "relativeWIS_pcpi_pch", ".pdf")),
+ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", paste0(global_file_prefix, prefix, "relativeWIS_pcpi_pch", ".pdf")),
                 relwis, width = 7, height = 4)
 
 
@@ -96,5 +96,5 @@ relwis <- ggplot(aes(x = relwis), data = bvar_twospec |> copy() |> .d(target == 
   geom_histogram(binwidth = 0.13345, color = "steelblue4", fill = "steelblue3") +
   theme_uqimf() +
   xlab("Relative WIS: (BVAR - CISS) / (BVAR - direct)")
-ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", paste0(prefix, "relativeWIS_ngdp_rpch", ".pdf")),
+ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", paste0(global_file_prefix, prefix, "relativeWIS_ngdp_rpch", ".pdf")),
                 relwis, width = 7, height = 4)

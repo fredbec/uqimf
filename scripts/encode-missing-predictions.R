@@ -4,7 +4,7 @@ library(data.table)
 .d <- `[` #for piping data.table operations
 
 #benchmark data
-benchmarks <- data.table::fread(here("data", "point_forecasts.csv"))
+benchmarks <- data.table::fread(here("data", paste0(global_file_prefix, "point_forecasts.csv")))
 
 #data if there were no missing predictions
 perfect_avail_dat <- expand.grid(
@@ -21,4 +21,4 @@ perfect_avail_dat <- expand.grid(
 missingdat <- benchmarks[perfect_avail_dat, on = c("country", "target", "forecast_year", "horizon", "source")] |>
   .d(is.na(target_year), target_year := forecast_year + floor(horizon))
 
-data.table::fwrite(missingdat, here("data", "point_forecasts.csv"))
+data.table::fwrite(missingdat, here("data", paste0(global_file_prefix, "point_forecasts.csv")))

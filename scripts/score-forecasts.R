@@ -6,7 +6,6 @@ source(here("specs", "specs.R"))
 
 .d <- `[`
 
-tv_release <- specs$tv_release
 window_length <- specs$window_length
 
 cis <- specs$ci_levels_eval
@@ -14,17 +13,17 @@ qus <- specs$qu_levels
 cis100 <- specs$ci_levels_eval_su #for passing to scoring function
 
 #for scoring point forecasts
-fcdat <- data.table::fread(here("data", "toscore_point_forecasts.csv"))|>
+fcdat <- data.table::fread(here("data", paste0(global_file_prefix, "toscore_point_forecasts.csv"))) |>
   .d(target_year <= max_year)
 
 
 ####################################read in quantile forecasts########################
 qufcs <- data.table::fread(here("quantile_forecasts",
-                                paste0("toscore", prefix, "_quantile_forecasts.csv")))
+                                paste0(global_file_prefix, "toscore", prefix, "_quantile_forecasts.csv")))
 qufcs_directional <- data.table::fread(here("quantile_forecasts",
-                                            paste0("toscore", prefix, "_quantile_forecasts_directional.csv")))
+                                            paste0(global_file_prefix, "toscore", prefix, "_quantile_forecasts_directional.csv")))
 qufcs_ho <- data.table::fread(here("quantile_forecasts",
-                                   paste0("toscore", prefix, "_quantile_forecasts_ho.csv")))
+                                   paste0(global_file_prefix, "toscore", prefix, "_quantile_forecasts_ho.csv")))
 
 combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"))
 
@@ -80,10 +79,10 @@ pp_scores <- fcdat |>
 ####################################Score BVAR Quantile Forecasts################################
 
 bvar_qus <- data.table::fread(here("benchmarks",
-                                   paste0("toscore", prefix, "_bvar_direct_quantile_forecasts.csv"))) |>
+                                   paste0(global_file_prefix, "toscore", prefix, "_bvar_direct_quantile_forecasts.csv"))) |>
   setnames(paste0("tv_", tv_release), "true_value")
 bvar_qus_ho <- data.table::fread(here("benchmarks",
-                                      paste0("toscore", prefix, "_bvar_direct_quantile_forecasts_ho.csv"))) |>
+                                      paste0(global_file_prefix, "toscore", prefix, "_bvar_direct_quantile_forecasts_ho.csv"))) |>
   setnames(paste0("tv_", tv_release), "true_value")
 
 bvar_qus <- bvar_qus |>
@@ -118,26 +117,26 @@ bvar_scores_cvgshort_ho <- scoreempQu(bvar_qus_ho, cvg_rg = cis100,
 
 
 ######################################Saving#######################################################
-data.table::fwrite(scores, here("scores", prefix, "ci_scores.csv"))
-data.table::fwrite(scores_directional, here("scores", prefix, "ci_scores_directional.csv"))
-data.table::fwrite(scores_ho, here("scores", prefix, "ci_scores_ho.csv"))
+data.table::fwrite(scores, here("scores", prefix, paste0(global_file_prefix, "ci_scores.csv")))
+data.table::fwrite(scores_directional, here("scores", prefix, paste0(global_file_prefix, "ci_scores_directional.csv")))
+data.table::fwrite(scores_ho, here("scores", prefix, paste0(global_file_prefix, "ci_scores_ho.csv")))
 
-data.table::fwrite(scores_avgcountry, here("scores",prefix, "ci_scores_avgcnt.csv"))
-data.table::fwrite(scores_avgcountry_directional, here("scores",prefix, "ci_scores_avgcnt_directional.csv"))
-data.table::fwrite(scores_avgcountry_ho, here("scores", prefix, "ci_scores_avgcnt_ho.csv"))
+data.table::fwrite(scores_avgcountry, here("scores",prefix, paste0(global_file_prefix, "ci_scores_avgcnt.csv")))
+data.table::fwrite(scores_avgcountry_directional, here("scores", prefix, paste0(global_file_prefix, "ci_scores_avgcnt_directional.csv")))
+data.table::fwrite(scores_avgcountry_ho, here("scores", prefix, paste0(global_file_prefix, "ci_scores_avgcnt_ho.csv")))
 
-data.table::fwrite(scores_cvgshort, here("scores", prefix,"cvg_pooled.csv"))
-data.table::fwrite(scores_cvgshort_directional, here("scores", prefix, "cvg_pooled_directional.csv"))
-data.table::fwrite(scores_cvgshort_ho, here("scores", prefix, "cvg_pooled_ho.csv"))
+data.table::fwrite(scores_cvgshort, here("scores", prefix,paste0(global_file_prefix, "cvg_pooled.csv")))
+data.table::fwrite(scores_cvgshort_directional, here("scores", prefix, paste0(global_file_prefix, "cvg_pooled_directional.csv")))
+data.table::fwrite(scores_cvgshort_ho, here("scores", prefix, paste0(global_file_prefix, "cvg_pooled_ho.csv")))
 
-data.table::fwrite(pp_scores, here("scores", prefix, "pointfc_scores.csv"))
+data.table::fwrite(pp_scores, here("scores", prefix, paste0(global_file_prefix, "pointfc_scores.csv")))
 
-data.table::fwrite(bvar_scores, here("scores", prefix, "bvar_ci_scores.csv"))
-data.table::fwrite(bvar_scores_ho, here("scores", prefix, "bvar_ci_scores_ho.csv"))
+data.table::fwrite(bvar_scores, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores.csv")))
+data.table::fwrite(bvar_scores_ho, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_ho.csv")))
 
-data.table::fwrite(bvar_scores_cvgshort, here("scores", prefix, "bvar_cvg_pooled.csv"))
-data.table::fwrite(bvar_scores_cvgshort_ho, here("scores", prefix, "bvar_cvg_pooled_ho.csv"))
+data.table::fwrite(bvar_scores_cvgshort, here("scores", prefix, paste0(global_file_prefix, "bvar_cvg_pooled.csv")))
+data.table::fwrite(bvar_scores_cvgshort_ho, here("scores", prefix, paste0(global_file_prefix, "bvar_cvg_pooled_ho.csv")))
 
-data.table::fwrite(bvar_scores_avgcountry, here("scores", prefix, "bvar_ci_scores_avgcnt.csv"))
-data.table::fwrite(bvar_scores_avgcountry_ho, here("scores", prefix, "bvar_ci_scores_avgcnt_ho.csv"))
+data.table::fwrite(bvar_scores_avgcountry, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_avgcnt.csv")))
+data.table::fwrite(bvar_scores_avgcountry_ho, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_avgcnt_ho.csv")))
 

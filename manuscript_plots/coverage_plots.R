@@ -17,10 +17,10 @@ coverage_plot_paper <- function(dataset_suffix,
 
   ####Read and filter coverage data
   #Scores by average country
-  scores_cvgshort <- fread(here("scores", paste0("ci_scores_avgcnt", dataset_suffix, ".csv"))) ##|>
+  scores_cvgshort <- fread(here("scores", paste0(global_file_prefix, "ci_scores_avgcnt", dataset_suffix, ".csv"))) ##|>
     #setnames("model", "source", skip_absent = TRUE)
 
-  bvar_scores_cvgshort <- fread(here("scores", paste0("bvar_ci_scores_avgcnt", bvar_dataset_suffix, ".csv"))) |>
+  bvar_scores_cvgshort <- fread(here("scores", paste0(global_file_prefix, "bvar_ci_scores_avgcnt", bvar_dataset_suffix, ".csv"))) |>
     #setnames("model", "source", skip_absent = TRUE) |>
     .d(model == "bvar_qu") |>
     .d(,error_method := unique(scores_cvgshort$error_method)) |>
@@ -35,8 +35,8 @@ coverage_plot_paper <- function(dataset_suffix,
 
 
 
-  scores_cvgaggregate <- fread(here("scores", paste0("cvg_pooled", dataset_suffix, ".csv"))) |>
-    rbind(fread(here("scores", paste0("bvar_cvg_pooled", bvar_dataset_suffix, ".csv"))) |>
+  scores_cvgaggregate <- fread(here("scores", paste0(global_file_prefix, "cvg_pooled", dataset_suffix, ".csv"))) |>
+    rbind(fread(here("scores", paste0(global_file_prefix, "bvar_cvg_pooled", bvar_dataset_suffix, ".csv"))) |>
             .d(,error_method := unique(scores_cvgshort$error_method)) |>
             .d(,method := unique(scores_cvgshort$method)) |>
             .d(model == "bvar_qu")) |>
@@ -46,8 +46,8 @@ coverage_plot_paper <- function(dataset_suffix,
 
 
   #non aggregated
-  scores <- fread(here("scores", paste0("ci_scores", dataset_suffix, ".csv"))) |>
-    rbind(fread(here("scores", paste0("bvar_ci_scores", bvar_dataset_suffix, ".csv"))) |>
+  scores <- fread(here("scores", paste0(global_file_prefix, "ci_scores", dataset_suffix, ".csv"))) |>
+    rbind(fread(here("scores", paste0(global_file_prefix, "bvar_ci_scores", bvar_dataset_suffix, ".csv"))) |>
             .d(,error_method := unique(scores_cvgshort$error_method)) |>
             .d(,method := unique(scores_cvgshort$method)) |>
                  .d(model == "bvar_qu")) |>

@@ -29,12 +29,12 @@ for(m in 1:nrow(all_plotcombs)){
 
   wis_plot <- wis_plot_paper(dataset_suffix = dataset_suffix,
                              chosen_target = chosen_target)
-  ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", paste0("wis_", chosen_target,"_", dataset_suffix, "_", ".pdf")),
+  ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", paste0(global_file_prefix, "wis_", chosen_target,"_", dataset_suffix, "_", ".pdf")),
                   wis_plot, width = 9, height = 8)
 
   cvg_plot <- coverage_plot_paper(dataset_suffix = dataset_suffix,
                                   chosen_target = chosen_target)
-  ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", paste0("coverage_", chosen_target,"_", dataset_suffix, "_", ".pdf")),
+  ggplot2::ggsave(here("..", "uqimf-manuscript", "figures", paste0(global_file_prefix, "coverage_", chosen_target,"_", dataset_suffix, "_", ".pdf")),
                   cvg_plot, width = 12, height = 4.3)
 
   #source(here("manuscript-plots", "coverage_plots.R"))

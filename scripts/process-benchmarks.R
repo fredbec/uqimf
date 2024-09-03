@@ -10,7 +10,6 @@ source(here("specs", "specs.R"))
 min_year <- specs$min_year
 max_year <- specs$max_year
 holdout_split <- specs$holdout_split
-tv_release <- specs$tv_release
 window_length <- specs$window_length
 flag_imputetv05as1 <- specs$flag_imputetv05as1
 
@@ -136,7 +135,7 @@ bvar_fc_ho <- bvar_fc |>
 
 ################################################################################
 #save data
-data.table::fwrite(benchmark_fc, here("benchmarks", "point_benchmarks_processed.csv"))
-data.table::fwrite(bvar_fc_train, here("benchmarks", "bvar_direct_quantile_forecasts.csv"))
-data.table::fwrite(bvar_fc_ho, here("benchmarks", "bvar_direct_quantile_forecasts_ho.csv"))
-data.table::fwrite(weodat, here("data", "point_forecasts.csv"))
+data.table::fwrite(benchmark_fc, here("benchmarks", paste0(global_file_prefix, "point_benchmarks_processed.csv")))
+data.table::fwrite(bvar_fc_train, here("benchmarks", paste0(global_file_prefix, "bvar_direct_quantile_forecasts.csv")))
+data.table::fwrite(bvar_fc_ho, here("benchmarks", paste0(global_file_prefix, "bvar_direct_quantile_forecasts_ho.csv")))
+data.table::fwrite(weodat, here("data", paste0(global_file_prefix, "point_forecasts.csv")))

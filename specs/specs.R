@@ -12,7 +12,7 @@ specs <- list(
 
   holdout_split = 2013,
 
-  tv_release = 1,
+  tv_release = "oecd",
   window_length = 11,
   #score_max_year = ifelse(holdout, 2023, 2012),
   max_year = 2023,

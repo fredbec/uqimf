@@ -115,5 +115,5 @@ legend.box.margin=margin(-15,-10,15,-10)) +
   scale_alpha_manual(name = "",
                      breaks = c("50% Interval", "80% Interval"),
                      values = c("50% Interval" = 0.8, "80% Interval" = 0.4) )
-ggsave(here("..", "uqimf-manuscript", "figures", paste0(prefix, "cilength_byhorizon.pdf")), cilengthplot, width = 4.75, height = 3.25)
+ggsave(here("..", "uqimf-manuscript", "figures", paste0(global_file_prefix, prefix, "cilength_byhorizon.pdf")), cilengthplot, width = 4.75, height = 3.25)
 
