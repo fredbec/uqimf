@@ -1,54 +1,54 @@
-coverage_plot_paper_bvarspecs <- function(chosen_method,
-                                chosen_em,
-                                chosen_target,
-                                prefix,
-                                cscale = "Hokusai3"){
+coverage_plot_paper_bvarspecs <- function(dataset_suffix,
+                                          chosen_target,
+                                          cscale = "Hokusai3"){
 
-  #when using absolute errors, read in scores of pava corrected forecasts
-  if(chosen_em == "absolute"){
-    pasteon_filename <- "_pava"
+  if(nchar(dataset_suffix) > 0){
+
+    dataset_suffix <- paste0("_", dataset_suffix)
+  }
+
+  if (dataset_suffix == "_directional"){
+
+    bvar_dataset_suffix <- ""
   } else {
-    pasteon_filename <- ""
+
+    bvar_dataset_suffix <- dataset_suffix
   }
 
   ####Read and filter coverage data
   #Scores by average country
-  scores_cvgshort <- fread(here("scores", "bvarspecs", paste0("ci_scores_avgcnt", pasteon_filename, ".csv"))) |>
+  scores_cvgshort <- fread(here("scores", "_bvarspecs", paste0("ci_scores_avgcnt", dataset_suffix, ".csv"))) |>
     .d(model == "IMF")
 
-  bvar_scores_cvgshort <- fread(here("scores", "bvarspecs", "bvar_ci_scores_avgcnt.csv")) |>
+  bvar_scores_cvgshort <- fread(here("scores", "_bvarspecs", paste0("bvar_ci_scores_avgcnt", bvar_dataset_suffix, ".csv"))) |>
     #setnames("model", "source", skip_absent = TRUE) |>
-    .d(, method := chosen_method) |>
-    .d(, error_method := chosen_em)
+    .d(,error_method := unique(scores_cvgshort$error_method)) |>
+    .d(,method := unique(scores_cvgshort$method))
 
   scores_cvgshort <- rbind(scores_cvgshort, bvar_scores_cvgshort) |>
     #setnames("model", "source", skip_absent = TRUE) |>
-    .d(error_method == chosen_em & method == chosen_method & target == chosen_target) |>
+    .d(target == chosen_target) |>
     .d(, model := factor(model, levels = c("IMF", "bvar_qu", "bvar_ciss"),
                           label = c("IMF", "BVAR - direct", "BVAR - CISS"),
                           ordered = TRUE))
 
 
-  scores_cvgaggregate <- fread(here("scores", "bvarspecs", paste0("cvg_pooled", pasteon_filename, ".csv")))|>
+  scores_cvgaggregate <- fread(here("scores", "_bvarspecs", paste0("cvg_pooled", dataset_suffix, ".csv")))|>
     .d(model == "IMF") |>
-    rbind(fread(here("scores", "bvarspecs", "bvar_cvg_pooled.csv")) |>
-            .d(, error_method := chosen_em) |>
-            .d(, method := chosen_method)) |>
-    .d(error_method == chosen_em) |>
-    .d(method == chosen_method) |>
+    rbind(fread(here("scores", "_bvarspecs", paste0("bvar_cvg_pooled", bvar_dataset_suffix,".csv"))) |>
+            .d(,error_method := unique(scores_cvgshort$error_method)) |>
+            .d(,method := unique(scores_cvgshort$method))) |>
     .d(, model := factor(model, levels = c("IMF", "bvar_qu", "bvar_ciss"),
                           label = c("IMF", "BVAR - direct", "BVAR - CISS"),
                           ordered = TRUE))
 
 
   #non aggregated
-  scores <- fread(here("scores", "bvarspecs", paste0("ci_scores", pasteon_filename, ".csv"))) |>
+  scores <- fread(here("scores", "_bvarspecs", paste0("ci_scores", dataset_suffix, ".csv"))) |>
     .d(model == "IMF") |>
-    rbind(fread(here("scores", "bvarspecs", "bvar_ci_scores.csv"))|>
-            .d(, error_method := chosen_em) |>
-            .d(, method := chosen_method)) |>
-    .d(error_method == chosen_em) |>
-    .d(method == chosen_method) |>
+    rbind(fread(here("scores", "_bvarspecs", paste0("bvar_ci_scores", bvar_dataset_suffix ,".csv"))) |>
+            .d(,error_method := unique(scores_cvgshort$error_method)) |>
+            .d(,method := unique(scores_cvgshort$method))) |>
     .d(, model := factor(model, levels = c("IMF", "bvar_qu", "bvar_ciss"),
                           label = c("IMF", "BVAR - direct", "BVAR - CISS"),
                           ordered = TRUE))

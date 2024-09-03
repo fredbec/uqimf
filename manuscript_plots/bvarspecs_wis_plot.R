@@ -1,44 +1,45 @@
 source(here("R", "plot.R"))
 
 wis_plot_paper_bvarspecs <-
-  function(chosen_method,
-           chosen_em,
+  function(dataset_suffix,
            chosen_target,
-           prefix,
            cscale = "Hokusai3"){
 
 
-  #when using absolute errors, read in scores of pava corrected forecasts
-  if(chosen_em == "absolute"){
-    pasteon_filename <- "_pava"
-  } else {
-    pasteon_filename <- ""
-  }
+    ######## WIS Data
+    #scores <- fread(here("scores", "ci_scores_pava.csv"))
 
-  ######## WIS Data
-  #scores <- fread(here("scores", "bvarspecs", "ci_scores_pava.csv"))
+    if(nchar(dataset_suffix) > 0){
 
+      dataset_suffix <- paste0("_", dataset_suffix)
+    }
 
-  wis_scores <- fread(here("scores", "bvarspecs", paste0("ci_scores_avgcnt", pasteon_filename, ".csv"))) |>
+    if (dataset_suffix == "_directional"){
+
+      bvar_dataset_suffix <- ""
+    } else {
+
+      bvar_dataset_suffix <- dataset_suffix
+    }
+
+  wis_scores <- fread(here("scores", "_bvarspecs", paste0("ci_scores_avgcnt", dataset_suffix, ".csv"))) |>
     data.table::copy() |>
     .d(, .(model, error_method, method, target, horizon, interval_score, dispersion, underprediction, overprediction)) |>
     setnames("model", "source") |>
     .d(source == "IMF")
 
 
-  bvar_wis_scores <- fread(here("scores", "bvarspecs", "bvar_ci_scores_avgcnt.csv")) |>
+  bvar_wis_scores <- fread(here("scores", "_bvarspecs", paste0("bvar_ci_scores_avgcnt", bvar_dataset_suffix, ".csv"))) |>
     data.table::copy() |>
     .d(, .(model, target, horizon, interval_score, dispersion, underprediction, overprediction)) |>
     setnames("model", "source") |>
-    .d(,error_method := chosen_em) |>
-    .d(,method := chosen_method) #change later
+    .d(,error_method := unique(wis_scores$error_method)) |>
+    .d(,method := unique(wis_scores$method))
 
 
   wis_scores <- rbind(wis_scores, bvar_wis_scores) |>
     .d(, source := factor(source, levels = c("IMF", "bvar_qu", "bvar_ciss"),
-                          label = c("IMF", "BVAR - direct", "BVAR - CISS"))) |>
-    .d(method == chosen_method) |>
-    .d(error_method == chosen_em)
+                          label = c("IMF", "BVAR - direct", "BVAR - CISS")))
 
   colors_manual <- met.brewer(cscale, 3)
   names(colors_manual) <- unique(wis_scores$source)
