@@ -2,21 +2,13 @@ library(here)
 library(data.table)
 
 #set project wide specifications
-
-min_year <- 1990
-holdout <- FALSE
-
-
 specs <- list(
-  scoreset = ifelse(holdout, "holdout set 2013-2023", "train set 2001-2012"),
-
   holdout_split = 2013,
 
-  tv_release = "oecd",
+  tv_release = 1,
   window_length = 11,
-  #score_max_year = ifelse(holdout, 2023, 2012),
   max_year = 2023,
-  min_year = min_year,
+  min_year = 1990,
   #score_min_year = ifelse(holdout, 2013, min_year + window_length),
   #score_min_year = min_year + window_length,
   ci_levels_eval = c(0.5, 0.8),
@@ -29,18 +21,20 @@ specs <- list(
 
   instances_to_exclude = list(
 
-    #no benchmarks for JAPAN after this time (due to missing inflation data)
+    #no benchmarks for Japan after 2021 (due to missing inflation data)
     i1 = list(
       country = c("JPN"),
       target_year = 2021:2100 #2100 is just a random maximum value
-    )
+    ),
 
-    #only if using bvar_ciss as the benchmark model
-    #i2 = list(country = c("JPN", "CAN"))
+    #don't score any years prior to 2001 (due to 11 being the default window length)
+    i2 = list(
+      target_year = 1900:2000 #1900 is just a random minimum value
+    )
   ),
 
   #exclude Japan and Canada for comparing BVAR specs, as there is no CISS
-  #data available for these models
+  #data available for these countries
   instances_to_exclude_bvarspecs = list(
 
     i1 = list(country = c("JPN", "CAN"))
