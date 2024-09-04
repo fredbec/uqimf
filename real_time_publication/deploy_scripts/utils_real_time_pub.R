@@ -76,7 +76,7 @@ apply_pava_and_clean <- function(qufcs,
     .d(, error_method := error_method) |>
     .d(, source := "placeholder") |>
     .d(ceiling(target_year - horizon) == current_yr_season$forecast_year) |>
-    empFC_pava()|>
+    empFC_pava() |>
     .d(, method := NULL) |>
     .d(, error_method := NULL) |>
     .d(, source := NULL) |>
@@ -88,7 +88,6 @@ apply_pava_and_clean <- function(qufcs,
     .d(forecast_year == current_yr_season$forecast_year) |>
     .d(, .(country, target, forecast_year, forecast_season, target_year, quantile, prediction)) |>
     .d(, target := ifelse(target == "ngdp_rpch", "gdp_growth", "inflation"))
-
 
   return(qufcs)
 }
