@@ -15,5 +15,5 @@ imfpp::download.process.weo(includeGeoData = FALSE)
 weodat <- data.table::fread(here("WEOforecasts_tidy.csv"))
 
 #save as parquet to limit file size for GitHub
-write_parquet(weodat, here("data", "WEOforecasts_prefilter.parquet"))
+write_parquet(weodat, here(location_download, "WEOforecasts_prefilter.parquet"))
 file.remove(here("WEOforecasts_tidy.csv"))

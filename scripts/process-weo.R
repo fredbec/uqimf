@@ -15,4 +15,4 @@ weodat <- read_parquet(here("data", "WEOforecasts_prefilter.parquet")) |>
   setnames("ISOAlpha_3Code", "country")
 
 
-data.table::fwrite(weodat, here("data", "weodat.csv"))
+data.table::fwrite(weodat, here(location_download, "weodat.csv"))

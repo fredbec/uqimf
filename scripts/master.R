@@ -7,6 +7,7 @@ source(here("specs", "specs.R"))
 tv_release <- specs$tv_release
 global_file_prefix <- ifelse(tv_release == "oecd", "oecd_", "")
 
+location_download <- "data"
 
 devtools::load_all()
 .d <- `[`
