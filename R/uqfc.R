@@ -223,7 +223,8 @@ empFC_pava <- function(fcdat,
 
   #to merge again later
   extra_cols <- fcdat |>
-    .d(, .(imf_pp, true_value, error, country, target, target_year, horizon,
+    .d(, forecast_year := ceiling(target_year - horizon)) |>
+    .d(, .(imf_pp, true_value, error, country, target, forecast_year, target_year, horizon,
            source, error_method, method)) |>
     unique()
 
@@ -250,15 +251,16 @@ empFC_pava <- function(fcdat,
     .d(, .(country, target, target_year, horizon, error_prediction,
            source, error_method, method, quantile)) |>
 
+    .d(, forecast_year := ceiling(target_year - horizon)) |>
 
     #wide formal
     .d(, horizon := paste0("h", 10*horizon)) |>
-    dcast(country + target + target_year + quantile +
+    dcast(country + target + forecast_year + quantile +
             error_method + method + source ~ horizon,
           value.var = "error_prediction") |>
 
-    .d(, .(country, target, source, method, error_method, target_year, quantile, h0, h5, h10, h15)) |>
-    .d(order(country, target, target_year, error_method, method, source, quantile)) |>
+    .d(, .(country, target, source, method, error_method, forecast_year, quantile, h0, h5, h10, h15)) |>
+    .d(order(country, target, forecast_year, error_method, method, source, quantile)) |>
 
     #define helper variable: upper quantiles will need to be smaller with rising horizon to
     #constitute a violation, lower quantiles similarly need to be bigger
@@ -268,20 +270,21 @@ empFC_pava <- function(fcdat,
 
     ##Pooling for
     .d(, viol := ifelse( qtype*h10 > qtype*h0, TRUE, FALSE)) |>
-    .d(, poolH := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
+    .d(, poolH := any(viol), by = .(country, target, forecast_year, error_method, method, source)) |>
     .d(poolH == TRUE, c("h0", "h10") := (h0+h10)/2) |>
 
     .d(, viol := ifelse( qtype*h15 > qtype*h5, TRUE, FALSE)) |>
-    .d(, poolS := any(viol), by = .(country, target, target_year, error_method, method, source)) |>
+    .d(, poolS := any(viol), by = .(country, target, forecast_year, error_method, method, source)) |>
     .d(poolS == TRUE, c("h5", "h15") := (h5+h15)/2) |>
 
-    .d(, .(country, target, source, method, error_method, target_year, quantile, h0, h5, h10, h15)) |>
-    melt(id.vars = c("country", "target", "source", "method", "error_method", "target_year", "quantile"),
+    .d(, .(country, target, source, method, error_method, forecast_year, quantile, h0, h5, h10, h15)) |>
+    melt(id.vars = c("country", "target", "source", "method", "error_method", "forecast_year", "quantile"),
          variable.name = "horizon",
          value.name = "error_prediction") |>
-    .d(,horizon := as.numeric(substr(horizon, 2, 100))/10)
+    .d(,horizon := as.numeric(substr(horizon, 2, 100))/10) |>
+    .d(!is.na(error_prediction))
 
-  fcs <- extra_cols[violations, on = c("country", "target", "target_year", "horizon",
+  fcs <- extra_cols[violations, on = c("country", "target", "forecast_year", "horizon",
                                        "source", "error_method", "method")] |>
     .d(, prediction := imf_pp + error_prediction) |>
     .d(, .(country, target, target_year, imf_pp, horizon, true_value, error, quantile, prediction, error_prediction, source, error_method, method))
