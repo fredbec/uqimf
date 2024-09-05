@@ -9,13 +9,13 @@ devtools::load_all()
 .d <- `[`
 ### OECD actuals vs. IMF actuals
 
-oecdbv <- fread(here("scores", "alt_scores", "oecd_bvar_ci_scores.csv"))|>
+oecdbv <- fread(here("scores", "oecd_bvar_ci_scores_ho.csv"))|>
   .d(model == "bvar_qu")|>
   .d(,truth := "oecd") |>
   .d(, c("model", "country", "target", "horizon", "truth", "interval_score"))
 cntbv <- unique(oecdbv$country)
 
-oecdimf <- fread(here("scores", "alt_scores", "oecd_ci_scores_pava.csv"))|>
+oecdimf <- fread(here("scores", "oecd_ci_scores_ho.csv"))|>
   .d(model == "IMF")|>
   .d(,truth := "oecd") |>
   .d(country %in% cntbv) |>
@@ -24,11 +24,11 @@ oecdimf <- fread(here("scores", "alt_scores", "oecd_ci_scores_pava.csv"))|>
   rbind(oecdbv) |>
   dcast(country + target + horizon + truth ~ model, value.var = "interval_score")
 
-imfbv <- fread(here("scores", "alt_scores", "imf_bvar_ci_scores.csv")) |>
+imfbv <- fread(here("scores", "bvar_ci_scores_ho.csv")) |>
   .d(model == "bvar_qu")|>
   .d(,truth := "imf") |>
   .d(, c("model", "country", "target", "horizon", "truth", "interval_score"))
-imfimf <- fread(here("scores", "alt_scores", "imf_ci_scores_pava.csv")) |>
+imfimf <- fread(here("scores", "ci_scores_ho.csv")) |>
   .d(model == "IMF") |>
   .d(,truth := "imf") |>
   .d(country %in% cntbv) |>
