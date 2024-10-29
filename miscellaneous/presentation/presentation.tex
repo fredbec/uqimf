@@ -202,10 +202,9 @@ We apply an attractively simple and cheap method. For a given country and target
 
 \section{Results}
 \begin{frame}{Scores on holdout data 2013-2023 - Inflation}
-%\textit{I'll make the figures, incl. legends, nicer and also remove (the reason for) the joke about the devoured overprediction}
     \begin{figure}
         \centering
-        \includegraphics[width=0.45\textwidth]{figures/ho_wis_pcpi_pch_absolute_rollingwindow.pdf} 
+        \includegraphics[width=0.45\textwidth]{figures/wis_pcpi_pch_ho.pdf} 
         \label{fig:enter-label}
     \end{figure} 
 \end{frame}
@@ -214,38 +213,34 @@ We apply an attractively simple and cheap method. For a given country and target
 %\textit{I'll make the figures, incl. legends, nicer and also remove (the reason for) the joke about the devoured overprediction}
     \begin{figure}
         \centering
-        \includegraphics[width=0.45\textwidth]{figures/ho_wis_ngdp_rpch_absolute_rollingwindow.pdf} 
+        \includegraphics[width=0.45\textwidth]{figures/wis_ngdp_rpch_ho.pdf} 
         \label{fig:enter-label}
     \end{figure} 
 \end{frame}
 
 
 \begin{frame}{Calibration - on holdout data 2013-2023}
-%\textit{Here, I'll instead map the colors to the different forecast sources (currently mapped to the window method), so we'll just have one plot each}
-    %Coverage at the 50\% and 80\% central interval: \\ 
 \begin{figure}
   \begin{subfigure}{0.385\textwidth}
   \centering
-    \includegraphics[width=\textwidth]{figures/ho_coverage_pcpi_pch_absolute_rollingwindow.pdf} %\vspace{0.3cm}
+    \includegraphics[width=\textwidth]{figures/coverage_pcpi_pch_ho.pdf} %\vspace{0.3cm}
   \end{subfigure}
   \hspace*{12mm}
   %\hfill  % maximize separation between the subfigures
   \begin{subfigure}{0.385\textwidth}
   \centering
-    \includegraphics[width=\textwidth]{figures/ho_coverage_ngdp_rpch_absolute_rollingwindow.pdf} %\vspace{0.3cm}
+    \includegraphics[width=\textwidth]{figures/coverage_ngdp_rpch_ho.pdf} %\vspace{0.3cm}
   \end{subfigure}%
 \end{figure}
 
 \end{frame}
 
 \begin{frame}{Increasing Uncertainty}
-%Width of Prediction Intervals, by Horizon
-%\textit{include graphic or table showing increasing uncertainty with rising horizons}\\ 
 \begin{columns}
 \begin{column}{0.6\textwidth}
     \begin{figure}
         \centering
-        \includegraphics[width=\textwidth]{figures/cilength_byhorizon.pdf}
+        \includegraphics[width=\textwidth]{figures/cilength_byhorizon_ho.pdf}
         %\caption{Coverage at the 50 and 80 percent level}
         \label{fig:enter-label}
     \end{figure}
@@ -300,7 +295,7 @@ Spring, NY &1.4 &2.2 \\
     \end{itemize}
     \item window method: rolling vs. expanding window
     \begin{itemize}
-    \item slightly improved coverage and scores, at the cost of interpretability \hyperlink{extractionmethod}{\beamerbutton{link}}
+    \item slightly improved coverage and scores, at the cost of interpretability 
     \end{itemize}
 
     \item alternative truth values from the OECD
@@ -435,16 +430,11 @@ GitHub repo with our forecasts: \\
 \end{frame}
 
 
-
-\begin{frame}{Expanding Window - Scores}
-\label{extractionmethod}
-\end{frame}
-
 \begin{frame}{Alternative truth value - Scores}
 \label{alternativetruth}
     \begin{figure}
         %\centering
-        \includegraphics[width=0.55\textwidth]{figures/oecdvsimf.pdf}
+        \includegraphics[width=0.55\textwidth]{figures/ho_oecdvsimf.pdf}
         %\caption{Coverage at the 50 and 80 percent level}
         \label{fig:enter-label}
     \end{figure}   
@@ -455,14 +445,14 @@ GitHub repo with our forecasts: \\
 \begin{figure}
   \begin{subfigure}{0.45\textwidth}
   \centering
-    \includegraphics[width=\textwidth]{figures/ho_bvarspecs_wis_pcpi_pch_absolute_rollingwindow.pdf} %\vspace{0.3cm}
+    \includegraphics[width=\textwidth]{figures/bvarspecs_wis_pcpi_pch_ho.pdf} %\vspace{0.3cm}
     \caption{Inflation}
   \end{subfigure}
   \hspace*{8mm}
   %\hfill  % maximize separation between the subfigures
   \begin{subfigure}{0.45\textwidth}
   \centering
-    \includegraphics[width=\textwidth]{figures/ho_bvarspecs_wis_ngdp_rpch_absolute_rollingwindow.pdf} %\vspace{0.3cm}
+    \includegraphics[width=\textwidth]{figures/bvarspecs_wis_ngdp_rpch_ho.pdf} %\vspace{0.3cm}
     \caption{GDP Growth}
   \end{subfigure}%
 \end{figure}
