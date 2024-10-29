@@ -1,3 +1,4 @@
+library(here)
 library(data.table)
 library(ggplot2)
 library(MetBrewer)
@@ -16,6 +17,38 @@ release_season <- ifelse(cmonth %in% 4:9, "Spring", "Fall")
 release_year <- ifelse(cmonth < 4, cyear - 1, cyear)
 release <- paste0(release_season, release_year)
 release_title <- paste(release_season, release_year)
+
+localrun <- TRUE
+
+
+stepback <- tryCatch({
+  # Attempt to read the file from the URL
+  if(localrun){
+    data.table::fread(here("real_time_publication", "forecasts", paste0("forecasts_", release, ".csv")))
+  }
+
+  else {
+    read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/forecasts/forecasts_", release, ".csv"))
+  }
+
+  FALSE
+
+}, error = function(e) {
+  # If an error occurs (e.g., file not found), set month to 9
+  #message("Current release not yet out, default to previous season")
+
+  return(TRUE)
+})
+
+if(stepback){
+
+  release_year <- ifelse(release_season == "Spring", release_year - 1, release_year)
+  release_season <- ifelse(release_season == "Spring", "Fall", "Spring")
+  release <- paste0(release_season, release_year)
+  release_title <- paste(release_season, release_year)
+}
+
+print(release)
 
 
 ui <- fluidPage(
@@ -235,19 +268,24 @@ server <- function(input, output) {
                          "by the IMF.",
                          sep = "\n"))
   }
-  #read in data
-  qufcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/forecasts/forecasts_", release, ".csv")) |>
-    setDT()
-  realized_vals <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/imf-data/historicvalues_", release, ".csv"))|>
-    setDT()
-  point_fcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/imf-data/pointforecasts_", release, ".csv"))|>
-    setDT()
-  #qufcs <- data.table::fread(here("..", "MacroPI_check", "MacroPI", "forecasts", paste0("forecasts_", release, ".csv"))) |>
-  #  setDT()
-  #realized_vals <- data.table::fread(here("..", "MacroPI_check", "MacroPI", "imf-data", paste0("historicvalues_", release, ".csv"))) |>
-  #  setDT()
-  #point_fcs <- data.table::fread(  here("..", "MacroPI_check", "MacroPI", "imf-data", paste0("pointforecasts_", release, ".csv"))) |>
-  #  setDT()
+
+  if(localrun){
+
+    qufcs <- data.table::fread(here("real_time_publication", "forecasts", paste0("forecasts_", release, ".csv"))) |>
+      setDT()
+    realized_vals <- data.table::fread(here("real_time_publication", "imf-data", paste0("historicvalues_", release, ".csv"))) |>
+      setDT()
+    point_fcs <- data.table::fread(  here("real_time_publication", "imf-data", paste0("pointforecasts_", release, ".csv"))) |>
+      setDT()
+  } else {
+    qufcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/forecasts/forecasts_", release, ".csv")) |>
+      setDT()
+    realized_vals <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/imf-data/historicvalues_", release, ".csv"))|>
+      setDT()
+    point_fcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/imf-data/pointforecasts_", release, ".csv"))|>
+      setDT()
+  }
+
 
 
   cis <- c(0.5, 0.8)
@@ -284,7 +322,7 @@ server <- function(input, output) {
                            setnames("true_value", "prediction") |>
                            .d(target_year >= release_year - 1)
                          )
-    #cyear <- min(linerange_dat$target_year)
+
     labeldat_80_cy <- linerange_dat |>
       copy() |>
       .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
@@ -347,7 +385,6 @@ server <- function(input, output) {
                            .d(target_year >= release_year - 1)
     )
 
-    #cyear <- min(linerange_dat$target_year)
     labeldat_80_cy <- linerange_dat |>
       copy() |>
       .d(, (cols) := lapply(.SD, function(val) as.character(round(val, 1))), .SDcols = cols) |>
