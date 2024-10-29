@@ -19,6 +19,7 @@ realized_vals <- weodat |>
   .d(target_year > vis_begin_yr) |>
   .d(, .(country, target, target_year, true_value)) |>
   .d(!is.na(true_value)) |>
+  .d(, target := ifelse(target == "ngdp_rpch", "gdp_growth", "inflation")) |>
   unique()
 
 point_forecasts <- weodat |>
@@ -31,5 +32,5 @@ point_forecasts <- weodat |>
   .d(, .(country, target, target_year, prediction))
 
 data.table::fwrite(realized_vals, here(path_dest, "imf-data", paste0("historicvalues_", current_yr_season$identifier, ".csv")))
-data.table::fwrite(realized_vals, here(path_dest, "imf-data", paste0("pointforecasts_", current_yr_season$identifier, ".csv")))
+data.table::fwrite(point_forecasts, here(path_dest, "imf-data", paste0("pointforecasts_", current_yr_season$identifier, ".csv")))
 

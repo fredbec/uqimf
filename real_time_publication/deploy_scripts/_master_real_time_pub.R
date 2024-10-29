@@ -11,7 +11,7 @@ devtools::load_all()
 ready_to_publish <- FALSE
 publish_dest <- here("..", "MacroPI")
 
-download_data <- TRUE
+download_data <- FALSE
 
 
 #folder to save forecasts into
@@ -22,7 +22,7 @@ location_download <- here("real_time_publication", "downloaded_data")
 tv_release <- specs$tv_release
 
 
-if(downdload_data){
+if(download_data){
   source(here("scripts", "download-data.R"))
 }
 source(here("scripts", "process-weo.R"))
