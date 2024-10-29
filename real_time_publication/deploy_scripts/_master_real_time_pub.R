@@ -11,7 +11,7 @@ devtools::load_all()
 ready_to_publish <- FALSE
 publish_dest <- here("..", "MacroPI")
 
-download_data <- FALSE
+download_data <- TRUE
 
 
 #folder to save forecasts into

@@ -8,7 +8,7 @@ DT <- `[`
 #devtools::install_github("https://github.com/fredbec/imfpp")
 
 #then downdload IMF data
-imfpp::download.process.weo(includeGeoData = FALSE)
+imfpp::download.process.weo(includeGeoData = FALSE, includeCountryGroups = TRUE)
 
 #this alos downloads two datafiles, WB_LFP, WB_GDPpC, these can be deleted
 
@@ -16,9 +16,7 @@ weodat <- data.table::fread(here("WEOforecasts_tidy.csv"))
 
 #save as parquet to limit file size for GitHub
 write_parquet(weodat, here(location_download, "WEOforecasts_prefilter.parquet"))
+file.remove(here("WEOforecasts.csv"))
 file.remove(here("WEOforecasts_tidy.csv"))
 
-#also remove extra files that come with the download
-file.remove(here("FMEcongroup.xlsx"))
-file.remove(here("WB_GDPpC.xls"))
-file.remove(here("WB_LFP.xls"))
+file.remove(here("FMEconGroup.xlsx"))
