@@ -16,7 +16,6 @@ weodat <- data.table::fread(here("WEOforecasts_tidy.csv"))
 
 #save as parquet to limit file size for GitHub
 write_parquet(weodat, here(location_download, "WEOforecasts_prefilter.parquet"))
-file.remove(here("WEOforecasts.csv"))
 file.remove(here("WEOforecasts_tidy.csv"))
 
 file.remove(here("FMEconGroup.xlsx"))

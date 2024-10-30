@@ -48,9 +48,6 @@ if(stepback){
   release_title <- paste(release_season, release_year)
 }
 
-print(release)
-
-
 ui <- fluidPage(
 
   # App title ----
@@ -218,7 +215,9 @@ server <- function(input, output) {
                    aes(x = x, y = y, label = label),
                    color = "grey50",
                    alpha = 0.45,
-                   size=4.35 , angle=45, fontface="bold")
+                   size=4.35 ,
+                   #angle=45,
+                   fontface="bold")
       }) +
       theme_uqimf() %+replace%
       theme(
@@ -262,7 +261,7 @@ server <- function(input, output) {
                          "IMF point forecast errors.",
                          "",
                          "Our forecasts are publicly available and documented in the following",
-                         "Github repository: https://github.com/MacroPrediction/MacroPI/ ",
+                         "Github repository: https://github.com/KITmetricslab/MacroPI/ ",
                          "",
                          "Please note that this project is not affiliated with or endorsed",
                          "by the IMF.",

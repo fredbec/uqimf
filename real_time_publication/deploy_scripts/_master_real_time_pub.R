@@ -29,7 +29,7 @@ source(here("scripts", "process-weo.R"))
 weodat <- fread(here(location_download, "weodat.csv"))
 current_yr_season <- get_current_year_season(weodat)
 
-#process further
+#process further (change row order, change some column names)
 source(here("real_time_publication", "deploy_scripts", "process_weo_real_time_pub.R"))
 weodat <- fread(here(location_download, "weodat.csv"))
 
@@ -41,8 +41,8 @@ source(here("real_time_publication", "deploy_scripts", "check_forecast_data.R"))
 
 if(ready_to_publish){
 
-  forecasts <- data.table::fread(here(path_dest, "forecasts", paste0("forecasts", current_yr_season$identifier, ".csv")))
-  data.table::fwrite(forecasts, here(publish_dest, "forecasts", paste0("forecasts", current_yr_season$identifier, ".csv")))
+  forecasts <- data.table::fread(here(path_dest, "forecasts", paste0("forecasts_", current_yr_season$identifier, ".csv")))
+  data.table::fwrite(forecasts, here(publish_dest, "forecasts", paste0("forecasts_", current_yr_season$identifier, ".csv")))
 
   realized_vals <- data.table::fread(here(path_dest, "imf-data", paste0("historicvalues_", current_yr_season$identifier, ".csv")))
   data.table::fwrite(realized_vals, here(publish_dest, "imf-data", paste0("historicvalues_", current_yr_season$identifier, ".csv")))
