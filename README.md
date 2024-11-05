@@ -51,25 +51,25 @@ further links to a dashboard, a preregistration protocol, etc.
 More details on each folder can be found in its own respective section
 further below.
 
-| Folder                                      | Purpose                                                                                                                                    |
-|---------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| [`benchmarks`](benchmarks/)                 | Code and forecast data of benchmark forecasts.                                                                                             |
-| [`data`](data/)                             | Processed WEO and benchmark forecast data.                                                                                                 |
-| [`miscellanous`](miscellanous/)             | Files that are not relevant for the final analysis (exploratory scripts, presentation files, etc). Kept for completeness and transparency. |
-| [`oecd_data`](oecd_data/)                   | OECD truth data used for fitting benchmarks and for robustness checks.                                                                     |
-| [`quantile_forecasts`](quantile_forecasts/) | The generated forecast intervals, recorded via their upper and lower endpoints.                                                            |
-| [`R`](R/)                                   | R functions used in the analysis and for evaluation.                                                                                       |
-| [`scores`](scores/)                         | Scores of forecasts.                                                                                                                       |
-| [`scripts`](scripts/)                       | Executive scripts to produce all results.                                                                                                  |
-| [`specs`](specs/)                           | Specifications and global options for the analysis.                                                                                        |
+| Folder | Purpose |
+|----|----|
+| [`benchmarks`](benchmarks/) | Code and forecast data of benchmark forecasts. |
+| [`data`](data/) | Processed WEO and benchmark forecast data. |
+| [`miscellanous`](miscellanous/) | Files that are not relevant for the final analysis (exploratory scripts, presentation files, etc). Kept for completeness and transparency. |
+| [`oecd_data`](oecd_data/) | OECD truth data used for fitting benchmarks and for robustness checks. |
+| [`quantile_forecasts`](quantile_forecasts/) | The generated forecast intervals, recorded via their upper and lower endpoints. |
+| [`R`](R/) | R functions used in the analysis and for evaluation. |
+| [`scores`](scores/) | Scores of forecasts. |
+| [`scripts`](scripts/) | Executive scripts to produce all results. |
+| [`specs`](specs/) | Specifications and global options for the analysis. |
 
-## General notes on naming data files
+## General notes on the naming of data files
 
 Note that data files in this repository are generally identified with
 some “core-name”, e.g. quantile_forecasts, and then with prefixes and/or
 suffixes that further describe deviations from the default setting.
 
-- Default setting: training data (target years 2001-2012); absolute
+- default setting: training data (target years 2001-2012); absolute
   error method; IMF WEO truth data; complete data before discarding
   instances for scoring
 - “ho” suffix: holdout data (target years 2013-2023)
@@ -77,6 +77,11 @@ suffixes that further describe deviations from the default setting.
 - “oecd” prefix: OECD truth data (used for robustness check)
 - “to_score” prefix: excludes some instances for scoring data. All
   scores in scores/ folder are calculated based on these data versions.
+- “bvarspecs” prefix: for scoring different BVAR specifications
+  (benchmark models) against each other. Excludes more instances, for
+  data availability reasons.
+
+## Contents of individual folders
 
 ### R folder
 

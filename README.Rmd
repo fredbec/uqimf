@@ -64,16 +64,19 @@ Folder | Purpose
 [`scripts`](scripts/) | Executive scripts to produce all results.
 [`specs`](specs/) | Specifications and global options for the analysis.
 
-## General notes on naming data files
+## General notes on the naming of data files
 
 Note that data files in this repository are generally identified with some "core-name", e.g. quantile_forecasts, and then with prefixes and/or suffixes that further describe deviations from the default setting.
 
-- Default setting: training data (target years 2001-2012); absolute error method; IMF WEO truth data; complete data before discarding instances for scoring
+- default setting: training data (target years 2001-2012); absolute error method; IMF WEO truth data; complete data before discarding instances for scoring
 - "ho" suffix: holdout data (target years 2013-2023)
 - "directional" suffix: directional error method
 - "oecd" prefix: OECD truth data (used for robustness check)
-- "to_score" prefix: excludes some instances for scoring data. All scores in scores/ folder are calculated based on these data versions. 
+- "to_score" prefix: excludes some instances for scoring data. All scores in scores/ folder are calculated based on these data versions.
+- "bvarspecs" prefix: for scoring different BVAR specifications (benchmark models) against each other. Excludes more instances, for data availability reasons.
 
+
+## Contents of individual folders
 
 ### R folder
 

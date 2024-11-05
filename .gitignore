@@ -94,6 +94,8 @@ scripts/old
 benchmarks/old
 scores/R_value_scores/old
 
+#package things that are not needed for Github
+
 
 ##things from miscellaneous folder
 #old minor analysis files
@@ -102,3 +104,22 @@ miscellaneous/exploratory_scripts/old/
 miscellaneous/simulations/results
 #notes
 miscellaneous/misc_notes/
+
+#package things that are not needed for Github
+man/
+
+#check
+makesafecopiesforchecking.R
+quantile_forecasts/quantile_forecasts_check.csv
+quantile_forecasts/quantile_forecasts_ho_check.csv
+quantile_forecasts/quantile_forecasts_directional_check.csv
+scores/ci_scores_check.csv
+scores/ci_scores_directional_check.csv
+
+data/real_time_publicationweodat.csv
+
+
+#Documentation files for upload
+Instructions_MacroPI.tex
+Instructions_MacroPI.pdf
+directory.jpg
