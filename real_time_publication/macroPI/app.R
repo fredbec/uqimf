@@ -4,6 +4,7 @@ library(ggplot2)
 library(MetBrewer)
 library(patchwork)
 library(ggpubr)
+library(bslib)
 
 #source(here("test-macropi", "shiny-plot-deploy-function.R"))
 
@@ -18,7 +19,7 @@ release_year <- ifelse(cmonth < 4, cyear - 1, cyear)
 release <- paste0(release_season, release_year)
 release_title <- paste(release_season, release_year)
 
-localrun <- TRUE
+localrun <- FALSE
 
 
 stepback <- tryCatch({
@@ -48,28 +49,30 @@ if(stepback){
   release_title <- paste(release_season, release_year)
 }
 
-ui <- fluidPage(
-
-  # App title ----
-  titlePanel("Simple Macroeconomic Forecast Distributions"),
-
-
-
-  #Main plot with series and forecast intervals for G7 countries
-
-  fluidRow(
-    column(12,
-
-           # Output: Tabset w/ plot, summary, and table ----
-           tabsetPanel(type = "tabs",
-                       tabPanel(paste0(release_title, " Forecasts - Inflation"), plotOutput(outputId = "allcplot_inflation",
-                                                   height = 1000, width = 1000)),
-                       tabPanel(paste0(release_title, " Forecasts - GDP Growth"), plotOutput(outputId = "allcplot_gdp",
-                                                      height = 1000, width = 1000))
-           )
-    )
+ui <- page_sidebar(
+  title = "Simple Macroeconomic Forecast Distributions",
+  sidebar = sidebar(paste(paste0("This panel contains distributional forecasts for GDP Growth and inflation, in the"),
+                          "format of prediction intervals, for G7 countries and current and next",
+                          "year's target. \n",
+                          "Our distributional forecasts are constructed around the current IMF",
+                          "point forecasts and the methodology to create them is based on past",
+                          "IMF point forecast errors.\n",
+                          "Our forecasts are publicly available and documented in the following",
+                          "Github repository: https://github.com/KITmetricslab/MacroPI/ \n",
+                          "",
+                          "Please note that this project is not affiliated with or endorsed",
+                          "by the IMF.",
+                          sep = "\n")),
+  card(
+    plotOutput(outputId = "allcplot_gdp",
+               height = 6000, width = 1000)
+  ),
+  card(
+    plotOutput(outputId = "allcplot_inflation",
+               height = 6000, width = 1000)
   )
 )
+
 
 
 server <- function(input, output) {
@@ -160,6 +163,8 @@ server <- function(input, output) {
 
     .d <- `[`
 
+    textsize_y <- 18
+
     trgt <- unique(realized_series$target)
     qus_list <- qu_lvls(cis) |>
       lapply(as.list)
@@ -222,12 +227,21 @@ server <- function(input, output) {
       theme_uqimf() %+replace%
       theme(
         legend.position = "right",
-        legend.text=element_text(size=12),
+        #legend.text=element_text(size=12),
         plot.title = element_text(hjust = 0.5,
                                   vjust = 3,
                                   colour = colorscale[plot_country],
                                   size = 18,
-                                  face = "bold")) +
+                                  face = "bold"),
+        axis.text.x = element_blank(),
+        #axis.text.x = element_text(size = textsize_y, angle = 90, hjust = .5, vjust = .5, face = "plain"),
+        #strip.text = element_text(size = 8),
+        axis.text.y = element_text(size = textsize_y),
+        axis.title.y = element_text(size = textsize_y, angle = 90, vjust = 2),
+        strip.text = element_text(size=textsize_y),
+        legend.text=element_text(size=textsize_y),
+        legend.title=element_blank(),
+        plot.margin = margin(t=10,b=10,r=10,l=10, unit = "pt")) +
       scale_alpha_manual(name = "",
                          breaks = c("50% Interval", "80% Interval"),
                          values = c("50% Interval" = 0.6, "80% Interval" = 0.4),
@@ -238,9 +252,9 @@ server <- function(input, output) {
                          values = c("IMF Point Forecast" = 19),
                          guide = guide_legend(override.aes = list(color = "grey30") )) +
       scale_linetype_manual(name = "LEGEND",
-                         breaks = c("Realized Series", "Projection"),
-                         values = c("Realized Series" = "solid", "Projection" = "dashed"),
-                         guide = guide_legend(override.aes = list(color = "grey30") ))
+                            breaks = c("Realized Series", "Projection"),
+                            values = c("Realized Series" = "solid", "Projection" = "dashed"),
+                            guide = guide_legend(override.aes = list(color = "grey30") ))
 
   }
 
@@ -252,20 +266,20 @@ server <- function(input, output) {
     778899"
 
   displaytext <-  function(targetlabel){
-    return(paste(paste0("This site contains distributional forecasts for ", targetlabel, " in the"),
-                         "format of prediction intervals, for G7 countries and current and next",
-                         "year's target",
-                         "",
-                         "Our distributional forecasts are constructed around the current IMF",
-                         "point forecasts and the methodology to create them is based on past",
-                         "IMF point forecast errors.",
-                         "",
-                         "Our forecasts are publicly available and documented in the following",
-                         "Github repository: https://github.com/KITmetricslab/MacroPI/ ",
-                         "",
-                         "Please note that this project is not affiliated with or endorsed",
-                         "by the IMF.",
-                         sep = "\n"))
+    return(paste(paste0("This panel contains distributional forecasts for ", targetlabel, " in the"),
+                 "format of prediction intervals, for G7 countries and current and next",
+                 "year's target",
+                 "",
+                 "Our distributional forecasts are constructed around the current IMF",
+                 "point forecasts and the methodology to create them is based on past",
+                 "IMF point forecast errors.",
+                 "",
+                 "Our forecasts are publicly available and documented in the following",
+                 "Github repository: https://github.com/KITmetricslab/MacroPI/ ",
+                 "",
+                 "Please note that this project is not affiliated with or endorsed",
+                 "by the IMF.",
+                 sep = "\n"))
   }
 
   if(localrun){
@@ -320,7 +334,7 @@ server <- function(input, output) {
                            copy() |>
                            setnames("true_value", "prediction") |>
                            .d(target_year >= release_year - 1)
-                         )
+    )
 
     labeldat_80_cy <- linerange_dat |>
       copy() |>
