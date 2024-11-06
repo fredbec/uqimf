@@ -50,26 +50,26 @@ if(stepback){
 }
 
 ui <- page_sidebar(
-  title = "Simple Macroeconomic Forecast Distributions",
-  sidebar = sidebar(paste(paste0("This panel contains distributional forecasts for GDP Growth and inflation, in the"),
-                          "format of prediction intervals, for G7 countries and current and next",
-                          "year's target. \n",
-                          "Our distributional forecasts are constructed around the current IMF",
-                          "point forecasts and the methodology to create them is based on past",
-                          "IMF point forecast errors.\n",
-                          "Our forecasts are publicly available and documented in the following",
-                          "Github repository: https://github.com/KITmetricslab/MacroPI/ \n",
-                          "",
-                          "Please note that this project is not affiliated with or endorsed",
-                          "by the IMF.",
-                          sep = "\n")),
+  title = "Simple Macroeconomic Forecast Distributions for the G7 Economies",
+  sidebar = sidebar("These panels contain forecast intervals for growth and inflation
+                    in the G7 countries and current and next
+                    year's target.", tags$br(), tags$br(),
+                    "Our forecast intervals are constructed around the current IMF
+                    point forecasts and the methodology to create them is based on past
+                    IMF point forecast errors.",tags$br(), tags$br(),
+                    "All forecast intervals are publicly available via Github
+                    (repo name: KITmetricslab/MacroPI)",tags$br(), tags$br(),
+                    "Please note that this project is not affiliated with or endorsed
+                    by the IMF."),
   card(
+    card_header(paste0("GDP Growth Forecasts - ", release_title)),
     plotOutput(outputId = "allcplot_gdp",
-               height = 6000, width = 1000)
+               height = 1000, width = 1400)
   ),
   card(
+    card_header(paste0("Inflation Forecasts - ", release_title)),
     plotOutput(outputId = "allcplot_inflation",
-               height = 6000, width = 1000)
+               height = 1000, width = 1400)
   )
 )
 
@@ -163,7 +163,7 @@ server <- function(input, output) {
 
     .d <- `[`
 
-    textsize_y <- 18
+    textsize_y <- 12
 
     trgt <- unique(realized_series$target)
     qus_list <- qu_lvls(cis) |>
@@ -190,6 +190,7 @@ server <- function(input, output) {
       ylab(plot_target_label()[trgt]) +
       ylim(minval, ylimmax) +
       xlab("") +
+      scale_x_continuous(breaks=seq(cyear-7, cyear+1, 1)) +
       ggtitle(plot_country_label()[plot_country]) +
       scale_color_met_d("Hokusai1") +
       lapply(qus_list, function(qupr){
@@ -233,9 +234,9 @@ server <- function(input, output) {
                                   colour = colorscale[plot_country],
                                   size = 18,
                                   face = "bold"),
-        axis.text.x = element_blank(),
         #axis.text.x = element_text(size = textsize_y, angle = 90, hjust = .5, vjust = .5, face = "plain"),
         #strip.text = element_text(size = 8),
+        axis.text.x = element_text(size = textsize_y),
         axis.text.y = element_text(size = textsize_y),
         axis.title.y = element_text(size = textsize_y, angle = 90, vjust = 2),
         strip.text = element_text(size=textsize_y),
@@ -264,6 +265,9 @@ server <- function(input, output) {
     "112333
     445566
     778899"
+  patchwork_layout2 <-
+    "11223344
+    55667788"
 
   displaytext <-  function(targetlabel){
     return(paste(paste0("This panel contains distributional forecasts for ", targetlabel, " in the"),
@@ -311,7 +315,7 @@ server <- function(input, output) {
 
   #######################################Inflation#####################################
   infl <- reactive({
-    ylimmax <- 9.5
+    ylimmax <- 11
     trgt <- "inflation"
     ylabel <- "Inflation rate (in %)"
     textlabel <- "CPI inflation"
@@ -342,27 +346,28 @@ server <- function(input, output) {
       .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
       .d(, .(country, target, target_year, quantile0.1, quantile0.9)) |>
       dcast(country + target ~ target_year, value.var = c("quantile0.1", "quantile0.9")) |>
-      .d(, x :=  release_year - 4.55) |>
-      .d(, y := ylimmax - 1.85) |>
-      .d(, label := paste0("80% Prediction Interval:", "\n", release_year, ": ", get(paste0("quantile0.1_", release_year)), "% to ", get(paste0("quantile0.9_", release_year)) , "%", "\n",
+      .d(, x :=  release_year - 5.1) |>
+      .d(, y := ylimmax - 1.75) |>
+      .d(, label := paste0("80% Forecast Intervals:", "\n", release_year, ": ", get(paste0("quantile0.1_", release_year)), "% to ", get(paste0("quantile0.9_", release_year)) , "%", "\n",
                            release_year+1, ": ", get(paste0("quantile0.1_", release_year+1)), "% to ", get(paste0("quantile0.9_", release_year+1)) , "%"))
     ###########################################################################
 
     plotlist <- lapply(as.list(unique(qufcs$country)),
-                       function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, list(labeldat_80_cy), pltc, colors, cis))
+                       function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, list(labeldat_80_cy), pltc, colors, cis, ylimmax = ylimmax))
 
 
     text2 <- get_legend(plotlist[[1]])
     text3 <- grid::textGrob(label = displaytext(textlabel),
                             x = unit(0.10, "npc"),
                             hjust = 0)
-    plotlist[[7]]
 
-
-
-    plotlist[[2]] + text2 + text3 + plotlist[[1]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+
+   # text2 + plotlist[[2]] + plotlist[[1]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+
+    #plot_layout(guides = "collect",
+    #              design = patchwork_layout2) &
+    #  theme(legend.position='none')
+    plotlist[[2]] + plotlist[[1]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+ text2 +
       plot_layout(guides = "collect",
-                  design = patchwork_layout) &
+                  design = patchwork_layout2) &
       theme(legend.position='none')
   })
 
@@ -404,25 +409,23 @@ server <- function(input, output) {
       .d(, (cols) := lapply(.SD, function(val) ifelse(grepl("[.]", val), val, paste0(val, ".0"))), .SDcols = cols) |>
       .d(, .(country, target, target_year, quantile0.1, quantile0.9)) |>
       dcast(country + target ~ target_year, value.var = c("quantile0.1", "quantile0.9")) |>
-      .d(, x :=  release_year - 4.55) |>
-      .d(, y := ylimmax - 7.25) |>
-      .d(, label := paste0("80% Prediction Interval:", "\n", release_year, ": ", get(paste0("quantile0.1_", release_year)), "% to ", get(paste0("quantile0.9_", release_year)) , "%", "\n",
+      .d(, x :=  release_year - 5.0) |>
+      .d(, y := ylimmax - 3.25) |>
+      .d(, label := paste0("80% Forecast Intervals:", "\n", release_year, ": ", get(paste0("quantile0.1_", release_year)), "% to ", get(paste0("quantile0.9_", release_year)) , "%", "\n",
                            release_year+1, ": ", get(paste0("quantile0.1_", release_year+1)), "% to ", get(paste0("quantile0.9_", release_year+1)) , "%"))
     ###########################################################################
 
     plotlist <- lapply(as.list(unique(qufcs$country)),
-                       function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, list(labeldat_80_cy), pltc, colors, cis))
+                       function(pltc) shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, list(labeldat_80_cy), pltc, colors, cis, ylimmax = ylimmax))
 
     #print(realized_vals_infl)
     #shinyplot(realized_vals_infl, linerange_dat, point_fcs_infl, dashed_line, list(labeldat_80_cy), "USA", colors, cis)
 
     text2 <- get_legend(plotlist[[1]])
-    text3 <- grid::textGrob(label = displaytext(textlabel),
-                            x = unit(0.10, "npc"),
-                            hjust = 0)
-    plotlist[[2]] + text2 + text3 + plotlist[[1]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+
+
+    plotlist[[2]] + plotlist[[1]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+ text2 +
       plot_layout(guides = "collect",
-                  design = patchwork_layout) &
+                  design = patchwork_layout2) &
       theme(legend.position='none')
   })
 
