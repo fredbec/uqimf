@@ -34,8 +34,7 @@ truth <- data.table::fread(
   here("data", "weodat.csv")
 ) |>
   .d(, .(country, target, target_year, tv_0.5, tv_1, tv_1.5, tv_2)) |>
-  .d(oecd_truth, on = c("country", "target", "target_year"))
-
+  merge(oecd_truth, on = c("country", "target", "target_year"), all.x = TRUE)
 
 if(flag_imputetv05as1){
   cyear <- format(Sys.Date(), "%Y") |> as.numeric()
@@ -43,7 +42,7 @@ if(flag_imputetv05as1){
   truth <- truth |>
     copy() |>
     #.d(target_year == cyear - 1) |>
-    .d(is.na(tv_1) & target_year == cyear - 1,tv_1 := tv_0.5)
+    .d(is.na(tv_1) & target_year == cyear - 2,tv_1 := tv_0.5)
 
   #truth <- truth |>
   #  .d(target_year!= cyear - 1) |>
@@ -55,6 +54,7 @@ truth <- truth |>
   #.d(!is.na(tv_0.5)) |>
   .d(!is.na(get(paste0("tv_", tv_release)))) |>
   unique()
+
 
 
 ################################################################################
