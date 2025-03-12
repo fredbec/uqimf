@@ -75,7 +75,7 @@ emptycontainer <- lapply(qufcs, function(dat){
   if(em_suffix == "absolute"){
     #pava correction for absolute forecasts
     dat <- dat |>
-      empFC_pava()
+      empFC_pava(ci_levels = cis)
 
     data.table::fwrite(dat,
                        here("quantile_forecasts",

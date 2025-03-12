@@ -30,8 +30,8 @@ combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"
 #################score CI's####################################################
 qufcs <- qufcs |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, method, error_method, source)) |>
-  setnames("source", "model") |>
-  .d(quantile %in% qus)
+  setnames("source", "model") #|>
+  #.d(round(quantile,8) %in% qus)
 qufcs_directional <- qufcs_directional |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, method, error_method, source)) |>
   setnames("source", "model") |>

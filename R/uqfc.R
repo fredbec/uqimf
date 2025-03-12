@@ -52,7 +52,7 @@ empFC <- function(weodat,
                   tv_release,
                   error_method = c("directional", "absolute"),
                   method = c("leave-one-out", "rolling window", "expanding window"),
-                  ci_levels = c(0.5, 0.8),
+                  ci_levels = seq(0.1, 0.9, by = 0.1),
                   quantiles = NULL,
                   window_length = NULL,
                   only_errorquants = FALSE,
@@ -93,7 +93,10 @@ empFC <- function(weodat,
 
     } else {
 
-      quantiles <- ci_to_quantiles(ci_levels, error_method = error_method)
+      quantiles <- ci_to_quantiles(ci_levels, error_method = error_method) |>
+        #needed because of fp error
+        round(2)
+
     }
   } else {
     if(is.null(quantiles)){
@@ -168,11 +171,11 @@ empFC <- function(weodat,
 
       quSet_pos <- quSet |>
         data.table::copy() |>
-        .d(, quantile := 0.5 + quantile / 2)
+        .d(, quantile := round(0.5 + quantile / 2, 8))
 
       quSet_neg <- quSet |>
         data.table::copy() |>
-        .d(, quantile := 0.5 - quantile / 2) |>
+        .d(, quantile := round(0.5 - quantile / 2, 8)) |>
         .d(, prediction := - prediction)
 
       quSet <- rbind(quSet_neg,
@@ -211,15 +214,17 @@ empFC <- function(weodat,
 
 ##########NOTE: THIS FUNCTION IS HARDCODED FOR CIs 50 & 80
 empFC_pava <- function(fcdat,
-                       ci_levels = c(0.5, 0.8),
+                       ci_levels = seq(0.1, 0.9, by = 0.1),
                        qutype = 7){
 
   .d <- `[`
 
   qus <- ci_to_quantiles(ci_levels, "directional") |>
+    #needed because of fp error
+    round(8)
     #needed because of floating point error
-    as.character() |>
-    as.numeric()
+    #as.character() |>
+    #as.numeric()
 
   #to merge again later
   extra_cols <- fcdat |>
@@ -230,22 +235,24 @@ empFC_pava <- function(fcdat,
 
   #sometimes there is a floating point error that I can't quite figure out
   #so here's a bit of lazy code to address it
-  fcdat_update <- fcdat |>
-    .d(quantile %in% c(0.1, 0.25, 0.75, 0.9))
+  #fcdat <- fcdat |>
+  # .d(round(quantile,8) %in% seq(0.05, 0.95, by = 0.05))
 
-  if(length(unique(fcdat_update$quantile))<4){
-    message("addressing floating point error")
 
-    fcdat_update <-  fcdat |>
-      .d(quantile %in%  c(0.1 + fperror(), 0.25, 0.75, 0.9))
-  }
+  #if(length(unique(fcdat_update$quantile))<4){
+  #  message("addressing floating point error")
+
+  #fcdat <-  fcdat |>
+  #    .d(quantile %in%  c(0.1, 0.25, 0.75, 0.9))
+  #}
 
   #check again if all quantiles are there
-  if(length(unique(fcdat_update$quantile))<4){
-    stop("quantiles missing. Probably floating point error in filtering")
+  if(length(unique(fcdat$quantile))!=2*length(ci_levels)){
+    #message("change this part")
+    stop("Wrong number of quantiles")
   }
 
-  violations <- fcdat_update |>
+  violations <- fcdat |>
 
     #only keep relevant variables
     .d(, .(country, target, target_year, horizon, error_prediction,
@@ -287,6 +294,7 @@ empFC_pava <- function(fcdat,
   fcs <- extra_cols[violations, on = c("country", "target", "forecast_year", "horizon",
                                        "source", "error_method", "method")] |>
     .d(, prediction := imf_pp + error_prediction) |>
+    .d(, quantile := round(quantile, 8)) |>
     .d(, .(country, target, target_year, imf_pp, horizon, true_value, error, quantile, prediction, error_prediction, source, error_method, method))
 
 

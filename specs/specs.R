@@ -5,16 +5,19 @@ library(data.table)
 specs <- list(
   holdout_split = 2013,
 
+  cset = "base", #"extended" for alternative countries, as defined in next line
+  cset_list = c("KOR", "AUS", "ESP", "NLD", "CHE", "CHN", "IND", "RUS", "BRA", "IDN"),
+
   tv_release = 1,
   window_length = 11,
   max_year = 2023,
   min_year = 1990,
   #score_min_year = ifelse(holdout, 2013, min_year + window_length),
   #score_min_year = min_year + window_length,
-  ci_levels_eval = c(0.5, 0.8),
-  ci_levels_eval_su = c(50, 80), #for scoringutils wrapper
-  ci_levels_make =  seq(0.1, 0.9, by = 0.1),
-  qu_levels = c(0.1, 0.25, 0.75, 0.9),
+  ci_levels_eval = c(0.5, 0.8),#seq(0.1, 0.9, by = 0.1),
+  ci_levels_eval_su = c(50, 80), #seq(10, 90, by = 10), #for scoringutils wrapper
+  ci_levels_make = c(0.5, 0.8),# seq(0.1, 0.9, by = 0.1),
+  qu_levels = c(0.1, 0.25, 0.75, 0.9), #seq(0.05, 0.95, by = 0.05), #c(0.1, 0.25, 0.75, 0.9)
   qutype = 7,
 
   flag_imputetv05as1 = TRUE,

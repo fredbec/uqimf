@@ -23,7 +23,7 @@ ci_to_quantiles <- function(ci_levels,
     qus <- ci_levels
   }
 
-  return(qus)
+  return(round(qus, 2))
 }
 
 
