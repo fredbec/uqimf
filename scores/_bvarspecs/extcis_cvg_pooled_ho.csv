@@ -1,0 +1,7 @@
+model,error_method,method,target,interval_score,dispersion,underprediction,overprediction,coverage_deviation,bias,ae_median,coverage_10,coverage_20,coverage_40,coverage_50,coverage_60,coverage_80,coverage_90
+IMF,absolute,rolling window,ngdp_rpch,,,,0.458323576710063,,,,0.204545454545455,,,,0.65,,0.831818181818182
+IMF,absolute,rolling window,pcpi_pch,,,,0.0886050106590734,,,,0.140909090909091,,,,0.554545454545455,,0.786363636363636
+ar,absolute,rolling window,ngdp_rpch,,,,0.617581390731485,,,,0.190909090909091,,,,0.645454545454546,,0.840909090909091
+ar,absolute,rolling window,pcpi_pch,,,,0.261729812111541,,,,0.113636363636364,,,,0.486363636363636,,0.731818181818182
+bvar,absolute,rolling window,ngdp_rpch,,,,0.674730664182167,,,,0.145454545454545,,,,0.618181818181818,,0.845454545454546
+bvar,absolute,rolling window,pcpi_pch,,,,0.189999892816878,,,,0.131818181818182,,,,0.477272727272727,,0.727272727272727

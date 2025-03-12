@@ -1,0 +1,25 @@
+model,error_method,method,target,horizon,interval_score,dispersion,underprediction,overprediction,coverage_deviation,bias,ae_median,coverage_10,coverage_20,coverage_40,coverage_50,coverage_60,coverage_80,coverage_90
+IMF,directional,rolling window,ngdp_rpch,0,,,,0.0910810003463714,,,,0.0833333333333333,,,,0.516666666666667,,0.766666666666667
+IMF,directional,rolling window,ngdp_rpch,0.5,,,,0.136902211161155,,,,0.133333333333333,,,,0.583333333333333,,0.816666666666667
+IMF,directional,rolling window,ngdp_rpch,1,,,,0.475821489455373,,,,0.05,,,,0.45,,0.783333333333333
+IMF,directional,rolling window,ngdp_rpch,1.5,,,,0.609620546337964,,,,0.0333333333333333,,,,0.416666666666667,,0.7
+IMF,directional,rolling window,pcpi_pch,0,,,,0.0515425742152073,,,,0.0833333333333333,,,,0.483333333333333,,0.783333333333333
+IMF,directional,rolling window,pcpi_pch,0.5,,,,0.0528904113216953,,,,0.0666666666666667,,,,0.516666666666667,,0.75
+IMF,directional,rolling window,pcpi_pch,1,,,,0.108885528485436,,,,0.116666666666667,,,,0.383333333333333,,0.7
+IMF,directional,rolling window,pcpi_pch,1.5,,,,0.115067863015277,,,,0.0666666666666667,,,,0.416666666666667,,0.6
+ar,directional,rolling window,ngdp_rpch,0,,,,0.0990016778037644,,,,0.133333333333333,,,,0.5,,0.816666666666667
+ar,directional,rolling window,ngdp_rpch,0.5,,,,0.207839867227568,,,,0.05,,,,0.483333333333333,,0.8
+ar,directional,rolling window,ngdp_rpch,1,,,,0.6301688518485,,,,0.05,,,,0.533333333333333,,0.766666666666667
+ar,directional,rolling window,ngdp_rpch,1.5,,,,0.738596227230656,,,,0.116666666666667,,,,0.433333333333333,,0.75
+ar,directional,rolling window,pcpi_pch,0,,,,0.0461637164299315,,,,0.0666666666666667,,,,0.4,,0.7
+ar,directional,rolling window,pcpi_pch,0.5,,,,0.0552096352613851,,,,0.0666666666666667,,,,0.516666666666667,,0.733333333333333
+ar,directional,rolling window,pcpi_pch,1,,,,0.243866699630591,,,,0.0333333333333333,,,,0.466666666666667,,0.616666666666667
+ar,directional,rolling window,pcpi_pch,1.5,,,,0.152484010352933,,-0.428333333333333,,0,,,,0.316666666666667,,0.666666666666667
+bvar,directional,rolling window,ngdp_rpch,0,,,,0.0976908129181659,,,,0.1,,,,0.466666666666667,,0.833333333333333
+bvar,directional,rolling window,ngdp_rpch,0.5,,,,0.202230230864306,,,,0.05,,,,0.466666666666667,,0.766666666666667
+bvar,directional,rolling window,ngdp_rpch,1,,,,0.56727108188493,,,,0.1,,,,0.55,,0.75
+bvar,directional,rolling window,ngdp_rpch,1.5,,,,0.709065274359284,,,,0.1,,,,0.5,,0.75
+bvar,directional,rolling window,pcpi_pch,0,,,,0.0429948346820455,,,,0.0666666666666667,,,,0.4,,0.716666666666667
+bvar,directional,rolling window,pcpi_pch,0.5,,,,0.0440949432217269,,,,0.05,,,,0.4,,0.733333333333333
+bvar,directional,rolling window,pcpi_pch,1,,,,0.197627156367296,,,,0.0166666666666667,,,,0.433333333333333,,0.633333333333333
+bvar,directional,rolling window,pcpi_pch,1.5,,,,0.129078209815252,,,,0.0333333333333333,,,,0.25,,0.666666666666667

@@ -12,7 +12,11 @@ holdout_split <- specs$holdout_split
 window_length <- specs$window_length
 quantype <- specs$qutype
 
-cis <- specs$ci_levels_make
+if(specs$ciset == "extended"){
+  cis <- specs$ci_levels_make_extended
+} else {
+  cis <- specs$ci_levels_make
+}
 
 #make all combinations of settings
 combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"))

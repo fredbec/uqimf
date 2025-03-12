@@ -8,9 +8,23 @@ source(here("specs", "specs.R"))
 
 window_length <- specs$window_length
 
-cis <- specs$ci_levels_eval
-qus <- specs$qu_levels
-cis100 <- specs$ci_levels_eval_su #for passing to scoring function
+if(specs$ciset == "extended"){
+  cis <- specs$ci_levels_eval_extended
+} else {
+  cis <- specs$ci_levels_eval
+}
+
+if(specs$ciset == "extended"){
+  qus <- specs$qu_levels_extended
+} else {
+  qus <- specs$qu_levels
+}
+
+if(specs$ciset == "extended"){
+  cis100 <- specs$ci_levels_eval_su_extended
+} else {
+  cis100 <- specs$ci_levels_eval_su
+}
 
 #for scoring point forecasts
 fcdat <- data.table::fread(here("data", paste0(global_file_prefix, "toscore_point_forecasts.csv"))) |>
