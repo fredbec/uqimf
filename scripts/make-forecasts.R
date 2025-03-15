@@ -65,7 +65,7 @@ qufcs <- qufcs |>
   split(by = c("error_method", "holdout"))
 
 
-#then save data and do pava correction
+#then save data, do pava correction and make ensemble
 emptycontainer <- lapply(qufcs, function(dat){
 
   em_suffix <- unique(dat$error_method)
@@ -81,6 +81,15 @@ emptycontainer <- lapply(qufcs, function(dat){
     dat <- dat |>
       empFC_pava(ci_levels = cis)
 
+    ensdat <- dat |>
+      make_ensemble(summary_function = mean,
+                    incl = c("IMF", "ar", "bvar")) |>
+      .d(, error_prediction := NA) |>
+      .d(, error := NA) |>
+      .d(, imf_pp := NA)
+
+    dat <- rbind(dat, ensdat)
+
     data.table::fwrite(dat,
                        here("quantile_forecasts",
                             paste0(global_file_prefix, "quantile_forecasts",split_suffix, ".csv")))
@@ -90,6 +99,15 @@ emptycontainer <- lapply(qufcs, function(dat){
   } else if (em_suffix == "directional"){
 
     if(split_suffix == ""){
+      ensdat <- dat |>
+        make_ensemble(summary_function = mean,
+                      incl = c("IMF", "ar", "bvar")) |>
+        .d(, error_prediction := NA) |>
+        .d(, error := NA) |>
+        .d(, imf_pp := NA)
+
+      dat <- rbind(dat, ensdat)
+
       data.table::fwrite(dat,
                          here("quantile_forecasts",
                               paste0(global_file_prefix, "quantile_forecasts",split_suffix, "_", em_suffix, ".csv")))
