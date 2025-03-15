@@ -48,12 +48,12 @@ qufcs <- qufcs |>
   #.d(round(quantile,8) %in% qus)
 qufcs_directional <- qufcs_directional |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, method, error_method, source)) |>
-  setnames("source", "model") |>
-  .d(quantile %in% qus)
+  setnames("source", "model")# |>
+  #.d(quantile %in% qus)
 qufcs_ho <- qufcs_ho |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, method, error_method, source)) |>
-  setnames("source", "model") |>
-  .d(quantile %in% qus)
+  setnames("source", "model")# |>
+  #.d(quantile %in% qus)
 
 
 scores <- scoreempQu(qufcs, cvg_rg = cis100,

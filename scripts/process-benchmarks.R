@@ -34,7 +34,7 @@ truth <- data.table::fread(
   here("data", "weodat.csv")
 ) |>
   .d(, .(country, target, target_year, tv_0.5, tv_1, tv_1.5, tv_2)) |>
-  merge(oecd_truth, on = c("country", "target", "target_year"), all.x = TRUE)
+  merge(oecd_truth, by = c("country", "target", "target_year"), all.x = TRUE)
 
 if(flag_imputetv05as1){
   cyear <- format(Sys.Date(), "%Y") |> as.numeric()

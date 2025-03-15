@@ -60,14 +60,60 @@ scoreempQu <- function(fcdat,
     fcdat$model <- "model1"
   }
 
-  scores <- fcdat |>
+  fcdat <- fcdat |>
     data.table::copy() |>
-    data.table::setnames(paste0("tv_", tv_release), "true_value", skip_absent = TRUE) |>
-    scoringutils::score() |>
-    scoringutils::add_coverage(by = by, ranges = cvg_rg) |>
+    data.table::setnames(paste0("tv_", tv_release), "observed", skip_absent = TRUE) |>
+    data.table::setnames("true_value", "observed", skip_absent = TRUE) |>
+    data.table::setnames("prediction", "predicted", skip_absent = TRUE) |>
+    data.table::setnames("quantile", "quantile_level", skip_absent = TRUE) |>
+    .d(, .SD, .SDcols = union(by, c("country", "model", "horizon", "target", "target_year", "observed", "predicted", "quantile_level"))) |>
+    scoringutils::as_forecast_quantile()
+
+  scorenames <- scoringutils::get_metrics(fcdat) #to select scoring functions in next step
+
+  is_scores <- fcdat |>
+    data.table::copy() |>
+    scoringutils::score(metrics = list("wis" = scorenames$wis,
+                                       "overprediction" = scorenames$overprediction,
+                                       "underprediction" = scorenames$underprediction,
+                                       "dispersion" = scorenames$dispersion)) |>
     scoringutils::summarise_scores(by = by)
 
-  return(scores)
+  coverage_dat <- fcdat |>
+    scoringutils::get_coverage(by = by)
+
+  dcast_eqn <- paste(by, collapse = " + ")
+
+  cvg_interval <- coverage_dat |>
+    .d(, .SD, .SDcols = c(by, "interval_range", "interval_coverage")) |>
+    unique() |>
+    .d(, interval_range := paste0("coverage_", interval_range)) |>
+    dcast(as.formula(paste(dcast_eqn, "~ interval_range")), value.var = "interval_coverage")
+
+  cvg_quantile <- coverage_dat |>
+    .d(, .SD, .SDcols = c(by, "quantile_level", "quantile_coverage")) |>
+    unique() |>
+    .d(, quantile_level := paste0("qucoverage_", quantile_level*100)) |>
+    dcast(as.formula(paste(dcast_eqn, "~ quantile_level")), value.var = "quantile_coverage")
+
+  all_scores <- cvg_interval[cvg_quantile, on = by] |>
+    .d(is_scores, on = by) |>
+    setnames("wis", "interval_score") |>
+    .d(, .SD,
+       .SDcols = c(by,
+           "interval_score", "dispersion", "underprediction", "overprediction",
+           paste0("coverage_", seq(10, 90, by = 10)),
+           paste0("qucoverage_", c(seq(5,45, by = 5), seq(55, 95, by = 5))))
+       ) |>
+    .d(order(model, target))
+  #data.table::setnames("observed", "true_value", skip_absent = TRUE) |>
+  #data.table::setnames("predicted", "prediction", skip_absent = TRUE) |>
+  #data.table::setnames("quantile_level", "quantile", skip_absent = TRUE) |>
+
+  #scoringutils::add_coverage(by = by, ranges = cvg_rg) |>
+  #scoringutils::summarise_scores(by = by)
+
+  return(all_scores)
 
 }
 
