@@ -60,6 +60,14 @@ scoreempQu <- function(fcdat,
     fcdat$model <- "model1"
   }
 
+  is_50 <- fcdat |>
+    data.table::copy() |>
+    compute_is(50, by = by)
+
+  is_80 <- fcdat |>
+    data.table::copy() |>
+    compute_is(80, by = by)
+
   fcdat <- fcdat |>
     data.table::copy() |>
     data.table::setnames(paste0("tv_", tv_release), "observed", skip_absent = TRUE) |>
@@ -98,10 +106,13 @@ scoreempQu <- function(fcdat,
 
   all_scores <- cvg_interval[cvg_quantile, on = by] |>
     .d(is_scores, on = by) |>
+    .d(is_50, on = by) |>
+    .d(is_80, on = by) |>
     setnames("wis", "interval_score") |>
     .d(, .SD,
        .SDcols = c(by,
            "interval_score", "dispersion", "underprediction", "overprediction",
+           "interval_score_50", "interval_score_80",
            paste0("coverage_", seq(10, 90, by = 10)),
            paste0("qucoverage_", c(seq(5,45, by = 5), seq(55, 95, by = 5))))
        ) |>
@@ -250,4 +261,41 @@ score_by_crps <- function(weodat,
   ) |>
     data.table::rbindlist()
 
+}
+
+#function to compute the interval score
+compute_is <- function(fcdata, cilevel, by){
+
+  lower_br <- 50 - cilevel/2
+  upper_br <- 50 + cilevel/2
+  alph_br <- (1 - (cilevel/100))
+  fact_br <- alph_br / 2
+
+  is_cmpt <- fcdata |>
+    data.table::copy() |>
+    .d(,quantile := 100 * quantile) |>
+    .d(quantile %in% c(lower_br, upper_br))
+
+  if(length(unique(is_cmpt$quantile)) != 2){
+    message(paste0("CI level ", cilevel))
+    stop("Quantile filtering did not work")
+  }
+
+
+  is_cmpt <- is_cmpt |>
+    .d(,quantile := ifelse(quantile < 50, "lower", "upper")) |>
+    dcast(model + error_method + method + country + target + horizon + target_year + true_value ~ quantile, value.var = "prediction") |>
+    .d(, lower_ind := as.numeric(true_value < lower)) |>
+    .d(, upper_ind := as.numeric(true_value > upper)) |>
+    .d(, lower_dist := lower - true_value) |>
+    .d(, upper_dist := true_value - upper) |>
+    .d(, underpred := (fact_br * lower_ind * lower_dist)) |>
+    .d(, overpred := (fact_br * upper_ind * upper_dist)) |>
+    .d(, disp := upper-lower) |>
+    .d(, iscore := disp + underpred + overpred) |>
+    .d(, .SD, .SDcols = c("model", "error_method", "method", "country", "target", "horizon", "target_year", "iscore")) |>
+    .d(, .(interval_score = mean(iscore)), by = by) |>
+    setnames("interval_score", paste0("interval_score_", cilevel))
+
+  return(is_cmpt)
 }
