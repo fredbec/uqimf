@@ -104,6 +104,8 @@ scoreempQu <- function(fcdat,
     .d(, quantile_level := paste0("qucoverage_", quantile_level*100)) |>
     dcast(as.formula(paste(dcast_eqn, "~ quantile_level")), value.var = "quantile_coverage")
 
+  qulvlss <- 100 * ci_to_quantiles(cvg_rg/100, "directional")
+
   all_scores <- cvg_interval[cvg_quantile, on = by] |>
     .d(is_scores, on = by) |>
     .d(is_50, on = by) |>
@@ -113,8 +115,8 @@ scoreempQu <- function(fcdat,
        .SDcols = c(by,
            "interval_score", "dispersion", "underprediction", "overprediction",
            "interval_score_50", "interval_score_80",
-           paste0("coverage_", seq(10, 90, by = 10)),
-           paste0("qucoverage_", c(seq(5,45, by = 5), seq(55, 95, by = 5))))
+           paste0("coverage_", cvg_rg),
+           paste0("qucoverage_", qulvlss))
        ) |>
     .d(order(model, target))
   #data.table::setnames("observed", "true_value", skip_absent = TRUE) |>
