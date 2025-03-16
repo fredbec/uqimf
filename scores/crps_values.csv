@@ -1,0 +1,25 @@
+target,horizon,method,error_method,source,score
+ngdp_rpch,0,rolling window,absolute,IMF,0.275922236532142
+ngdp_rpch,0.5,rolling window,absolute,IMF,0.512874370189804
+ngdp_rpch,1,rolling window,absolute,IMF,1.07430468396267
+ngdp_rpch,1.5,rolling window,absolute,IMF,1.3208747360208
+pcpi_pch,0,rolling window,absolute,IMF,0.141698409286552
+pcpi_pch,0.5,rolling window,absolute,IMF,0.31113147551113
+pcpi_pch,1,rolling window,absolute,IMF,0.557399202583001
+pcpi_pch,1.5,rolling window,absolute,IMF,0.62608920091984
+ngdp_rpch,0,rolling window,absolute,ar,0.364489352888709
+ngdp_rpch,0.5,rolling window,absolute,ar,0.693084681930574
+ngdp_rpch,1,rolling window,absolute,ar,1.40203280036738
+ngdp_rpch,1.5,rolling window,absolute,ar,1.66752848099378
+pcpi_pch,0,rolling window,absolute,ar,0.152158563115892
+pcpi_pch,0.5,rolling window,absolute,ar,0.341895860880605
+pcpi_pch,1,rolling window,absolute,ar,0.94843896727719
+pcpi_pch,1.5,rolling window,absolute,ar,1.36524410248624
+ngdp_rpch,0,rolling window,absolute,bvar,0.359600433909644
+ngdp_rpch,0.5,rolling window,absolute,bvar,0.641509382484514
+ngdp_rpch,1,rolling window,absolute,bvar,1.21316958101603
+ngdp_rpch,1.5,rolling window,absolute,bvar,1.44343412647501
+pcpi_pch,0,rolling window,absolute,bvar,0.148126542421335
+pcpi_pch,0.5,rolling window,absolute,bvar,0.350273890572941
+pcpi_pch,1,rolling window,absolute,bvar,0.740047015862379
+pcpi_pch,1.5,rolling window,absolute,bvar,1.03509862278973
