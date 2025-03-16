@@ -31,6 +31,40 @@ fcdat <- data.table::fread(here("data", paste0(global_file_prefix, "toscore_poin
   .d(target_year <= max_year)
 
 
+############### CRPS by sample ###############################
+weodat_samples <- fcdat |>
+  data.table::copy() |>
+  .d(horizon < 2) |>
+  .d(,.(country, source, target, horizon, target_year, get(paste0("tv_", tv_release)), prediction)) |>
+  data.table::setnames("V6", paste0("tv_", tv_release))
+
+combs_methods <- data.table::CJ(error_method = c("directional", "absolute"),
+                                method = c("rolling window"),
+                                source = c("IMF", "bvar", "ar"))
+
+all_crps <- lapply(1:nrow(combs_methods), function(idx){
+
+  comb_set <- combs_methods[idx,]
+
+  start_year <- specs$holdout_split
+
+  sub_samples <- weodat_samples |>
+    .d(source == comb_set[, "source"])
+
+  score_by_crps(sub_samples, target_years = start_year:max_year, tv_release = tv_release,
+                error_method = comb_set[, "error_method"], method = comb_set[, "method"],
+                window_length = window_length) |>
+    .d(, method := comb_set[, "method"]) |>
+    .d(, error_method := comb_set[, "error_method"]) |>
+    .d(, source := comb_set[, "source"])
+}
+) |>
+  rbindlist() |>
+  .d(, .(score = mean(score)), by = c("target", "horizon", "method", "error_method", "source"))
+
+
+
+
 ####################################read in quantile forecasts########################
 qufcs <- data.table::fread(here("quantile_forecasts",
                                 paste0(global_file_prefix, "toscore", prefix, "_quantile_forecasts.csv")))
@@ -144,6 +178,7 @@ data.table::fwrite(scores_cvgshort_directional, here("scores", prefix, paste0(gl
 data.table::fwrite(scores_cvgshort_ho, here("scores", prefix, paste0(global_file_prefix, "cvg_pooled_ho.csv")))
 
 data.table::fwrite(pp_scores, here("scores", prefix, paste0(global_file_prefix, "pointfc_scores.csv")))
+data.table::fwrite(all_crps, here("scores", prefix, paste0(global_file_prefix, "crps_values.csv")))
 
 if(FALSE){ #placeholder until we have BVAR forecasts for extended countries
 data.table::fwrite(bvar_scores, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores.csv")))

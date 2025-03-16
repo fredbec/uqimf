@@ -249,9 +249,16 @@ score_by_crps <- function(weodat,
       .d(target == comb[2]) |>
       .d(horizon == comb[3])
 
+    if(comb[1] == "JPN"){
+      target_years_sub <- min(target_years):2020
+    } else {
+      target_years_sub <- target_years
+
+    }
+
 
     score_sample(subdat,
-                 target_years = target_years,
+                 target_years = target_years_sub,
                  tv_release = tv_release,
                  country = comb[1],
                  target = comb[2],
