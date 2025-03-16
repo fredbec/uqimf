@@ -440,9 +440,22 @@ compute_is <- function(fcdata, cilevel, by){
   }
 
 
+  dcast_vars <- c("model", "country", "target", "horizon", "target_year", "true_value")
+  subset_vars <- c("model", "country", "target", "horizon", "target_year")
+
+  if(is.null(fcdata$error_method)){
+
+    dcast_eqnbv <- paste(dcast_vars, collapse = " + ")
+  } else {
+
+    dcast_eqnbv <- paste(c(dcast_vars, "method", "error_method"), collapse = " + ")
+    subset_vars <- c(subset_vars, "method", "error_method")
+  }
+
+
   is_cmpt <- is_cmpt |>
     .d(,quantile := ifelse(quantile < 50, "lower", "upper")) |>
-    dcast(model + error_method + method + country + target + horizon + target_year + true_value ~ quantile, value.var = "prediction") |>
+    dcast(as.formula(paste(dcast_eqnbv, "~ quantile")), value.var = "prediction") |>
     .d(, lower_ind := as.numeric(true_value < lower)) |>
     .d(, upper_ind := as.numeric(true_value > upper)) |>
     .d(, lower_dist := lower - true_value) |>
@@ -451,7 +464,7 @@ compute_is <- function(fcdata, cilevel, by){
     .d(, overpred := (fact_br * upper_ind * upper_dist)) |>
     .d(, disp := upper-lower) |>
     .d(, iscore := disp + underpred + overpred) |>
-    .d(, .SD, .SDcols = c("model", "error_method", "method", "country", "target", "horizon", "target_year", "iscore")) |>
+    .d(, .SD, .SDcols = c(subset_vars, "iscore")) |>
     .d(, .(interval_score = mean(iscore)), by = by) |>
     setnames("interval_score", paste0("interval_score_", cilevel))
 

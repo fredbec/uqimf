@@ -172,7 +172,7 @@ pp_scores <- fcdat |>
 
 
 ####################################Score BVAR Quantile Forecasts################################
-if(FALSE){ #placeholder until we have bvar data for extended countries
+#if(FALSE){ #placeholder until we have bvar data for extended countries
 bvar_qus <- data.table::fread(here("benchmarks",
                                    paste0(global_file_prefix, "toscore", prefix, "_bvar_direct_quantile_forecasts.csv"))) |>
   setnames(paste0("tv_", tv_release), "true_value")
@@ -183,13 +183,13 @@ bvar_qus_ho <- data.table::fread(here("benchmarks",
 bvar_qus <- bvar_qus |>
   data.table::copy() |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, source)) |>
-  setnames("source", "model") |>
-  .d(quantile %in% qus)
+  setnames("source", "model") #|>
+  #.d(quantile %in% qus)
 bvar_qus_ho <- bvar_qus_ho |>
   data.table::copy() |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, source)) |>
-  setnames("source", "model") |>
-  .d(quantile %in% qus)
+  setnames("source", "model") #|>
+  #.d(quantile %in% qus)
 
 
 bvar_scores <- scoreempQu(bvar_qus, cvg_rg = cis100,
@@ -208,7 +208,7 @@ bvar_scores_cvgshort_ho <- scoreempQu(bvar_qus_ho, cvg_rg = cis100,
                                    by = c("model", "target"))
 
 
-}
+#}
 
 
 ######################################Saving#######################################################
@@ -229,7 +229,7 @@ data.table::fwrite(all_crps, here("scores", prefix, paste0(global_file_prefix, "
 data.table::fwrite(all_crps_directional, here("scores", prefix, paste0(global_file_prefix, "crps_values_directional.csv")))
 data.table::fwrite(all_crps_ho, here("scores", prefix, paste0(global_file_prefix, "crps_values_ho.csv")))
 
-if(FALSE){ #placeholder until we have BVAR forecasts for extended countries
+#if(FALSE){ #placeholder until we have BVAR forecasts for extended countries
 data.table::fwrite(bvar_scores, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores.csv")))
 data.table::fwrite(bvar_scores_ho, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_ho.csv")))
 
@@ -238,4 +238,4 @@ data.table::fwrite(bvar_scores_cvgshort_ho, here("scores", prefix, paste0(global
 
 data.table::fwrite(bvar_scores_avgcountry, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_avgcnt.csv")))
 data.table::fwrite(bvar_scores_avgcountry_ho, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_avgcnt_ho.csv")))
-}
+#}
