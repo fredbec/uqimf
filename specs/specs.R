@@ -55,7 +55,7 @@ specs <- list(
 error_method <- c("directional", "absolute")
 method <- c("rolling window")
 target <- c("pcpi_pch", "ngdp_rpch")
-source <- c("IMF", "bvar", "ar")
+source <- c("IMF", "bvar", "ar", "ar_bic", "bvar_const")
 
 #make all combinations of settings
 combs <- data.table::CJ(source, target, error_method, method)

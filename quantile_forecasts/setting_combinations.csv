@@ -7,7 +7,15 @@ ar,ngdp_rpch,absolute,rolling window
 ar,ngdp_rpch,directional,rolling window
 ar,pcpi_pch,absolute,rolling window
 ar,pcpi_pch,directional,rolling window
+ar_bic,ngdp_rpch,absolute,rolling window
+ar_bic,ngdp_rpch,directional,rolling window
+ar_bic,pcpi_pch,absolute,rolling window
+ar_bic,pcpi_pch,directional,rolling window
 bvar,ngdp_rpch,absolute,rolling window
 bvar,ngdp_rpch,directional,rolling window
 bvar,pcpi_pch,absolute,rolling window
 bvar,pcpi_pch,directional,rolling window
+bvar_const,ngdp_rpch,absolute,rolling window
+bvar_const,ngdp_rpch,directional,rolling window
+bvar_const,pcpi_pch,absolute,rolling window
+bvar_const,pcpi_pch,directional,rolling window
