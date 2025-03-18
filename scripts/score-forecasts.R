@@ -60,7 +60,7 @@ qufcs_ho <- qufcs_ho |>
 ############### CRPS by sample ###############################
 combs_methods <- data.table::CJ(error_method = c("absolute"),
                                 method = c("rolling window"),
-                                source = c("IMF", "bvar", "ar"))
+                                source = c("IMF", "bvar", "ar", "ar_bic", "bvar", "bvar_const", "mean_ensemble"))
 
 all_crps <- lapply(1:nrow(combs_methods), function(idx){
 
@@ -88,7 +88,7 @@ all_crps <- lapply(1:nrow(combs_methods), function(idx){
 ############### CRPS by sample directional ##############################
 combs_methods <- data.table::CJ(error_method = c("directional"),
                                 method = c("rolling window"),
-                                source = c("IMF", "bvar", "ar"))
+                                source = c("IMF", "bvar", "ar", "ar_bic", "bvar", "bvar_const", "mean_ensemble"))
 
 all_crps_directional <- lapply(1:nrow(combs_methods), function(idx){
 
@@ -111,9 +111,9 @@ all_crps_directional <- lapply(1:nrow(combs_methods), function(idx){
   .d(, .(score = mean(score)), by = c("target", "horizon", "method", "error_method", "source"))
 
 ############### CRPS by sample directional ##############################
-combs_methods <- data.table::CJ(error_method = c("directional"),
+combs_methods <- data.table::CJ(error_method = c("absolute"),
                                 method = c("rolling window"),
-                                source = c("IMF", "bvar", "ar"))
+                                source = c("IMF", "bvar", "ar", "ar_bic", "bvar", "bvar_const", "mean_ensemble"))
 
 all_crps_ho <- lapply(1:nrow(combs_methods), function(idx){
 
