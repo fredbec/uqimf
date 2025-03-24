@@ -285,23 +285,27 @@ score_by_crps_quants <- function(weodat,
 
   combs <- data.table::CJ(unique(weodat$country), unique(weodat$target), unique(weodat$horizon))
 
-
   lapply(1:nrow(combs), function(idx){
     comb <- combs[idx,] |> unlist()
-
 
     subdat <- weodat |>
       .d(country == comb[1]) |>
       .d(target == comb[2]) |>
       .d(horizon == comb[3])
 
-    if(comb[1] == "JPN" & max(target_years)>2020){
+    if(comb[1] == "JPN" & max(weodat$target_year)>2020){
       target_years_sub <- min(target_years):2020
     } else {
       target_years_sub <- target_years
-
     }
 
+    if(unique(subdat$model == "ar_annual-direct")){
+      if(comb[1] == "JPN" & max(target_years)>2020){
+        target_years_sub <- 2014:2020
+      } else {
+        target_years_sub <- 2014:2023
+      }
+    }
 
     score_sample_quants(subdat,
                  target_years = target_years_sub,
