@@ -29,5 +29,8 @@ source(here("scripts", "make-forecasts.R"))
 source(here("scripts", "exclude-from-scoring.R"))
 prefix <- ""
 source(here("scripts", "score-forecasts.R"))
-prefix <- "_bvarspecs"
-source(here("scripts", "score-forecasts.R"))
+
+if(cset == "base"){
+  prefix <- "_bvarspecs"
+  source(here("scripts", "score-forecasts.R"))
+}

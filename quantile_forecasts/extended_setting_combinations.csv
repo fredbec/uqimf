@@ -1,0 +1,3 @@
+source,target,error_method,method
+IMF,ngdp_rpch,absolute,rolling window
+IMF,pcpi_pch,absolute,rolling window

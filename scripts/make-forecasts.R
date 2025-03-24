@@ -19,8 +19,9 @@ if(specs$ciset == "extended"){
 }
 
 #make all combinations of settings
-combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"))
-
+combs <- data.table::fread(here("quantile_forecasts", paste0(specs$cset, "_setting_combinations.csv")))
+#combs <- data.table(source = rep("IMF",2), target = c("ngdp_rpch", "pcpi_pch"),
+#                    error_method = rep("absolute",2), method = rep("rolling window",2))
 
 fcdat <- data.table::fread(here("data", paste0(global_file_prefix, "point_forecasts.csv")))
 
@@ -29,6 +30,7 @@ qufcs <- lapply(1:nrow(combs),
   function(idxsub){
 
     setting <- combs[idxsub]
+
 
     start_year <- min_year + window_length
 
@@ -81,15 +83,16 @@ emptycontainer <- lapply(qufcs, function(dat){
     dat <- dat |>
       empFC_pava(ci_levels = cis)
 
-    ensdat <- dat |>
-      make_ensemble(summary_function = mean,
-                    incl = c("IMF", "ar", "bvar")) |>
-      .d(, error_prediction := NA) |>
-      .d(, error := NA) |>
-      .d(, imf_pp := NA)
+    if(cset == "base"){
+      ensdat <- dat |>
+        make_ensemble(summary_function = mean,
+                      incl = c("IMF", "ar", "bvar")) |>
+        .d(, error_prediction := NA) |>
+        .d(, error := NA) |>
+        .d(, imf_pp := NA)
 
-    dat <- rbind(dat, ensdat)
-
+      dat <- rbind(dat, ensdat)
+    }
     data.table::fwrite(dat,
                        here("quantile_forecasts",
                             paste0(global_file_prefix, "quantile_forecasts",split_suffix, ".csv")))

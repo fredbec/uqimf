@@ -8,7 +8,7 @@ specs <- list(
   cset = "base", #"extended" for alternative countries, as defined in next line
   cset_list = c("KOR", "AUS", "ESP", "NLD", "CHE", "CHN", "IND", "RUS", "BRA", "IDN"),
 
-  ciset = "extended", #"extended" for more CI levels (10,20,...,90)
+  ciset = "base", #"extended" for more CI levels (10,20,...,90)
 
   tv_release = 1,
   window_length = 11,
@@ -58,6 +58,16 @@ target <- c("pcpi_pch", "ngdp_rpch")
 source <- c("IMF", "bvar", "ar", "ar_bic", "bvar_const")
 
 #make all combinations of settings
-combs <- data.table::CJ(source, target, error_method, method)
-data.table::fwrite(combs, here("quantile_forecasts", "setting_combinations.csv"))
+combs <- data.table::CJ(source = source, target = target, error_method = error_method, method = method)
+data.table::fwrite(combs, here("quantile_forecasts", "base_setting_combinations.csv"))
+
+
+error_method_ext <- c("absolute")
+method_ext <- c("rolling window")
+target_ext <- c("pcpi_pch", "ngdp_rpch")
+source_ext <- c("IMF")
+
+#make all combinations of settings
+combs <- data.table::CJ(source = source_ext, target = target_ext, error_method = error_method_ext, method = method_ext)
+data.table::fwrite(combs, here("quantile_forecasts", "extended_setting_combinations.csv"))
 
