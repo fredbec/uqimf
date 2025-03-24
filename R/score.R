@@ -68,6 +68,26 @@ scoreempQu <- function(fcdat,
     data.table::copy() |>
     compute_is(80, by = by)
 
+
+  cvg_rg_list <- as.list(cvg_rg)
+
+  is_unweighted <- lapply(cvg_rg_list, function(cvgrg){
+
+    fcdat |>
+      data.table::copy() |>
+      compute_is(cvgrg, by = by) |>
+      setnames(paste0("interval_score_", cvgrg), "iscore") |>
+      .d(, iscore_rg := cvgrg)
+  }) |>
+    data.table::rbindlist()
+
+  if(length((unique(is_unweighted$iscore_rg))) != length(cvg_rg)){
+    warning("not the correct number of interval scores calculated. Might be an fp error in interval score function")
+  }
+
+  is_unweighted <- is_unweighted |>
+    .d(, .(unweighted_interval_score = mean(iscore)), by = by)
+
   fcdat <- fcdat |>
     data.table::copy() |>
     data.table::setnames(paste0("tv_", tv_release), "observed", skip_absent = TRUE) |>
@@ -110,11 +130,12 @@ scoreempQu <- function(fcdat,
     .d(is_scores, on = by) |>
     .d(is_50, on = by) |>
     .d(is_80, on = by) |>
+    .d(is_unweighted, on = by) |>
     setnames("wis", "interval_score") |>
     .d(, .SD,
        .SDcols = c(by,
            "interval_score", "dispersion", "underprediction", "overprediction",
-           "interval_score_50", "interval_score_80",
+           "interval_score_50", "interval_score_80", "unweighted_interval_score",
            paste0("coverage_", cvg_rg),
            paste0("qucoverage_", qulvlss))
        ) |>
@@ -435,8 +456,8 @@ compute_is <- function(fcdata, cilevel, by){
 
   is_cmpt <- fcdata |>
     data.table::copy() |>
-    .d(,quantile := 100 * quantile) |>
-    .d(quantile %in% c(lower_br, upper_br))
+    .d(,quantile := round(100 * quantile)) |>
+    .d(round(quantile) %in% c(lower_br, upper_br))
 
   if(length(unique(is_cmpt$quantile)) != 2){
     message(paste0("CI level ", cilevel))
