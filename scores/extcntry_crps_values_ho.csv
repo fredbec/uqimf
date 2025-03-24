@@ -1,0 +1,17 @@
+target,horizon,method,error_method,source,score
+ngdp_rpch,0,rolling window,absolute,IMF,0.404526037253359
+ngdp_rpch,0.5,rolling window,absolute,IMF,0.805956233193315
+ngdp_rpch,1,rolling window,absolute,IMF,1.32766173276073
+ngdp_rpch,1.5,rolling window,absolute,IMF,1.52542617529114
+pcpi_pch,0,rolling window,absolute,IMF,0.23662609928328
+pcpi_pch,0.5,rolling window,absolute,IMF,0.675766161321459
+pcpi_pch,1,rolling window,absolute,IMF,1.25148987612744
+pcpi_pch,1.5,rolling window,absolute,IMF,1.47638069941177
+ngdp_rpch,0,rolling window,absolute,ar_annual-direct,1.81507199039346
+ngdp_rpch,0.5,rolling window,absolute,ar_annual-direct,1.83195421682164
+ngdp_rpch,1,rolling window,absolute,ar_annual-direct,1.76289861768957
+ngdp_rpch,1.5,rolling window,absolute,ar_annual-direct,1.77137747446874
+pcpi_pch,0,rolling window,absolute,ar_annual-direct,14.6203765277052
+pcpi_pch,0.5,rolling window,absolute,ar_annual-direct,14.6225559357139
+pcpi_pch,1,rolling window,absolute,ar_annual-direct,16.822992001092
+pcpi_pch,1.5,rolling window,absolute,ar_annual-direct,16.8209690512461
