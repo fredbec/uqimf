@@ -199,9 +199,9 @@ if(cset == "base"){
   ############### CRPS by sample holdout ##############################
   combs_methods <- data.table::CJ(error_method = c("absolute"),
                                   method = c("rolling window"),
-                                  source = c("IMF", "bvar", "ar", "ar_bic", "bvar", "bvar_const", "mean_ensemble",
+                                  source = c("IMF", "bvar", "ar", "ar_bic", "bvar", "bvar_const", "bvar_mix", "mean_ensemble",
                                              "ar-direct", "ar_bic-direct", "bvar_const-direct", "bvar_qu-direct",
-                                             "ar_annual-direct"))
+                                             "ar_annual-direct", "bvar_mix-direct"))
 
   all_crps_ho <- lapply(1:nrow(combs_methods), function(idx){
 
