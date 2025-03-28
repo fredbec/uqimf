@@ -86,7 +86,7 @@ emptycontainer <- lapply(qufcs, function(dat){
     if(cset == "base"){
       ensdat <- dat |>
         make_ensemble(summary_function = mean,
-                      incl = c("IMF", "ar", "bvar")) |>
+                      incl = c("IMF", "ar", "bvar_const")) |>
         .d(, error_prediction := NA) |>
         .d(, error := NA) |>
         .d(, imf_pp := NA)
