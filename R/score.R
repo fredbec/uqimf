@@ -452,7 +452,7 @@ compute_is <- function(fcdata, cilevel, by){
   lower_br <- 50 - cilevel/2
   upper_br <- 50 + cilevel/2
   alph_br <- (1 - (cilevel/100))
-  fact_br <- alph_br / 2
+  fact_br <- 2/alph_br
 
   is_cmpt <- fcdata |>
     data.table::copy() |>
