@@ -2,7 +2,7 @@ library(data.table)
 library(knitr)
 library(kableExtra)
 
-prefix <- "extcis_"
+prefix <- "extcntry_"
 
 
 ciscores <- fread(here("scores", paste0(prefix, "ci_scores_avgcnt_ho.csv")))|>
@@ -41,15 +41,15 @@ crps_qus <- crps |>
 
 scoredat <- rbind(crps_qus, crps_base)
 
-create_latex_table2 <- function(dat){
+create_latex_table2 <- function(dat, tgt){
 
   round_cols_new <- c("(Weighted) IS", "Unweighted IS", "IS 50", "IS 80", "CRPS")#,
-                       #"Deviation 50","Deviation 80")
+  #"Deviation 50","Deviation 80")
 
   round_cols_newer <- c("$\\text{IS}_{W}$", "$\\text{IS}_{U}$",
                         "$\\text{IS}_{50}$", "$\\text{IS}_{80}$",
                         "$\\text{CRPS}$")#,
-                        #"$\\text{Dev}_{50}$", "$\\text{Dev}_{80}$")
+  #"$\\text{Dev}_{50}$", "$\\text{Dev}_{80}$")
 
   singletab <- lapply(dat, function(dt){
 
@@ -83,14 +83,20 @@ create_latex_table2 <- function(dat){
       .d(, horizon := curr_hor) |>
       setnames(round_cols, round_cols_newer)
 
-    }
+  }
   )|>
     rbindlist() |>
     dcast(model + horizon ~ target, value.var = round_cols_newer)
 
+  if(tgt == "CPI"){
+    singletab <- singletab |>
+      .d(, .SD, .SDcols = c("horizon", "model", paste0(round_cols_newer, "_CPI")))
+  } else {
+    singletab <- singletab |>
+      .d(, .SD, .SDcols = c("horizon", "model",
+                            paste0(round_cols_newer, "_GDP")))
+  }
   singletab <- singletab |>
-    .d(, .SD, .SDcols = c("horizon", "model", paste0(round_cols_newer, "_CPI"),
-                          paste0(round_cols_newer, "_GDP"))) |>
     .d(order(horizon)) |>
     .d(, model := fifelse(model == "ar-direct", "Direct: AR",
                           fifelse(model == "ar-annual-direct", "Direct: AR-annual",
@@ -101,8 +107,9 @@ create_latex_table2 <- function(dat){
                                                                   fifelse(model == "ar-bic", "AR-BIC",
                                                                           fifelse(model == "bvar", "BVAR-SV",
                                                                                   fifelse(model == "bvar-const", "BVAR-CP",
-                                                                                          fifelse(model == "mean-ensemble", "AAEnsemble",
-                                                                                                  fifelse(model == "IMF", "AAAIMF", model)))))))))))) |>
+                                                                                          fifelse(model == "arx-annual-direct", "Direct: ARX-annual",
+                                                                                                  fifelse(model == "mean-ensemble", "AAEnsemble",
+                                                                                                          fifelse(model == "IMF", "AAAIMF", model))))))))))))) |>
     .d(order(horizon, model)) |>
     .d(, model := fifelse(model == "AAAIMF", "IMF",
                           fifelse(model == "AAEnsemble", "Ensemble", model))) |>
@@ -111,54 +118,40 @@ create_latex_table2 <- function(dat){
 
 
 
-  singletab <- singletab[1:22, horizon := ""] |>
-    setnames(paste0(round_cols_newer, "_GDP"), paste0(round_cols_newer, "-g")) |>
-    setnames(paste0(round_cols_newer, "_CPI"), paste0(round_cols_newer, "-c")) |>
+  singletab <- singletab[1:nrow(singletab), horizon := ""] |>
+    setnames(paste0(round_cols_newer, "_GDP"), paste0(round_cols_newer, "-g"), skip_absent = TRUE) |>
+    setnames(paste0(round_cols_newer, "_CPI"), paste0(round_cols_newer, "-c"), skip_absent = TRUE) |>
     setnames("horizon", "")  |>
     setnames("model", "")
 
-  dt_latex <- kable(singletab, format = "latex", escape = FALSE, booktabs = TRUE, linesep = c('', '', '', '','','','','','','', '\\addlinespace'),
-              caption = "Interval Scores with Minimums Highlighted") %>%
-          kable_styling(latex_options = c("hold_position"))
+  dt_latex <- kable(singletab, format = "latex", escape = FALSE, booktabs = TRUE, linesep = c('','', '\\addlinespace', '','', '\\addlinespace','','','\\addlinespace','',''),
+                    caption = "Interval Scores with Minimums Highlighted") %>%
+    kable_styling(latex_options = c("hold_position"))
 
 
   dt_latex <- dt_latex |>
-    row_spec(1, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Fall, Current}}}") |>
-    row_spec(12, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Spring, Current}}}")# |>
-   # row_spec(23, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Fall, Next}}}") |>
-   # row_spec(34, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Spring, Next}}}")
-
-  highlight_rows <- c(1, 12)
-  for (i in highlight_rows) {
-    dt_latex <- dt_latex %>%
-      row_spec(i, background = "gray!35")  # Set the background color to grey (light grey)
-  }
-  highlight_rows <- c(2, 13)
-  for (i in highlight_rows) {
-    dt_latex <- dt_latex %>%
-      row_spec(i, background = "gray!15")  # Set the background color to grey (light grey)
-  }
+    row_spec(1, extra_latex = "\\multirow{3}{*}{Fall, Current}") |>
+    row_spec(4, extra_latex = "\\multirow{3}{*}{Spring, Current}") |>
+    row_spec(7, extra_latex = "\\multirow{3}{*}{Fall, Next}") |>
+    row_spec(10, extra_latex = "\\multirow{3}{*}{Spring, Next}")
+  # row_spec(23, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Fall, Next}}}") |>
+  # row_spec(34, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Spring, Next}}}")
 
 
 
   return(dt_latex)
-  }
+}
 
 
 
 
-  # Generate and return the full LaTeX table with bold highlights
-  #kable(dt, format = "latex", escape = FALSE, booktabs = TRUE,
-  #      caption = "Interval Scores with Minimums Highlighted") %>%
-  #  kable_styling(latex_options = c("hold_position"))
+# Generate and return the full LaTeX table with bold highlights
+#kable(dt, format = "latex", escape = FALSE, booktabs = TRUE,
+#      caption = "Interval Scores with Minimums Highlighted") %>%
+#  kable_styling(latex_options = c("hold_position"))
 scoredat1 <- scoredat |>
   copy() |>
-  .d(horizon < 1) |>
-  split(by = c("horizon", "target"))
-scoredat2 <- scoredat |>
-  copy() |>
-  .d(horizon >= 1) |>
+  .d(target == "GDP") |>
   split(by = c("horizon", "target"))
 
-myvals <- create_latex_table2(scoredat1)
-myvals2 <- create_latex_table2(scoredat2)
+myvals <- create_latex_table2(scoredat1, "GDP")

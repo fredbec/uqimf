@@ -2,7 +2,7 @@ library(data.table)
 library(knitr)
 library(kableExtra)
 
-prefix <- "extcntry_"
+prefix <- "extcis_"
 
 
 ciscores <- fread(here("scores", paste0(prefix, "ci_scores_avgcnt_ho.csv")))|>
@@ -10,6 +10,11 @@ ciscores <- fread(here("scores", paste0(prefix, "ci_scores_avgcnt_ho.csv")))|>
   .d(, dev_80 := 100*coverage_80 - 80) |>
   .d(, c("model", "target", "horizon", "interval_score", "unweighted_interval_score", "interval_score_50", "interval_score_80", "dev_50", "dev_80")) |>
   .d(, target := ifelse(target == "ngdp_rpch", "GDP", "CPI"))
+ciscores_base <- fread(here("scores", paste0("ci_scores_avgcnt_ho.csv")))|>
+  .d(, c("model", "target", "horizon", "interval_score")) |>
+  setnames("interval_score", "base_interval_score") |>
+  .d(, target := ifelse(target == "ngdp_rpch", "GDP", "CPI"))
+ciscores <- merge(ciscores, ciscores_base, by = c("model", "target", "horizon"))
 
 crps <- fread(here("scores", paste0(prefix, "crps_values_ho.csv"))) |>
   setnames("source", "model") |>
@@ -31,6 +36,13 @@ ciscores2 <- fread(here("scores", paste0(prefix, "bvar_ci_scores_avgcnt_ho.csv")
   .d(, target := ifelse(target == "ngdp_rpch", "GDP", "CPI")) |>
   .d(, model := gsub("_", "-", model)) |>
   .d(, model := paste0(model, "-direct"))
+ciscores2_base <- fread(here("scores", paste0("bvar_ci_scores_avgcnt_ho.csv"))) |>
+  .d(, c("model", "target", "horizon", "interval_score")) |>
+  setnames("interval_score", "base_interval_score") |>
+  .d(, target := ifelse(target == "ngdp_rpch", "GDP", "CPI")) |>
+  .d(, model := gsub("_", "-", model)) |>
+  .d(, model := paste0(model, "-direct"))
+ciscores2 <- merge(ciscores2, ciscores2_base, by = c("model", "target", "horizon"))
 
 crps_qus <- crps |>
   data.table::copy() |>
@@ -41,14 +53,13 @@ crps_qus <- crps |>
 
 scoredat <- rbind(crps_qus, crps_base)
 
-create_latex_table2 <- function(dat, tgt){
+create_latex_table2 <- function(dat){
 
-  round_cols_new <- c("(Weighted) IS", "Unweighted IS", "IS 50", "IS 80", "CRPS")#,
+  #round_cols_new <- c("CRPS", "(Weighted) IS",  "Unweighted IS", "IS 50", "IS 80")#,
                        #"Deviation 50","Deviation 80")
 
-  round_cols_newer <- c("$\\text{IS}_{W}$", "$\\text{IS}_{U}$",
-                        "$\\text{IS}_{50}$", "$\\text{IS}_{80}$",
-                        "$\\text{CRPS}$")#,
+  round_cols_newer <- c("$\\text{CRPS}^{2)}$", "$\\text{IS}_{W}^{1)}$", "$\\text{IS}_{W,base}^{1)}$", "$\\text{IS}_{U}^{1)}$",
+                        "$\\text{IS}_{50}^{1)}$", "$\\text{IS}_{80}^{1)}$")#,
                         #"$\\text{Dev}_{50}$", "$\\text{Dev}_{80}$")
 
   singletab <- lapply(dat, function(dt){
@@ -56,7 +67,7 @@ create_latex_table2 <- function(dat, tgt){
     curr_hor <- dt$horizon
     curr_tgt <- dt$target
 
-    round_cols <- c("interval_score", "unweighted_interval_score", "interval_score_50", "interval_score_80", "crps")#, "dev_50", "dev_80")
+    round_cols <- c("crps", "interval_score", "base_interval_score", "unweighted_interval_score", "interval_score_50", "interval_score_80")#, "dev_50", "dev_80")
     #round_cols_extra <- c("dev_50", "dev_80")
 
     dt[, (round_cols) := lapply(.SD, round, 3), .SDcols = round_cols]
@@ -88,54 +99,58 @@ create_latex_table2 <- function(dat, tgt){
     rbindlist() |>
     dcast(model + horizon ~ target, value.var = round_cols_newer)
 
-  if(tgt == "CPI"){
-    singletab <- singletab |>
-      .d(, .SD, .SDcols = c("horizon", "model", paste0(round_cols_newer, "_CPI")))
-  } else {
-    singletab <- singletab |>
-      .d(, .SD, .SDcols = c("horizon", "model",
-                            paste0(round_cols_newer, "_GDP")))
-  }
   singletab <- singletab |>
+    .d(, .SD, .SDcols = c("horizon", "model", paste0(round_cols_newer, "_CPI"),
+                          paste0(round_cols_newer, "_GDP"))) |>
     .d(order(horizon)) |>
-    .d(, model := fifelse(model == "ar-direct", "Direct: AR",
-                          fifelse(model == "ar-annual-direct", "Direct: AR-annual",
-                                  fifelse(model == "ar-bic-direct", "Direct: AR-BIC",
-                                          fifelse(model == "bvar-const-direct", "Direct: BVAR-CP",
-                                                  fifelse(model == "bvar-qu-direct", "Direct: BVAR-SV",
-                                                          fifelse(model == "ar", "AR",
-                                                                  fifelse(model == "ar-bic", "AR-BIC",
+    .d(, model := fifelse(model == "ar-direct", "Direct$^{3)}$: AR(1)",
+                          fifelse(model == "ar-annual-direct", "Direct$^{3)}$: AR-annual",
+                                  fifelse(model == "ar-bic-direct", "Direct$^{3)}$: AR(p)",
+                                          fifelse(model == "bvar-const-direct", "Direct$^{3)}$: BVAR-Const.",
+                                                  fifelse(model == "bvar-qu-direct", "Direct$^{3)}$: BVAR-SV",
+                                                          fifelse(model == "ar", "AR(1)",
+                                                                  fifelse(model == "ar-bic", "AR(p)",
                                                                           fifelse(model == "bvar", "BVAR-SV",
-                                                                                  fifelse(model == "bvar-const", "BVAR-CP",
-                                                                                          fifelse(model == "ar-annual-direct", "Direct: AR-annual",
-                                                                                              fifelse(model == "mean-ensemble", "AAEnsemble",
-                                                                                                  fifelse(model == "IMF", "AAAIMF", model))))))))))))) |>
+                                                                                  fifelse(model == "bvar-const", "BVAR-Const.",
+                                                                                          fifelse(model == "bvar-mix", "BVAR-Mix",
+                                                                                                  fifelse(model == "bvar-mix-direct", "Direct$^{3)}$: BVAR-Mix",
+                                                                                                                  fifelse(model == "mean-ensemble", "ZEnsemble",
+                                                                                                                          fifelse(model == "IMF", "AAAIMF", model)))))))))))))) |>
     .d(order(horizon, model)) |>
     .d(, model := fifelse(model == "AAAIMF", "IMF",
-                          fifelse(model == "AAEnsemble", "Ensemble", model))) |>
+                          fifelse(model == "ZEnsemble", "Simple Ensemble$^{3)}$", model))) |>
     .d(, horizon := as.character(horizon))
 
 
+  maxr <- nrow(singletab)
 
-
-  singletab <- singletab[1:nrow(singletab), horizon := ""] |>
-    setnames(paste0(round_cols_newer, "_GDP"), paste0(round_cols_newer, "-g"), skip_absent = TRUE) |>
-    setnames(paste0(round_cols_newer, "_CPI"), paste0(round_cols_newer, "-c"), skip_absent = TRUE) |>
+  singletab <- singletab[1:maxr, horizon := ""] |>
+    setnames(paste0(round_cols_newer, "_GDP"), paste0(round_cols_newer, "-g")) |>
+    setnames(paste0(round_cols_newer, "_CPI"), paste0(round_cols_newer, "-c")) |>
     setnames("horizon", "")  |>
     setnames("model", "")
 
-  dt_latex <- kable(singletab, format = "latex", escape = FALSE, booktabs = TRUE, linesep = c('', '\\addlinespace', '', '\\addlinespace','','\\addlinespace','',''),
+  dt_latex <- kable(singletab, format = "latex", escape = FALSE, booktabs = TRUE, linesep = c('', '', '', '','','','','','','','','', '\\addlinespace\\addlinespace'),
               caption = "Interval Scores with Minimums Highlighted") %>%
           kable_styling(latex_options = c("hold_position"))
 
 
   dt_latex <- dt_latex |>
-    row_spec(1, extra_latex = "\\multirow{2}{*}{Fall, Current}") |>
-    row_spec(2, extra_latex = "\\multirow{2}{*}{Spring, Current}") |>
-    row_spec(4, extra_latex = "\\multirow{2}{*}{Fall, Next}") |>
-    row_spec(6, extra_latex = "\\multirow{2}{*}{Spring, Next}")
+    row_spec(1, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Fall, Current}}}") |>
+    row_spec(14, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Spring, Current}}}")# |>
    # row_spec(23, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Fall, Next}}}") |>
    # row_spec(34, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Spring, Next}}}")
+
+  highlight_rows <- c(1, 14)
+  for (i in highlight_rows) {
+    dt_latex <- dt_latex %>%
+      row_spec(i, background = "gray!35")  # Set the background color to grey (light grey)
+  }
+  highlight_rows <- c(13, maxr)
+  for (i in highlight_rows) {
+    dt_latex <- dt_latex %>%
+      row_spec(i, background = "gray!15")  # Set the background color to grey (light grey)
+  }
 
 
 
@@ -151,7 +166,12 @@ create_latex_table2 <- function(dat, tgt){
   #  kable_styling(latex_options = c("hold_position"))
 scoredat1 <- scoredat |>
   copy() |>
-  .d(target == "GDP") |>
+  .d(horizon < 1) |>
+  split(by = c("horizon", "target"))
+scoredat2 <- scoredat |>
+  copy() |>
+  .d(horizon >= 1) |>
   split(by = c("horizon", "target"))
 
-myvals <- create_latex_table2(scoredat1, "GDP")
+myvals <- create_latex_table2(scoredat1)
+myvals2 <- create_latex_table2(scoredat2)
