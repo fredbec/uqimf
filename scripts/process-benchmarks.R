@@ -70,6 +70,9 @@ if(specs$cset == "extended"){
 ar_datext <- data.table::CJ(unique(weodat$country),
                          c("F", "S"),
                          modelvec)
+arx_datext <- data.table::CJ(unique(weodat$country),
+                             c("F", "S"),
+                             c("annual"))
 
 fcdat_ar <- lapply(1:nrow(ar_datext), function(idx){
   comb <- ar_datext[idx,] |> unlist()
@@ -88,6 +91,25 @@ fcdat_ar <- lapply(1:nrow(ar_datext), function(idx){
   .d(, var := NULL) |>
   .d(, source := ifelse(source == "ar_p1", "ar", source))
 
+
+fcdat_arx <- lapply(1:nrow(arx_datext), function(idx){
+  comb <- arx_datext[idx,] |> unlist()
+
+  dat <- data.table::fread(
+    here("benchmarks", "raw", "forecasts_2025", "fcsts_ar_2025",
+         paste0("fcst_", comb[1], "_", comb[2], "_", "annual_x", ".csv"))
+  ) |>
+    .d(, season := comb[2]) |>
+    .d(, country := comb[1]) |>
+    .d(, source := paste0("arx_", gsub("=", "",comb[3])))
+}
+) |>
+  rbindlist() |>
+  .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
+  .d(, var := NULL) |>
+  .d(, source := ifelse(source == "ar_p1", "arx", source))
+
+fcdat_ar <- rbind(fcdat_ar, fcdat_arx)
 
 #only have alternative point forecasts for G7, otherwise assign NULL datatable
 if(specs$cset == "extended"){
