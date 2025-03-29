@@ -24,7 +24,14 @@ quantile_grid = seq(from = .01, to = .99, by = .01)
 n_q <- length(quantile_grid)
 
 full_dat <- data.table::fread(here("data", "weodat.csv")) |>
-  .d(,target := ifelse(target == "pcpi_pch", "cpi", "gdp"))
+  .d(,target := ifelse(target == "pcpi_pch", "cpi", "gdp")) |>
+  .d(, ind_rus := (target_year < 2000)) |>
+  .d(, ind_bra := (target_year < 1998)) |>
+  .d(, ind_rus := ifelse(ind_rus == 1 & country == "RUS" & target == "cpi", 1, 0))|>
+  .d(, ind_bra := ifelse(ind_bra == 1 & country == "BRA" & target == "cpi", 1, 0)) |>
+  .d(ind_rus == 0 & ind_bra == 0) |>
+  .d(, ind_rus := NULL) |>
+  .d(, ind_bra := NULL)
 
 for(ctry in ctrys){
   for(fsn in fsns){
@@ -34,6 +41,7 @@ for(ctry in ctrys){
 
 
         dat_y <- full_dat |>
+          data.table::copy() |>
           .d(forecast_season == fsn) |>
           .d(country == ctry & target == tgt) |>
           .d(, c("country", "target", "target_year", "forecast_year", "tv_0.5", "tv_1", "horizon", "prediction")) |>
@@ -48,8 +56,7 @@ for(ctry in ctrys){
           unlist()
         Tl <- length(y_dat)
         #for dat_z, we have to select by forecast_year!
-        dat_z <- data.table::fread(here("data", "weodat.csv")) |>
-          .d(,target := ifelse(target == "pcpi_pch", "cpi", "gdp")) |>
+        dat_z <- full_dat |>
           .d(forecast_season == fsn) |>
           .d(country == ctry & target == tgt) |>
           .d(, c("country", "target", "forecast_year", "horizon", "prediction"))
