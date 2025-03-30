@@ -194,16 +194,17 @@ if(specs$cset == "base"){
   bvar_qufcs <- NULL
 }
 
-#bvar_qufcs <- data.table::fread(
-#here("benchmarks", "raw", "forecasts_March2024.csv")) |>
-#  .d(method %in% c("bvar_ciss")) |> #remove Truth and IMF forecasts
-#  .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
-#  .d(, var := NULL) |>
-#  setnames("method", "source")
+bvar_qufcs_ciss <- data.table::fread(
+here("benchmarks", "raw", "forecasts_March2024.csv")) |>
+  .d(method %in% c("bvar_ciss")) |> #remove Truth and IMF forecasts, and old BVAR
+  .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
+  .d(, var := NULL) |>
+  setnames("method", "source")
 
 ar_qufcs <- fcdat_ar
 
-bvar_qufcs <- rbind(bvar_qufcs, ar_qufcs)
+bvar_qufcs <- rbind(bvar_qufcs, ar_qufcs) |>
+  rbind(bvar_qufcs_ciss)
 
 bvar_fc <- hordat[bvar_qufcs, on = c("target_year", "forecast_year", "season")] |>
   .d(!is.na(horizon)) |>

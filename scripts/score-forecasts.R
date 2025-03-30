@@ -117,6 +117,14 @@ bvar_qus_ho <- bvar_qus_ho |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, source)) |>
   setnames("source", "model")
 
+if(prefix != "_bvarspecs"){ #only score in bvarspecs serrint
+  bvar_qus <- bvar_qus |>
+    .d(model != "bvar_ciss")
+
+  bvar_qus_ho <- bvar_qus_ho |>
+    .d(model != "bvar_ciss")
+}
+
 if(specs$ciset == "base"){
   bvar_qus_ho <- bvar_qus_ho |>
     .d(quantile %in% qus)
@@ -156,127 +164,128 @@ bvar_scores_cvgshort_ho <- scoreempQu(bvar_qus_ho, cvg_rg = cis100,
 
 #if(FALSE){
 ############### CRPS by sample ###############################
-if(cset == "base"){
-  combs_methods <- data.table::CJ(error_method = c("absolute"),
-                                  method = c("rolling window"),
-                                  source = c("IMF", "bvar", "ar", "ar_bic", "bvar", "bvar_const", "mean_ensemble",
-                                             "ar-direct", "ar_bic-direct", "bvar_const-direct", "bvar_qu-direct"))
+if(prefix != "_bvarspecs"){ #crps not needed for bvarspecs setting
+  if(cset == "base"){
+    combs_methods <- data.table::CJ(error_method = c("absolute"),
+                                    method = c("rolling window"),
+                                    source = c("IMF", "bvar", "ar", "ar_bic", "bvar", "bvar_const", "mean_ensemble",
+                                               "ar-direct", "ar_bic-direct", "bvar_const-direct", "bvar_qu-direct"))
 
-  all_crps <- lapply(1:nrow(combs_methods), function(idx){
+    all_crps <- lapply(1:nrow(combs_methods), function(idx){
 
-    comb_set <- combs_methods[idx,]
+      comb_set <- combs_methods[idx,]
 
-    start_year <- 2001
+      start_year <- 2001
 
-    sub_samples <- qufcs |>
-      rbind(bvar_qus |>
-              copy() |>
-              .d(, model := paste0(model, "-direct")) |>
-              .d(,method := NA) |>
-              .d(,error_method := NA)) |>
-      .d(model == comb_set[, "source"])
+      sub_samples <- qufcs |>
+        rbind(bvar_qus |>
+                copy() |>
+                .d(, model := paste0(model, "-direct")) |>
+                .d(,method := NA) |>
+                .d(,error_method := NA)) |>
+        .d(model == comb_set[, "source"])
 
-    score_by_crps_quants(sub_samples, target_years = start_year:2012, tv_release = tv_release,
-                         error_method = comb_set[, "error_method"], method = comb_set[, "method"],
-                         window_length = window_length) |>
-      .d(, method := comb_set[, "method"]) |>
-      .d(, error_method := comb_set[, "error_method"]) |>
-      .d(, source := comb_set[, "source"])
+      score_by_crps_quants(sub_samples, target_years = start_year:2012, tv_release = tv_release,
+                           error_method = comb_set[, "error_method"], method = comb_set[, "method"],
+                           window_length = window_length) |>
+        .d(, method := comb_set[, "method"]) |>
+        .d(, error_method := comb_set[, "error_method"]) |>
+        .d(, source := comb_set[, "source"])
+    }
+    ) |>
+      rbindlist() |>
+      .d(, .(score = mean(score)), by = c("target", "horizon", "method", "error_method", "source"))
+
+
+
+
+    ############### CRPS by sample directional ##############################
+    combs_methods <- data.table::CJ(error_method = c("directional"),
+                                    method = c("rolling window"),
+                                    source = c("IMF", "bvar", "ar", "ar_bic", "bvar", "bvar_const", "mean_ensemble"))
+
+    all_crps_directional <- lapply(1:nrow(combs_methods), function(idx){
+
+      comb_set <- combs_methods[idx,]
+
+      start_year <- 2001
+
+      sub_samples <- qufcs_directional |>
+        .d(model == comb_set[, "source"])
+
+      score_by_crps_quants(sub_samples, target_years = start_year:2012, tv_release = tv_release,
+                           error_method = comb_set[, "error_method"], method = comb_set[, "method"],
+                           window_length = window_length) |>
+        .d(, method := comb_set[, "method"]) |>
+        .d(, error_method := comb_set[, "error_method"]) |>
+        .d(, source := comb_set[, "source"])
+    }
+    ) |>
+      rbindlist() |>
+      .d(, .(score = mean(score)), by = c("target", "horizon", "method", "error_method", "source"))
+    ############### CRPS by sample holdout ##############################
+    combs_methods <- data.table::CJ(error_method = c("absolute"),
+                                    method = c("rolling window"),
+                                    source = c("IMF", "bvar", "ar", "ar_bic", "bvar", "bvar_const", "bvar_mix", "mean_ensemble",
+                                               "ar-direct", "ar_bic-direct", "bvar_const-direct", "bvar_qu-direct",
+                                               "ar_annual-direct", "bvar_mix-direct", "arx_annual-direct"))
+
+    all_crps_ho <- lapply(1:nrow(combs_methods), function(idx){
+
+      comb_set <- combs_methods[idx,]
+      start_year <- 2013
+
+      sub_samples <- qufcs_ho  |>
+        rbind(bvar_qus_ho |>
+                copy() |>
+                .d(, model := paste0(model, "-direct")) |>
+                .d(,method := NA) |>
+                .d(,error_method := NA)) |>
+        .d(model == comb_set[, "source"])
+
+      score_by_crps_quants(sub_samples, target_years = start_year:2023, tv_release = tv_release,
+                           error_method = comb_set[, "error_method"], method = comb_set[, "method"],
+                           window_length = window_length) |>
+        .d(, method := comb_set[, "method"]) |>
+        .d(, error_method := comb_set[, "error_method"]) |>
+        .d(, source := comb_set[, "source"])
+    }
+    ) |>
+      rbindlist() |>
+      .d(, .(score = mean(score)), by = c("target", "horizon", "method", "error_method", "source"))
+
+  } else {
+    combs_methods <- data.table::CJ(error_method = c("absolute"),
+                                    method = c("rolling window"),
+                                    source = c("IMF", "ar_annual-direct", "arx_annual-direct"))
+
+    all_crps_ho <- lapply(1:nrow(combs_methods), function(idx){
+
+      comb_set <- combs_methods[idx,]
+      start_year <- 2013
+
+      sub_samples <- qufcs_ho  |>
+        rbind(bvar_qus_ho |>
+                copy() |>
+                .d(, model := paste0(model, "-direct")) |>
+                .d(,method := NA) |>
+                .d(,error_method := NA)) |>
+        .d(model == comb_set[, "source"])
+
+      score_by_crps_quants(sub_samples, target_years = start_year:2023, tv_release = tv_release,
+                           error_method = comb_set[, "error_method"], method = comb_set[, "method"],
+                           window_length = window_length) |>
+        .d(, method := comb_set[, "method"]) |>
+        .d(, error_method := comb_set[, "error_method"]) |>
+        .d(, source := comb_set[, "source"])
+    }
+    ) |>
+      rbindlist() |>
+      .d(, .(score = mean(score)), by = c("target", "horizon", "method", "error_method", "source"))
+
+
   }
-  ) |>
-    rbindlist() |>
-    .d(, .(score = mean(score)), by = c("target", "horizon", "method", "error_method", "source"))
-
-
-
-
-  ############### CRPS by sample directional ##############################
-  combs_methods <- data.table::CJ(error_method = c("directional"),
-                                  method = c("rolling window"),
-                                  source = c("IMF", "bvar", "ar", "ar_bic", "bvar", "bvar_const", "mean_ensemble"))
-
-  all_crps_directional <- lapply(1:nrow(combs_methods), function(idx){
-
-    comb_set <- combs_methods[idx,]
-
-    start_year <- 2001
-
-    sub_samples <- qufcs_directional |>
-      .d(model == comb_set[, "source"])
-
-    score_by_crps_quants(sub_samples, target_years = start_year:2012, tv_release = tv_release,
-                         error_method = comb_set[, "error_method"], method = comb_set[, "method"],
-                         window_length = window_length) |>
-      .d(, method := comb_set[, "method"]) |>
-      .d(, error_method := comb_set[, "error_method"]) |>
-      .d(, source := comb_set[, "source"])
-  }
-  ) |>
-    rbindlist() |>
-    .d(, .(score = mean(score)), by = c("target", "horizon", "method", "error_method", "source"))
-  ############### CRPS by sample holdout ##############################
-  combs_methods <- data.table::CJ(error_method = c("absolute"),
-                                  method = c("rolling window"),
-                                  source = c("IMF", "bvar", "ar", "ar_bic", "bvar", "bvar_const", "bvar_mix", "mean_ensemble",
-                                             "ar-direct", "ar_bic-direct", "bvar_const-direct", "bvar_qu-direct",
-                                             "ar_annual-direct", "bvar_mix-direct", "arx_annual-direct"))
-
-  all_crps_ho <- lapply(1:nrow(combs_methods), function(idx){
-
-    comb_set <- combs_methods[idx,]
-    start_year <- 2013
-
-    sub_samples <- qufcs_ho  |>
-      rbind(bvar_qus_ho |>
-              copy() |>
-              .d(, model := paste0(model, "-direct")) |>
-              .d(,method := NA) |>
-              .d(,error_method := NA)) |>
-      .d(model == comb_set[, "source"])
-
-    score_by_crps_quants(sub_samples, target_years = start_year:2023, tv_release = tv_release,
-                         error_method = comb_set[, "error_method"], method = comb_set[, "method"],
-                         window_length = window_length) |>
-      .d(, method := comb_set[, "method"]) |>
-      .d(, error_method := comb_set[, "error_method"]) |>
-      .d(, source := comb_set[, "source"])
-  }
-  ) |>
-    rbindlist() |>
-    .d(, .(score = mean(score)), by = c("target", "horizon", "method", "error_method", "source"))
-
-} else {
-  combs_methods <- data.table::CJ(error_method = c("absolute"),
-                                  method = c("rolling window"),
-                                  source = c("IMF", "ar_annual-direct", "arx_annual-direct"))
-
-  all_crps_ho <- lapply(1:nrow(combs_methods), function(idx){
-
-    comb_set <- combs_methods[idx,]
-    start_year <- 2013
-
-    sub_samples <- qufcs_ho  |>
-      rbind(bvar_qus_ho |>
-              copy() |>
-              .d(, model := paste0(model, "-direct")) |>
-              .d(,method := NA) |>
-              .d(,error_method := NA)) |>
-      .d(model == comb_set[, "source"])
-
-    score_by_crps_quants(sub_samples, target_years = start_year:2023, tv_release = tv_release,
-                         error_method = comb_set[, "error_method"], method = comb_set[, "method"],
-                         window_length = window_length) |>
-      .d(, method := comb_set[, "method"]) |>
-      .d(, error_method := comb_set[, "error_method"]) |>
-      .d(, source := comb_set[, "source"])
-  }
-  ) |>
-    rbindlist() |>
-    .d(, .(score = mean(score)), by = c("target", "horizon", "method", "error_method", "source"))
-
-
 }
-
 
 ######################################Saving#######################################################
 data.table::fwrite(scores, here("scores", prefix, paste0(global_file_prefix, "ci_scores.csv")))
@@ -289,16 +298,19 @@ data.table::fwrite(scores_cvgshort, here("scores", prefix,paste0(global_file_pre
 data.table::fwrite(scores_cvgshort_ho, here("scores", prefix, paste0(global_file_prefix, "cvg_pooled_ho.csv")))
 
 data.table::fwrite(pp_scores, here("scores", prefix, paste0(global_file_prefix, "pointfc_scores.csv")))
-data.table::fwrite(all_crps_ho, here("scores", prefix, paste0(global_file_prefix, "crps_values_ho.csv")))
 
+if(prefix != "_bvarspecs"){
+  data.table::fwrite(all_crps_ho, here("scores", prefix, paste0(global_file_prefix, "crps_values_ho.csv")))
+}
 
 if(cset == "base"){
   data.table::fwrite(scores_directional, here("scores", prefix, paste0(global_file_prefix, "ci_scores_directional.csv")))
   data.table::fwrite(scores_avgcountry_directional, here("scores", prefix, paste0(global_file_prefix, "ci_scores_avgcnt_directional.csv")))
   data.table::fwrite(scores_cvgshort_directional, here("scores", prefix, paste0(global_file_prefix, "cvg_pooled_directional.csv")))
-  data.table::fwrite(all_crps, here("scores", prefix, paste0(global_file_prefix, "crps_values.csv")))
-  data.table::fwrite(all_crps_directional, here("scores", prefix, paste0(global_file_prefix, "crps_values_directional.csv")))
-
+  if(prefix != "_bvarspecs"){
+    data.table::fwrite(all_crps, here("scores", prefix, paste0(global_file_prefix, "crps_values.csv")))
+    data.table::fwrite(all_crps_directional, here("scores", prefix, paste0(global_file_prefix, "crps_values_directional.csv")))
+  }
   data.table::fwrite(bvar_scores, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores.csv")))
   data.table::fwrite(bvar_scores_cvgshort, here("scores", prefix, paste0(global_file_prefix, "bvar_cvg_pooled.csv")))
   data.table::fwrite(bvar_scores_avgcountry, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_avgcnt.csv")))

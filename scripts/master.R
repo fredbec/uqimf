@@ -32,7 +32,7 @@ source(here("benchmarks", "raw", "forecasts_2025", "bvar-mix.R"))
 prefix <- ""
 source(here("scripts", "score-forecasts.R"))
 
-if(cset == "base"){
+if(cset == "base" & ciset == "base"){
   prefix <- "_bvarspecs"
   source(here("scripts", "score-forecasts.R"))
 }

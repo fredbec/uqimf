@@ -6,7 +6,7 @@ specs <- list(
   holdout_split = 2013,
 
   cset = "base", #"extended" for alternative countries, as defined in next line
-  cset_list = c("KOR", "AUS", "ESP", "NLD", "CHE", "CHN", "IND", "RUS", "BRA", "IDN"),
+  cset_list = c("KOR", "AUS", "ESP", "NLD", "CHE", "CHN", "IND", "RUS", "BRA", "MEX"),
 
   ciset = "base", #"extended" for more CI levels (10,20,...,90)
 
