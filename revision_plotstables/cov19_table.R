@@ -131,8 +131,8 @@ create_latex_table2 <- function(dat, tgt){
 #  kable_styling(latex_options = c("hold_position"))
 scoredat1 <- scoredat |>
   copy() |>
-  .d(target == "GDP") |>
+  .d(target == "CPI") |>
   split(by = c("horizon", "target"))
 
-myvals <- create_latex_table2(scoredat1, "GDP")
+myvals <- create_latex_table2(scoredat1, "CPI")
 myvals

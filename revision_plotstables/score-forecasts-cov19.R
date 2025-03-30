@@ -59,10 +59,13 @@ bvar_qus_ho <- data.table::fread(here("benchmarks",
 bvar_qus_ho <- bvar_qus_ho |>
   data.table::copy() |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, source)) |>
-  setnames("source", "model") #|>
-#.d(quantile %in% qus)
+  setnames("source", "model") |>
+  .d(quantile %in% qus)
 
 
+if(length(unique(bvar_qus_ho$quantile))!=length(qus)){
+  warning("quantiles were filtered out in bvar_qus_ho")
+}
 bvar_scores_ho <- scoreempQu(bvar_qus_ho, cvg_rg = cis100,
                              by = c("model", "country", "target", "horizon"))
 bvar_scores_avgcountry_ho <- scoreempQu(bvar_qus_ho, cvg_rg = cis100,

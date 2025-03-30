@@ -104,9 +104,9 @@ if(cset == "base"){
   bvar_qus <- bvar_qus |>
     data.table::copy() |>
     .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, source)) |>
-    setnames("source", "model") #|>
-  #.d(quantile %in% qus)
+    setnames("source", "model")
 }
+
 
 bvar_qus_ho <- data.table::fread(here("benchmarks",
                                       paste0(global_file_prefix, "toscore", prefix, "_bvar_direct_quantile_forecasts_ho.csv"))) |>
@@ -115,8 +115,26 @@ bvar_qus_ho <- data.table::fread(here("benchmarks",
 bvar_qus_ho <- bvar_qus_ho |>
   data.table::copy() |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, source)) |>
-  setnames("source", "model") #|>
-  #.d(quantile %in% qus)
+  setnames("source", "model")
+
+if(specs$ciset == "base"){
+  bvar_qus_ho <- bvar_qus_ho |>
+    .d(quantile %in% qus)
+
+  if(length(unique(bvar_qus_ho$quantile))!=length(qus)){
+    warning("quantiles were filtered out in bvar_qus_ho")
+  }
+
+  if(cset == "base"){
+    bvar_qus <- bvar_qus |>
+      .d(quantile %in% qus)
+
+    if(length(unique(bvar_qus$quantile))!=length(qus)){
+      warning("quantiles were filtered out in bvar_qus")
+    }
+  }
+}
+
 
 
 if(cset == "base"){

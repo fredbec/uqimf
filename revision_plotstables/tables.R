@@ -103,12 +103,16 @@ create_latex_table2 <- function(dat){
     .d(, .SD, .SDcols = c("horizon", "model", paste0(round_cols_newer, "_CPI"),
                           paste0(round_cols_newer, "_GDP"))) |>
     .d(order(horizon)) |>
+    .d(model != "bvar-qu") |>
+    .d(model != "bvar-qu-direct") |>
     .d(, model := fifelse(model == "ar-direct", "Direct$^{3)}$: AR(1)",
                           fifelse(model == "ar-annual-direct", "Direct$^{3)}$: AR-annual",
                                   fifelse(model == "ar-bic-direct", "Direct$^{3)}$: AR(p)",
                                           fifelse(model == "bvar-const-direct", "Direct$^{3)}$: BVAR-Const.",
                                                   fifelse(model == "bvar-qu-direct", "Direct$^{3)}$: BVAR-SV",
                                                           fifelse(model == "ar", "AR(1)",
+
+                                                                  fifelse(model == "arx-annual-direct", "Direct: ARX-annual",
                                                                   fifelse(model == "ar-bic", "AR(p)",
                                                                           fifelse(model == "bvar", "BVAR-SV",
                                                                                   fifelse(model == "bvar-const", "BVAR-Const.",
