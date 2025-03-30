@@ -34,6 +34,7 @@ ciscores_perfect <- rbind(ciscores_perfect,
 
 ciscores1 <- rbind(ciscores, ciscores_perfect) |>
   .d(, lvl := lvl/100) |>
+  .d(, dev :=  cvg-lvl) |>
   .d(, model := fifelse(model == "ar-direct", "Direct: AR",
                         fifelse(model == "arannual-direct", "Direct: AR-annual",
                                 fifelse(model == "arbic-direct", "Direct: AR-BIC",
@@ -54,6 +55,7 @@ ciscores2 <- ciscores2 |>
   rbind(ciscores[model == "IMF"]) |>
   rbind(ciscores_perfect) |>
   .d(, lvl := lvl/100) |>
+  .d(, dev := cvg-lvl) |>
   .d(, model := fifelse(model == "ar-direct", "Direct: AR",
                         fifelse(model == "arannual-direct", "Direct: AR-annual",
                                 fifelse(model == "arbic-direct", "Direct: AR-BIC",
@@ -101,8 +103,56 @@ qucvg_plot <- function(plotdat){
     scale_x_continuous(breaks=seq(0, 1, 0.1)) +
     scale_y_continuous(breaks=seq(0, 1, 0.1)) +
     theme_uqimf() +
-    xlab("Nominal Coverage Level") +
-    ylab("Empirical Coverage Level") +
+    xlab("Nominal Coverage (in %)") +
+    ylab("Empirical Coverage (in %)") +
+    theme_uqimf() %+replace%
+    theme(#axis.text.x = element_blank(),
+      axis.text.x = element_text(size = textsize_y),
+      #strip.text = element_text(size = 8),
+      axis.text.y = element_text(size = textsize_y),
+
+      axis.title.x = element_text(size = textsize_y),
+      axis.title.y = element_text(size = textsize_y, angle = 90, vjust = 2),
+      strip.text = element_text(size=textsize_y),
+      legend.text=element_text(size=textsize_y),
+      text = element_text(family = font_family),
+      legend.title=element_blank(),
+      plot.margin = margin(t=0,b=20,r=10,l=10, unit = "pt"))
+
+  return(plot1)
+
+}
+
+devqucvg_plot <- function(plotdat){
+  fancycols <- met.brewer("Hokusai3", n = length(unique(plotdat$model)))[2:length(unique(plotdat$model))]  # Get 10 colors from VanGogh1 palette
+  imfcol <-  met.brewer("Hokusai3", n = 4)[1]
+
+  modnames <- unique(plotdat$model)
+  modnames <- modnames[modnames != "IMF"] # gets its own manual color
+
+  color_map <- c("nominal" = "black", "IMF" = imfcol, setNames(fancycols, modnames))
+  textsize_y <- 15
+  font_family <- "serif"
+
+  nomdat <- plotdat |>
+    .d(model == "nominal")
+
+  plotdat <- plotdat |>
+    .d(model != "nominal")
+
+
+  plot1 <- ggplot() +
+    geom_hline(yintercept = 0, color = "black") +
+    geom_line(aes(x = lvl, y = dev, group = model, color = model), data = plotdat) +
+    geom_point(aes(x = lvl, y = dev, group = model, color = model), data = plotdat, shape = 18) +
+    scale_color_manual(values = color_map) +
+    scale_fill_manual(values = color_map) +
+    facet_wrap(~target) +
+    scale_x_continuous(breaks=seq(0, 1, 0.1)) +
+    scale_y_continuous(limits = c(-0.353, 0.353), breaks=seq(-0.4, 0.4, 0.1)) +
+    theme_uqimf() +
+    xlab("Nominal Coverage Level (in %)") +
+    ylab("Deviation from Nominal Coverage (in %)") +
     theme_uqimf() %+replace%
     theme(#axis.text.x = element_blank(),
       axis.text.x = element_text(size = textsize_y),
@@ -184,4 +234,12 @@ plot2 <- qucvg_plot(ciscores2)
 ovr_plot <- (plot1) /
   (plot2)
 ovr_plot
-ggsave(here("QuantileCoveragePlots2.pdf"), width = 8.3, height = 10.5)
+ggsave(here("revision_plotstables", "QuantileCoveragePlots.pdf"), width = 8.3, height = 10.5)
+
+plot1 <- devqucvg_plot(ciscores1)
+plot2 <- devqucvg_plot(ciscores2)
+
+ovr_plot <- (plot1) /
+  (plot2)
+ovr_plot
+ggsave(here("revision_plotstables", "DevQuantileCoveragePlots.pdf"), width = 9.3, height = 10.5)
