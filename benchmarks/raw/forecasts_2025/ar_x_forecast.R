@@ -16,7 +16,7 @@ if(specs$cset == "base"){
   ctrys <- specs$cset_list
 }
 vnms <- c("gdp", "cpi")
-yrs_fcst <- 2013:2023
+yrs_fcst <- 2012:2023
 fsns <- c("F", "S")
 
 # quantile grid
@@ -96,11 +96,21 @@ for(ctry in ctrys){
                           mean = fit_next$fc_mean[1],
                           sd = sqrt(fit_next$fc_vcv[1,1]))
 
-        df_current <- data.table(var = rep(tgt, n_q),
-                                 forecast_year = rep(yy, n_q),
-                                 target_year = rep(yy, n_q),
-                                 quantile_level = quantile_grid,
-                                 value = fc_current)
+
+        if(yy == 2012){
+
+          df_current <- data.table(var = rep(tgt, n_q),
+                                   forecast_year = rep(yy, n_q),
+                                   target_year = rep(yy, n_q),
+                                   quantile_level = quantile_grid,
+                                   value = NA)
+        } else {
+          df_current <- data.table(var = rep(tgt, n_q),
+                                   forecast_year = rep(yy, n_q),
+                                   target_year = rep(yy, n_q),
+                                   quantile_level = quantile_grid,
+                                   value = fc_current)
+        }
 
 
         df_next <- data.table(var = rep(tgt, n_q),
@@ -111,7 +121,8 @@ for(ctry in ctrys){
 
         df_tmp <- rbind(df_current, df_next)
 
-        df_all <- rbind(df_all, df_tmp)
+        df_all <- rbind(df_all, df_tmp) |>
+          .d(!is.na(value))
 
       }
     }

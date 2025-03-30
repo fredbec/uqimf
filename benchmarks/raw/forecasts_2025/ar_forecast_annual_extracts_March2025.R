@@ -19,17 +19,21 @@ dat <- read.csv(here("data", "weodat.csv")) %>% filter(horizon == 0) %>%
 
 # setting
 #g7 <- c("KOR", "AUS", "ESP", "NLD", "CHE", "CHN", "IND", "RUS", "BRA", "IDN")
-g7 <- specs$cset_list
+if(specs$cset == "base"){
+  ctrys <- c("CAN", "FRA", "DEU", "ITA", "JPN", "GBR", "USA")
+} else {
+  ctrys <- specs$cset_list
+}
 vnms <- c("ngdp_rpch", "pcpi_pch")
 vnms2 <- c("gdp", "cpi")
-yrs_fcst <- 2013:2023
+yrs_fcst <- 2012:2023
 forecast_season <- "S" # "S" (spring) or "F" (fall)
 
 # quantile grid
 quantile_grid = seq(from = .01, to = .99, by = .01)
 n_q <- length(quantile_grid)
 
-for (cc in g7){
+for (cc in ctrys){
   for (forecast_season in c("S", "F")){
     df_all <- data.frame()
     for (vv in vnms){
@@ -75,9 +79,15 @@ for (cc in g7){
         }
 
         fit <- ar_p_fcst(dat_fit, p = 1, max_h = 2)
-        fc_current <- qnorm(p = quantile_grid,
-                            mean = fit$fc_mean[1],
-                            sd = sqrt(fit$fc_vcv[1,1]))
+        if(yy == 2012){ # want only next year forecast
+          fc_current <- qnorm(p = quantile_grid,
+                              mean = NA,
+                              sd = NA)
+        } else {
+          fc_current <- qnorm(p = quantile_grid,
+                              mean = fit$fc_mean[1],
+                              sd = sqrt(fit$fc_vcv[1,1]))
+        }
         fc_next <- qnorm(p = quantile_grid,
                          mean = fit$fc_mean[2],
                          sd = sqrt(fit$fc_vcv[2,2]))
@@ -90,7 +100,8 @@ for (cc in g7){
                                                each = n_q),
                              quantile_level = rep(quantile_grid, 2),
                              value = c(fc_current, fc_next))
-        df_all <- rbind(df_all, df_tmp)
+        df_all <- rbind(df_all, df_tmp) |>
+          filter(!is.na(value))
       } # end of loop over time
     } # end of loop across variables
     # save results for current country and forecast season
