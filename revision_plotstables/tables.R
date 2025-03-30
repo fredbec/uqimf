@@ -14,7 +14,20 @@ ciscores_base <- fread(here("scores", paste0("ci_scores_avgcnt_ho.csv")))|>
   .d(, c("model", "target", "horizon", "interval_score")) |>
   setnames("interval_score", "base_interval_score") |>
   .d(, target := ifelse(target == "ngdp_rpch", "GDP", "CPI"))
-ciscores <- merge(ciscores, ciscores_base, by = c("model", "target", "horizon"))
+ciss_fakescpres <- ciscores |>
+  .d(model == "IMF") |>
+  .d(,model := "bvar_ciss") |>
+  .d(, c("interval_score", "unweighted_interval_score", "interval_score_50", "interval_score_80", "dev_50", "dev_80") := NA)
+ciscores <- rbind(ciscores, ciss_fakescpres)
+ciscores_ciss <- fread(here("scores", "_bvarspecs", paste0("ci_scores_avgcnt_ho.csv")))|>
+  .d(, dev_50 := 100*coverage_50 - 50) |>
+  .d(, dev_80 := 100*coverage_80 - 80) |>
+  .d(, c("model", "target", "horizon", "interval_score")) |>
+  setnames("interval_score", "ciss_interval_score") |>
+  .d(, target := ifelse(target == "ngdp_rpch", "GDP", "CPI"))
+
+ciscores <- merge(ciscores, ciscores_base, by = c("model", "target", "horizon"), all.x = TRUE) |>
+  merge(ciscores_ciss,  by = c("model", "target", "horizon"), all.x = TRUE)
 
 crps <- fread(here("scores", paste0(prefix, "crps_values_ho.csv"))) |>
   setnames("source", "model") |>
@@ -36,13 +49,26 @@ ciscores2 <- fread(here("scores", paste0(prefix, "bvar_ci_scores_avgcnt_ho.csv")
   .d(, target := ifelse(target == "ngdp_rpch", "GDP", "CPI")) |>
   .d(, model := gsub("_", "-", model)) |>
   .d(, model := paste0(model, "-direct"))
+ciss_fakescpres2 <- ciscores2 |>
+  .d(model == "ar-bic-direct") |>
+  .d(,model := "bvar-ciss-direct") |>
+  .d(, c("interval_score", "unweighted_interval_score", "interval_score_50", "interval_score_80", "dev_50", "dev_80") := NA)
+ciscores2 <- rbind(ciscores2, ciss_fakescpres2)
 ciscores2_base <- fread(here("scores", paste0("bvar_ci_scores_avgcnt_ho.csv"))) |>
   .d(, c("model", "target", "horizon", "interval_score")) |>
   setnames("interval_score", "base_interval_score") |>
   .d(, target := ifelse(target == "ngdp_rpch", "GDP", "CPI")) |>
   .d(, model := gsub("_", "-", model)) |>
   .d(, model := paste0(model, "-direct"))
-ciscores2 <- merge(ciscores2, ciscores2_base, by = c("model", "target", "horizon"))
+ciscores2_ciss <- fread(here("scores","_bvarspecs", paste0("bvar_ci_scores_avgcnt_ho.csv"))) |>
+  .d(, c("model", "target", "horizon", "interval_score")) |>
+  setnames("interval_score", "ciss_interval_score") |>
+  .d(, target := ifelse(target == "ngdp_rpch", "GDP", "CPI")) |>
+  .d(, model := gsub("_", "-", model)) |>
+  .d(, model := paste0(model, "-direct"))
+
+ciscores2 <- merge(ciscores2, ciscores2_base, by = c("model", "target", "horizon"),all.x = TRUE)|>
+  merge(ciscores2_ciss,  by = c("model", "target", "horizon"), all.x = TRUE)
 
 crps_qus <- crps |>
   data.table::copy() |>
@@ -58,8 +84,8 @@ create_latex_table2 <- function(dat){
   #round_cols_new <- c("CRPS", "(Weighted) IS",  "Unweighted IS", "IS 50", "IS 80")#,
                        #"Deviation 50","Deviation 80")
 
-  round_cols_newer <- c("$\\text{CRPS}^{2)}$", "$\\text{IS}_{W}^{1)}$", "$\\text{IS}_{W,base}^{1)}$", "$\\text{IS}_{U}^{1)}$",
-                        "$\\text{IS}_{50}^{1)}$", "$\\text{IS}_{80}^{1)}$")#,
+  round_cols_newer <- c("$\\text{CRPS}^{2)}$", "$\\text{IS}_{W}^{1)}$", "$\\text{IS}_{W,b}^{1)}$", "$\\text{IS}_{U}^{1)}$",
+                        "$\\text{IS}_{50}^{1)}$", "$\\text{IS}_{80}^{1)}$", "$\\text{IS}_{\\text{CISS}}^{1)}$")#,
                         #"$\\text{Dev}_{50}$", "$\\text{Dev}_{80}$")
 
   singletab <- lapply(dat, function(dt){
@@ -67,7 +93,7 @@ create_latex_table2 <- function(dat){
     curr_hor <- dt$horizon
     curr_tgt <- dt$target
 
-    round_cols <- c("crps", "interval_score", "base_interval_score", "unweighted_interval_score", "interval_score_50", "interval_score_80")#, "dev_50", "dev_80")
+    round_cols <- c("crps", "interval_score", "base_interval_score", "unweighted_interval_score", "interval_score_50", "interval_score_80", "ciss_interval_score")#, "dev_50", "dev_80")
     #round_cols_extra <- c("dev_50", "dev_80")
 
     dt[, (round_cols) := lapply(.SD, round, 3), .SDcols = round_cols]
@@ -103,26 +129,27 @@ create_latex_table2 <- function(dat){
     .d(, .SD, .SDcols = c("horizon", "model", paste0(round_cols_newer, "_CPI"),
                           paste0(round_cols_newer, "_GDP"))) |>
     .d(order(horizon)) |>
-    .d(model != "bvar-qu") |>
+    .d(model != "bvar") |> #exclude original bvar model due to stability issues
     .d(model != "bvar-qu-direct") |>
+    .d(model != "bvar-ciss") |>
     .d(, model := fifelse(model == "ar-direct", "Direct$^{3)}$: AR(1)",
                           fifelse(model == "ar-annual-direct", "Direct$^{3)}$: AR-annual",
                                   fifelse(model == "ar-bic-direct", "Direct$^{3)}$: AR(p)",
                                           fifelse(model == "bvar-const-direct", "Direct$^{3)}$: BVAR-Const.",
-                                                  fifelse(model == "bvar-qu-direct", "Direct$^{3)}$: BVAR-SV",
+                                                  fifelse(model == "bvar-ciss-direct", "Direct$^{3)}$: BVAR-CISS",
                                                           fifelse(model == "ar", "AR(1)",
 
-                                                                  fifelse(model == "arx-annual-direct", "Direct: ARX-annual",
+                                                                  fifelse(model == "arx-annual-direct", "Direct$^{3)}$: ARX-annual",
                                                                   fifelse(model == "ar-bic", "AR(p)",
-                                                                          fifelse(model == "bvar", "BVAR-SV",
+                                                                          fifelse(model == "bvar-ciss", "BVAR-CISS",
                                                                                   fifelse(model == "bvar-const", "BVAR-Const.",
                                                                                           fifelse(model == "bvar-mix", "BVAR-Mix",
                                                                                                   fifelse(model == "bvar-mix-direct", "Direct$^{3)}$: BVAR-Mix",
                                                                                                                   fifelse(model == "mean-ensemble", "ZEnsemble",
-                                                                                                                          fifelse(model == "IMF", "AAAIMF", model)))))))))))))) |>
+                                                                                                                          fifelse(model == "IMF", "AAAIMF", model))))))))))))))) |>
     .d(order(horizon, model)) |>
     .d(, model := fifelse(model == "AAAIMF", "IMF",
-                          fifelse(model == "ZEnsemble", "Simple Ensemble$^{3)}$", model))) |>
+                          fifelse(model == "ZEnsemble", "Simple Ensemble$^{4)}$", model))) |>
     .d(, horizon := as.character(horizon))
 
 
@@ -140,8 +167,8 @@ create_latex_table2 <- function(dat){
 
 
   dt_latex <- dt_latex |>
-    row_spec(1, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Fall, Current}}}") |>
-    row_spec(14, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Spring, Current}}}")# |>
+    row_spec(1, extra_latex = "\\parbox[t]{2mm}{\\multirow{13}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Fall, Current}}}") |>
+    row_spec(14, extra_latex = "\\parbox[t]{2mm}{\\multirow{13}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Spring, Current}}}")# |>
    # row_spec(23, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Fall, Next}}}") |>
    # row_spec(34, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Spring, Next}}}")
 
