@@ -14,7 +14,7 @@ qufcs <- data.table::fread(here("quantile_forecasts",
 qufcs_bvar <- data.table::fread(here("benchmarks",
                                      paste0(global_file_prefix, "toscore", prefix, "_bvar_direct_quantile_forecasts_ho.csv"))) |>
   setnames(paste0("tv_1"), "true_value") |>
-  .d(source == "bvar_const") |>
+  .d(source == "ar") |>
   .d(quantile %in% c(0.1, 0.25, 0.75, 0.9))
 
 
@@ -29,7 +29,7 @@ forecast_season <- "S"
 
 linerange_dat_imf <- qufcs |>
   .d(target == trgt) |>
-  .d(horizon == 0.5) |>
+  .d(horizon == 1) |>
   .d(target_year %in% c(2020, 2021)) |>
   .d(, target_year := target_year - 0.25) |>
   .d(,quantile := paste0("quantile", quantile)) |>
@@ -72,4 +72,4 @@ release_year <- 2024
 
 colors <- met.brewer("Hokusai1", 7)
 names(colors) <- unique(qufcs$country)
-shinyplot(realized_vals_infl, linerange_dat_imf, linerange_dat_bvar, point_fcs_infl, dashed_line, "CAN", colors, cis)
+shinyplot(realized_vals_infl, linerange_dat_imf, linerange_dat_bvar, point_fcs_infl, dashed_line, "ITA", colors, cis)
