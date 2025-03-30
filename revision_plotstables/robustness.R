@@ -15,63 +15,6 @@ tgt <- "ngdp_rpch"
 yr <- 2021
 hr <- 1
 rw <- 11
-make <- 5
-
-labelvec <- c("raw error\nvalues, from\n 2009-2019", "error values,\nabsolute transformed", "predictive distribution,\nconstructed around\n a point forecast of zero")
-
-errordat2 <- fread(here("data", "weodat.csv")) |>
-  .d(, fc_error := prediction - tv_1) |>
-  .d(country == ctry & target == tgt & horizon == hr) |>
-  .d(target_year %in% seq(yr-(rw+floor(hr)), yr-(1+floor(hr)), 1)) #need extra shift if hor > 1
-qufcs_imf<- data.table::fread(here("quantile_forecasts",
-                                       paste0("toscore", "", "_quantile_forecasts_ho.csv"))) |>
-  .d(country == ctry & target == tgt & horizon == hr) |>
-  .d(target_year == 2022) |>
-  .d(source == "IMF")
-qufcs_ar <- data.table::fread(here("benchmarks",
-                                      paste0("extcis_", "toscore", "", "_bvar_direct_quantile_forecasts_ho.csv"))) |>
-  setnames(paste0("tv_1"), "true_value") |>
-  .d(source == "ar")|>
-  .d(country == ctry & target == tgt & horizon == hr) |>
-  .d(target_year == yr) |>
-  .d(quantile %in% c(0.1, 0.25, 0.75, 0.9)) |>
-  .d(, mean := mean(prediction)) |>
-  .d(, error_prediction := prediction-mean)
-qufcs_bvar <- data.table::fread(here("benchmarks",
-                                   paste0("extcis_", "toscore", "", "_bvar_direct_quantile_forecasts_ho.csv"))) |>
-  setnames(paste0("tv_1"), "true_value") |>
-  .d(source == "bvar_mix")|>
-  .d(country == ctry & target == tgt & horizon == hr) |>
-  .d(target_year == yr) |>
-  .d(quantile %in% c(0.1, 0.25, 0.75, 0.9)) |>
-  .d(, mean := mean(prediction)) |>
-  .d(, error_prediction := prediction-mean)
-
-
-
-errors <- errordat2$fc_error
-msee <- sqrt(mean(errors^2))
-abs_errors <- errors |> abs()
-
-val80 <- quantile(abs_errors, 0.8)
-val50 <- quantile(abs_errors, 0.5)
-
-##make data
-errordat <- data.frame(
-  type = rep(0.85, w),
-  value = errors,
-  col = 1:11
-)
-errordat_abs <- data.frame(
-  type = rep(1.85, w),
-  value = abs_errors,
-  col = 1:11
-)
-
-errordat <- rbind(errordat, errordat_abs) |>
-  setDT() |>
-  .d(, value := ifelse(type == 2, value, value + 1e-09))
-
 
 getlinerangedat <- function(dat, xpos){
   val80_lr <- dat[quantile == 0.9, "error_prediction"] |> unname() |> unlist()
@@ -88,24 +31,99 @@ getlinerangedat <- function(dat, xpos){
   return(linerangedat_lr)
 }
 
-linerangedat_imf <- getlinerangedat(qufcs_imf, 2.65)
-linerangedat_ar <- getlinerangedat(qufcs_ar, 2.75)
-linerangedat_bvar <- getlinerangedat(qufcs_bvar, 2.85)
+labelvec <- c("raw error\nvalues", "error values,\nabsolute transformed", "prediction intervals, \ncentered around\n zero for illustration")
 
-linerangedat_tulip <- data.frame(
-  type = rep(c(2.95), each = 1),
-  upper80 = c(qnorm(0.9, 0, msee)),
-  lower80 = c( -qnorm(0.9, 0, msee)),
-  upper50 = c(qnorm(0.75, 0, msee)),
-  lower50 = c(-qnorm(0.75, 0, msee))
-) |>
-  setDT()
+fancycols <- met.brewer("Hokusai3", n = 4)
+######################################CURRENT YEAR#####################################
+makedata <- function(ctry, tgt, yr, hr, rw, pos = -1){
+  errordat2 <- fread(here("data", "weodat.csv")) |>
+    .d(, fc_error := prediction - tv_1) |>
+    .d(country == ctry & target == tgt & horizon == hr) |>
+    .d(target_year %in% seq(yr-(rw+floor(hr)), yr-(1+floor(hr)), 1)) #need extra shift if hor > 1
+  qufcs_imf<- data.table::fread(here("quantile_forecasts",
+                                         paste0("toscore", "", "_quantile_forecasts_ho.csv"))) |>
+    .d(country == ctry & target == tgt & horizon == hr) |>
+    .d(target_year == yr) |>
+    .d(source == "IMF")
+  qufcs_ar <- data.table::fread(here("benchmarks",
+                                        paste0("extcis_", "toscore", "", "_bvar_direct_quantile_forecasts_ho.csv"))) |>
+    setnames(paste0("tv_1"), "true_value") |>
+    .d(source == "ar")|>
+    .d(country == ctry & target == tgt & horizon == hr) |>
+    .d(target_year == yr) |>
+    .d(quantile %in% c(0.1, 0.25, 0.75, 0.9)) |>
+    .d(, mean := mean(prediction)) |>
+    .d(, error_prediction := prediction-mean)
+  qufcs_bvar <- data.table::fread(here("benchmarks",
+                                     paste0("extcis_", "toscore", "", "_bvar_direct_quantile_forecasts_ho.csv"))) |>
+    setnames(paste0("tv_1"), "true_value") |>
+    .d(source == "bvar_mix")|>
+    .d(country == ctry & target == tgt & horizon == hr) |>
+    .d(target_year == yr) |>
+    .d(quantile %in% c(0.1, 0.25, 0.75, 0.9)) |>
+    .d(, mean := mean(prediction)) |>
+    .d(, error_prediction := prediction-mean)
 
-#pointdat <- data.frame(
-#  type = rep(c(1, 2,4), each = 1),
-#  pointval = c(NA, NA, 0))|>
-#  setDT()
+  print(qufcs_bvar)
 
+  errors <- errordat2$fc_error
+  msee <- sqrt(mean(errors^2))
+  abs_errors <- errors |> abs()
+  val80 <- quantile(abs_errors, 0.8)
+  val50 <- quantile(abs_errors, 0.5)
+
+  ##make data
+  errordat <- data.frame(
+    type = rep(1 + pos*0.2, w),
+    value = errors,
+    col = 1:11
+  )
+  errordat_abs <- data.frame(
+    type = rep(2 + pos*0.2, w),
+    value = abs_errors,
+    col = 1:11
+  )
+  errordat <- rbind(errordat, errordat_abs) |>
+    setDT() |>
+    .d(, value := ifelse(type == 2, value, value + 1e-09))
+
+  pos_imf <- ifelse(pos == 1, 3.1, 2.6)
+  pos_bvar <- ifelse(pos == 1, 3.2, 2.7)
+  pos_ar <- ifelse(pos == 1, 3.3, 2.8)
+  pos_tulip <- ifelse(pos == 1, 3.4, 2.9)
+
+
+  linerangedat_imf <- getlinerangedat(qufcs_imf, pos_imf) |>
+    .d(, pltcol := fancycols[1])
+  linerangedat_ar <- getlinerangedat(qufcs_ar, pos_ar) |>
+    .d(, pltcol := fancycols[2])
+  linerangedat_bvar <- getlinerangedat(qufcs_bvar, pos_bvar)|>
+    .d(, pltcol := fancycols[4])
+
+  linerangedat_tulip <- data.frame(
+    type = rep(pos_tulip, each = 1),
+    upper80 = c(qnorm(0.9, 0, msee)),
+    lower80 = c( -qnorm(0.9, 0, msee)),
+    upper50 = c(qnorm(0.75, 0, msee)),
+    lower50 = c(-qnorm(0.75, 0, msee))
+  ) |>
+    setDT()|>
+    .d(, pltcol := "firebrick4")
+
+
+  return(list(errordat = errordat, listdatsets = list(linerangedat_imf, linerangedat_ar, linerangedat_bvar, linerangedat_tulip)))
+}
+
+val50 <- 0
+val80 <- 0
+######################################NEXT YEAR#####################################
+myres_next <- makedata(ctry = ctry, tgt = tgt, yr = yr + 1, hr = hr, rw = rw, pos = 1)
+nextyrerror <- myres_next$errordat
+nextyrdats <- myres_next$listdatsets
+
+myres_current <- makedata(ctry = ctry, tgt = tgt, yr = yr, hr = hr, rw = rw, pos = -1)
+errordat <- myres_current$errordat
+datasets <- myres_current$listdatsets
 
 #Define segment function
 geom_segment_hor <- function(x, y, xend, yend = y,
@@ -136,17 +154,18 @@ geom_segment_arrow <- function(x, y, xend, yend = y,
   )
 }
 
+#datasets <- list(linerangedat_imf, linerangedat_ar, linerangedat_bvar, linerangedat_tulip)
 
 lrcols <- met.brewer("Hokusai2", 2)
 rects <- data.frame(xstart = seq(1,3,1), xend = seq(1.5,3.5,1), col = "grey50")
 quantvis <- ggplot() +
-  geom_point(aes(x = type, y = value, color = as.factor(col)), data = errordat, size = 4) +
-  #geom_point(aes(x = type, y = value, color = as.factor(col)), data = errordat, size = 4) +
-  gghighlight(value %in% c(val50, val80)) +
+  geom_point(aes(x = type, y = value), color = "grey55", data = errordat, size = 2) +
+  geom_point(aes(x = type, y = value), color = "grey55", data = nextyrerror, size = 2) +
+  #gghighlight(value %in% c(val50, val80)) +
   scale_color_met_d("Hokusai2") +
   geom_hline(aes(yintercept = 0), linetype = "solid", color = "grey80", alpha = 0.7, size = 0.3) +
   guides(color = "none") +
-  geom_rect(data = rects, aes(xmin = xstart, xmax = xend, ymin = -Inf, ymax = Inf), fill = "grey70", alpha = 0.4) +
+  geom_rect(data = rects, aes(xmin = xstart, xmax = xend, ymin = -Inf, ymax = Inf), fill = "grey70", alpha = 0.2) +
   theme_uqimf() %+replace%
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         legend.position = "right",
@@ -160,79 +179,49 @@ quantvis <- ggplot() +
         legend.text=element_text(size=12),
         legend.title=element_blank(),
         plot.margin = margin(t=5,b=5,r=5,l=5, unit = "pt")) +
-  geom_linerange(
-    aes(x = type,
-        ymin = lower80,
-        ymax = upper80),
-    color = lrcols[1],
-    data = linerangedat_imf,
-    lwd = 4
-  ) +
-  geom_linerange(
-    aes(x = type,
-        ymin = lower50,
-        ymax = upper50),
-    color = lrcols[2],
-    data = linerangedat_imf,
-    lwd = 4
-  ) +
 
-  geom_linerange(
-    aes(x = type,
-        ymin = lower80,
-        ymax = upper80),
-    color = lrcols[1],
-    data = linerangedat_ar,
-    lwd = 4
-  ) +
-
-  geom_linerange(
-    aes(x = type,
-        ymin = lower50,
-        ymax = upper50),
-    color = lrcols[2],
-    data = linerangedat_ar,
-    lwd = 4
-  ) +
-
-
-  geom_linerange(
-    aes(x = type,
-        ymin = lower80,
-        ymax = upper80),
-    color = lrcols[1],
-    data = linerangedat_bvar,
-    lwd = 4
-  ) +
-
-  geom_linerange(
-    aes(x = type,
-        ymin = lower50,
-        ymax = upper50),
-    color = lrcols[2],
-    data = linerangedat_bvar,
-    lwd = 4
-  ) +
-
-
-  geom_linerange(
-    aes(x = type,
-        ymin = lower80,
-        ymax = upper80),
-    color = lrcols[1],
-    data = linerangedat_tulip,
-    lwd = 4
-  ) +
-
-  geom_linerange(
-    aes(x = type,
-        ymin = lower50,
-        ymax = upper50),
-    color = lrcols[2],
-    data = linerangedat_tulip,
-    lwd = 4
-  ) +
-
+  lapply(datasets, function(datset){
+    geom_linerange(
+      aes(x = type,
+          ymin = lower80,
+          ymax = upper80),
+      color = datset$pltc,
+      data = datset,
+      lwd = 3,
+      alpha = 0.5
+    )
+  }) +
+  lapply(datasets, function(datset){
+    geom_linerange(
+      aes(x = type,
+          ymin = lower50,
+          ymax = upper50),
+      color = datset$pltc,
+      data = datset,
+      lwd = 3
+    )
+  }) +
+  lapply(nextyrdats, function(datset){
+    geom_linerange(
+      aes(x = type,
+          ymin = lower80,
+          ymax = upper80),
+      color = datset$pltc,
+      data = datset,
+      lwd = 3,
+      alpha = 0.5
+    )
+  }) +
+  lapply(nextyrdats, function(datset){
+    geom_linerange(
+      aes(x = type,
+          ymin = lower50,
+          ymax = upper50),
+      color = datset$pltc,
+      data = datset,
+      lwd = 3
+    )
+  }) +
   #geom_segment_arrow(x = 1.15, xend = 1.85, y = -2.4) +
   #geom_segment_arrow(x = 2.15, xend = 2.85, y = -2.4) +
   geom_segment_hor(x = 2.05, xend = 2.685, y = val50) +
