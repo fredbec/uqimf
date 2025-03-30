@@ -43,12 +43,11 @@ scoredat <- rbind(crps_qus, crps_base)
 
 create_latex_table2 <- function(dat, tgt){
 
-  round_cols_new <- c("(Weighted) IS", "Unweighted IS", "IS 50", "IS 80", "CRPS")#,
+  round_cols_new <- c("CRPS", "(Weighted) IS", "Unweighted IS", "IS 50", "IS 80")#,
   #"Deviation 50","Deviation 80")
 
-  round_cols_newer <- c("$\\text{IS}_{W}$", "$\\text{IS}_{U}$",
-                        "$\\text{IS}_{50}$", "$\\text{IS}_{80}$",
-                        "$\\text{CRPS}$")#,
+  round_cols_newer <- c("$\\text{CRPS}$", "$\\text{IS}_{W}$", "$\\text{IS}_{U}$",
+                        "$\\text{IS}_{50}$", "$\\text{IS}_{80}$")#,
   #"$\\text{Dev}_{50}$", "$\\text{Dev}_{80}$")
 
   singletab <- lapply(dat, function(dt){
@@ -56,7 +55,7 @@ create_latex_table2 <- function(dat, tgt){
     curr_hor <- dt$horizon
     curr_tgt <- dt$target
 
-    round_cols <- c("interval_score", "unweighted_interval_score", "interval_score_50", "interval_score_80", "crps")#, "dev_50", "dev_80")
+    round_cols <- c("crps", "interval_score", "unweighted_interval_score", "interval_score_50", "interval_score_80")#, "dev_50", "dev_80")
     #round_cols_extra <- c("dev_50", "dev_80")
 
     dt[, (round_cols) := lapply(.SD, round, 3), .SDcols = round_cols]
@@ -151,7 +150,7 @@ create_latex_table2 <- function(dat, tgt){
 #  kable_styling(latex_options = c("hold_position"))
 scoredat1 <- scoredat |>
   copy() |>
-  .d(target == "GDP") |>
+  .d(target == "CPI") |>
   split(by = c("horizon", "target"))
 
-myvals <- create_latex_table2(scoredat1, "GDP")
+myvals <- create_latex_table2(scoredat1, "CPI")
