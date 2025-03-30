@@ -33,8 +33,8 @@ getlinerangedat <- function(dat, xpos){
 }
 
 makecovplot <- function(ctry, tgt, yr, hr, rw){
-  labelvec <- c("raw error\nvalues", "absolute\nerror values", "IMF", "RMSE-based",
-                "BVAR-direct", "AR-direct")
+  labelvec <- c("raw error\nvalues", "absolute\nerror values", "IMF", "RMSE-\nbased",
+                "BVAR-\ndirect", "AR-\ndirect")
 
   fancycols <- met.brewer("Hokusai3", n = 4)
   ######################################CURRENT YEAR#####################################
@@ -171,11 +171,11 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
     theme_uqimf() %+replace%
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
           legend.position = "right",
-          plot.title = element_text(hjust = 0.5),
+          plot.title = element_text(hjust = 0.5, size = 14),
           text = element_text(family = "serif"),
           #axis.text.x = element_text(size = textsize_y, angle = 90, hjust = .5, vjust = .5, face = "plain"),
           #strip.text = element_text(size = 8),
-          axis.text.x = element_text(size = 10),
+          axis.text.x = element_text(size = 12),
           axis.text.y = element_text(size = 12),
           axis.title.y = element_text(size = 12),
           strip.text = element_text(size=12),
@@ -274,13 +274,10 @@ plot_us <- makecovplot(ctry = "USA", tgt = tgt, yr = yr, hr = hr, rw = rw)+
 plot_uk <- makecovplot(ctry = "GBR", tgt = tgt, yr = yr, hr = hr, rw = rw)+
   ggtitle("GDP Growth, United Kingdom")
 
-ovrplot <- (plot_de) /
-  (plot_fr) /
-  (plot_it) /
-  (plot_ca) /
-  (plot_us) /
-  (plot_uk)
+ovrplot <- (plot_de + plot_ca) /
+  (plot_fr + plot_us) /
+  (plot_it + plot_uk)
 
-ggsave(here("revision_plotstables", "illustration_cov19.pdf"), ovrplot, width = 7, height = 12.5)
+ggsave(here("revision_plotstables", "illustration_cov19.pdf"), ovrplot, width = 10, height = 12.5)
 
 
