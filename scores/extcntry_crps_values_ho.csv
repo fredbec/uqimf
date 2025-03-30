@@ -17,9 +17,9 @@ pcpi_pch,1,rolling window,absolute,ar_annual-direct,1.55791049552474
 pcpi_pch,1.5,rolling window,absolute,ar_annual-direct,1.55589080896822
 ngdp_rpch,0,rolling window,absolute,arx_annual-direct,0.520096333778861
 ngdp_rpch,0.5,rolling window,absolute,arx_annual-direct,1.0769474171507
-ngdp_rpch,1,rolling window,absolute,arx_annual-direct,2.61135003519277
-ngdp_rpch,1.5,rolling window,absolute,arx_annual-direct,2.55435149563364
+ngdp_rpch,1,rolling window,absolute,arx_annual-direct,1.91660206019533
+ngdp_rpch,1.5,rolling window,absolute,arx_annual-direct,1.966197101458
 pcpi_pch,0,rolling window,absolute,arx_annual-direct,0.276477313828619
 pcpi_pch,0.5,rolling window,absolute,arx_annual-direct,0.82546814088347
-pcpi_pch,1,rolling window,absolute,arx_annual-direct,1.69521417277788
-pcpi_pch,1.5,rolling window,absolute,arx_annual-direct,1.79738405384198
+pcpi_pch,1,rolling window,absolute,arx_annual-direct,1.58842991485207
+pcpi_pch,1.5,rolling window,absolute,arx_annual-direct,1.71966051309136

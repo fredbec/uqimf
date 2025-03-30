@@ -82,14 +82,19 @@ for(ctry in ctrys){
         quantile_grid = seq(from = .01, to = .99, by = .01)
 
         fit_current <- ar_x_fcst(y_dat, z_dat_c, lag = 1, max_h = 1)
-        fit_next <- ar_x_fcst_lag(y_dat, z_dat_n, lag = 2, max_h = 1)
+
+        #fit_next1 <- ar_x_fcst_lag(y_dat, z_dat_n, lag = 2, max_h = 1)
+        fit_next <- ar_x_fcst_lag_extra(dat = y_dat, dat_z_n = z_dat_n, dat_z_c = z_dat_c, lag = 2, max_h = 1)
 
         fc_current <- qnorm(p = quantile_grid,
                             mean = fit_current$fc_mean[1],
                             sd = sqrt(fit_current$fc_vcv[1,1]))
+        #fc_next1 <- qnorm(p = quantile_grid,
+        #                 mean = fit_next1$fc_mean[1],
+        #                 sd = sqrt(fit_next1$fc_vcv[1,1]))
         fc_next <- qnorm(p = quantile_grid,
-                         mean = fit_next$fc_mean[1],
-                         sd = sqrt(fit_next$fc_vcv[1,1]))
+                          mean = fit_next$fc_mean[1],
+                          sd = sqrt(fit_next$fc_vcv[1,1]))
 
         df_current <- data.table(var = rep(tgt, n_q),
                                  forecast_year = rep(yy, n_q),
@@ -102,7 +107,7 @@ for(ctry in ctrys){
                                  forecast_year = rep(yy, n_q),
                                  target_year = rep(yy+1, n_q),
                                  quantile_level = quantile_grid,
-                                 value = fc_current)
+                                 value = fc_next)
 
         df_tmp <- rbind(df_current, df_next)
 
