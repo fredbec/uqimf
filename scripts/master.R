@@ -28,6 +28,9 @@ source(here("scripts", "encode-missing-predictions.R"))
 source(here("scripts", "make-forecasts.R"))
 source(here("scripts", "exclude-from-scoring.R"))
 #run on demand (produces bvar_mix forecasts)
+bvar_prefix <- ""
+source(here("benchmarks", "raw", "forecasts_2025", "bvar-mix.R"))
+bvar_prefix <- "_bvarspecs"
 source(here("benchmarks", "raw", "forecasts_2025", "bvar-mix.R"))
 prefix <- ""
 source(here("scripts", "score-forecasts.R"))
