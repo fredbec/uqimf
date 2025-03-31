@@ -117,7 +117,7 @@ bvar_qus_ho <- bvar_qus_ho |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, source)) |>
   setnames("source", "model")
 
-if(prefix != "_bvarspecs"){ #only score in bvarspecs serrint
+if(prefix != "_bvarspecs"){ #only score in bvarspecs setting
   bvar_qus <- bvar_qus |>
     .d(model != "bvar_ciss")
 
@@ -251,7 +251,14 @@ if(prefix != "_bvarspecs"){ #crps not needed for bvarspecs setting
         .d(, source := comb_set[, "source"])
     }
     ) |>
-      rbindlist() |>
+      rbindlist()
+
+    all_crps_ho_byyr <- all_crps_ho |>
+      data.table::copy()  |>
+      .d(, .(score = mean(score)), by = c("target_year", "target", "horizon", "method", "error_method", "source"))
+
+    all_crps_ho <- all_crps_ho |>
+      data.table::copy() |>
       .d(, .(score = mean(score)), by = c("target", "horizon", "method", "error_method", "source"))
 
   } else {
@@ -301,6 +308,7 @@ data.table::fwrite(pp_scores, here("scores", prefix, paste0(global_file_prefix, 
 
 if(prefix != "_bvarspecs"){
   data.table::fwrite(all_crps_ho, here("scores", prefix, paste0(global_file_prefix, "crps_values_ho.csv")))
+  data.table::fwrite(all_crps_ho_byyr, here("scores", prefix, paste0(global_file_prefix, "crps_values_ho_byyr.csv")))
 }
 
 if(cset == "base"){
