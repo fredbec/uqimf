@@ -148,7 +148,7 @@ create_latex_table2 <- function(dat, tgt){
 #kable(dt, format = "latex", escape = FALSE, booktabs = TRUE,
 #      caption = "Interval Scores with Minimums Highlighted") %>%
 #  kable_styling(latex_options = c("hold_position"))
-varvar <- "GDP"
+varvar <- "CPI"
 scoredat1 <- scoredat |>
   copy() |>
   .d(target == varvar) |>

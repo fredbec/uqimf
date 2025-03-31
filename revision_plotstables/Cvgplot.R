@@ -38,7 +38,7 @@ ciscores1 <- rbind(ciscores, ciscores_perfect) |>
   .d(, model := fifelse(model == "ar-direct", "Direct: AR",
                         fifelse(model == "arannual-direct", "Direct: AR-annual",
                                 fifelse(model == "arbic-direct", "Direct: AR-BIC",
-                                        fifelse(model == "bvarconst-direct", "Direct: BVAR-CP",
+                                        fifelse(model == "bvarconst-direct", "Direct: BVAR-Const.",
                                                 fifelse(model == "bvarqu-direct", "Direct: BVAR-SV",
                                                         fifelse(model == "ar", "AR",
 
@@ -47,7 +47,7 @@ ciscores1 <- rbind(ciscores, ciscores_perfect) |>
                                                                         fifelse(model == "bvarmix-direct", "Direct: BVAR-Mix",
                                                                 fifelse(model == "arbic", "AR-BIC",
                                                                         fifelse(model == "bvar", "BVAR-SV",
-                                                                                fifelse(model == "bvarconst", "BVAR-CP",
+                                                                                fifelse(model == "bvarconst", "BVAR-Const.",
                                                                                         fifelse(model == "meanensemble", "Ensemble",
                                                                                                 fifelse(model == "IMF", "IMF", model))))))))))))))
 
@@ -59,18 +59,19 @@ ciscores2 <- ciscores2 |>
   .d(, model := fifelse(model == "ar-direct", "Direct: AR",
                         fifelse(model == "arannual-direct", "Direct: AR-annual",
                                 fifelse(model == "arbic-direct", "Direct: AR-BIC",
-                                        fifelse(model == "bvarconst-direct", "Direct: BVAR-CP",
+                                        fifelse(model == "bvarconst-direct", "Direct: BVAR-Const.",
                                                 fifelse(model == "bvarqu-direct", "Direct: BVAR-SV",
                                                         fifelse(model == "ar", "AR",
+                                                                fifelse(model == "arxannual−direct", "Direct: ARX-annual",
 
                                                                 fifelse(model == "bvarmix", "BVAR-Mix",
 
                                                                         fifelse(model == "bvarmix-direct", "Direct: BVAR-Mix",
                                                                 fifelse(model == "arbic", "AR-BIC",
                                                                         fifelse(model == "bvar", "BVAR-SV",
-                                                                                fifelse(model == "bvarconst", "BVAR-CP",
+                                                                                fifelse(model == "bvarconst", "BVAR-Const.",
                                                                                         fifelse(model == "meanensemble", "Ensemble",
-                                                                                                fifelse(model == "IMF", "IMF", model))))))))))))))
+                                                                                                fifelse(model == "IMF", "IMF", model)))))))))))))))
 
 
 # Define colors

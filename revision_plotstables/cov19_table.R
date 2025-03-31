@@ -88,12 +88,12 @@ create_latex_table2 <- function(dat, tgt){
     .d(, model := fifelse(model == "ar-direct", "Direct: AR",
                           fifelse(model == "ar-annual-direct", "Direct: AR-annual",
                                   fifelse(model == "ar-bic-direct", "Direct: AR-BIC",
-                                          fifelse(model == "bvar-const-direct", "Direct: BVAR-CP",
+                                          fifelse(model == "bvar-const-direct", "Direct: BVAR-Const.",
                                                   fifelse(model == "bvar-qu-direct", "Direct: BVAR-SV",
                                                           fifelse(model == "ar", "AR",
                                                                   fifelse(model == "ar-bic", "AR-BIC",
                                                                           fifelse(model == "bvar", "BVAR-SV",
-                                                                                  fifelse(model == "bvar-const", "BVAR-CP",
+                                                                                  fifelse(model == "bvar-const", "BVAR-Const.",
                                                                                           fifelse(model == "arx-annual-direct", "Direct: ARX-annual",
                                                                                                   fifelse(model == "mean-ensemble", "AAEnsemble",
                                                                                                           fifelse(model == "IMF", "AAAIMF", model))))))))))))) |>
@@ -131,7 +131,7 @@ create_latex_table2 <- function(dat, tgt){
 #  kable_styling(latex_options = c("hold_position"))
 scoredat1 <- scoredat |>
   copy() |>
-  .d(target == "CPI") |>
+  .d(target == "GDP") |>
   split(by = c("horizon", "target"))
 
 myvals <- create_latex_table2(scoredat1, "CPI")
