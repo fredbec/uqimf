@@ -4,6 +4,7 @@ library(kableExtra)
 library(ggplot2)
 library(MetBrewer)
 library(patchwork)
+devtools::load_all()
 
 prefix <- "extcis_"
 
@@ -62,7 +63,7 @@ ciscores2 <- ciscores2 |>
                                         fifelse(model == "bvarconst-direct", "Direct: BVAR-Const.",
                                                 fifelse(model == "bvarqu-direct", "Direct: BVAR-SV",
                                                         fifelse(model == "ar", "AR",
-                                                                fifelse(model == "arxannual−direct", "Direct: ARX-annual",
+                                                                fifelse(model == "arxannual-direct", "Direct: ARX-annual",
 
                                                                 fifelse(model == "bvarmix", "BVAR-Mix",
 
@@ -124,14 +125,15 @@ qucvg_plot <- function(plotdat){
 
 }
 
-devqucvg_plot <- function(plotdat){
-  fancycols <- met.brewer("Hokusai3", n = length(unique(plotdat$model)))[2:length(unique(plotdat$model))]  # Get 10 colors from VanGogh1 palette
+devqucvg_plot <- function(plotdat, Colscale){
+  fancycols <- met.brewer(Colscale, n = length(unique(plotdat$model)))[2:length(unique(plotdat$model))]  # Get 10 colors from VanGogh1 palette
   imfcol <-  met.brewer("Hokusai3", n = 4)[1]
 
   modnames <- unique(plotdat$model)
   modnames <- modnames[modnames != "IMF"] # gets its own manual color
 
   color_map <- c("nominal" = "black", "IMF" = imfcol, setNames(fancycols, modnames))
+  #print(color_map)
   textsize_y <- 15
   font_family <- "serif"
 
@@ -152,8 +154,8 @@ devqucvg_plot <- function(plotdat){
     scale_x_continuous(breaks=seq(0, 1, 0.1)) +
     scale_y_continuous(limits = c(-0.353, 0.353), breaks=seq(-0.4, 0.4, 0.1)) +
     theme_uqimf() +
-    xlab("Nominal Coverage Level (in %)") +
-    ylab("Deviation from Nominal Coverage (in %)") +
+    xlab("Nominal Coverage Level") +
+    ylab("Deviation from Nominal Coverage") +
     theme_uqimf() %+replace%
     theme(#axis.text.x = element_blank(),
       axis.text.x = element_text(size = textsize_y),
@@ -237,8 +239,8 @@ ovr_plot <- (plot1) /
 ovr_plot
 ggsave(here("revision_plotstables", "QuantileCoveragePlots.pdf"), width = 8.3, height = 10.5)
 
-plot1 <- devqucvg_plot(ciscores1)
-plot2 <- devqucvg_plot(ciscores2)
+plot1 <- devqucvg_plot(ciscores1, "Hokusai3")
+plot2 <- devqucvg_plot(ciscores2, "OKeeffe2")
 
 ovr_plot <- (plot1) /
   (plot2)
