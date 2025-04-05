@@ -11,10 +11,10 @@ devtools::load_all()
 set.seed(2922)
 w <- 11
 
-ctry <- "CAN"
+ctry <- "FRA"
 tgt <- "ngdp_rpch"
-yr <- 2021
-hr <- 1
+yr <- 2020
+hr <- 0.5
 rw <- 11
 
 getlinerangedat <- function(dat, xpos){
@@ -33,8 +33,8 @@ getlinerangedat <- function(dat, xpos){
 }
 
 makecovplot <- function(ctry, tgt, yr, hr, rw){
-  labelvec <- c("raw error\nvalues", "absolute\nerror values", "IMF", "RMSE-\nbased",
-                "BVAR-\ndirect", "AR-\ndirect")
+  labelvec <- c("raw error\nvalues", "absolute\nerror values", "IMF",
+                "BVAR-\ndirect", "AR-\ndirect", "AR-annual-\ndirect")
 
   fancycols <- met.brewer("Hokusai3", n = 4)
   ######################################CURRENT YEAR#####################################
@@ -57,10 +57,22 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
       .d(quantile %in% c(0.1, 0.25, 0.75, 0.9)) |>
       .d(, mean := mean(prediction)) |>
       .d(, error_prediction := prediction-mean)
+
+    qufcs_arannual <- data.table::fread(here("benchmarks",
+                                       paste0("extcis_", "toscore", "", "_bvar_direct_quantile_forecasts_ho.csv"))) |>
+      setnames(paste0("tv_1"), "true_value") |>
+      .d(source == "ar_annual")|>
+      .d(country == ctry & target == tgt & horizon == hr) |>
+      .d(target_year == yr) |>
+      .d(quantile %in% c(0.1, 0.25, 0.75, 0.9)) |>
+      .d(, mean := mean(prediction)) |>
+      .d(, error_prediction := prediction-mean)
+
+    #print(qufcs_ar)
     qufcs_bvar <- data.table::fread(here("benchmarks",
                                        paste0("extcis_", "toscore", "", "_bvar_direct_quantile_forecasts_ho.csv"))) |>
       setnames(paste0("tv_1"), "true_value") |>
-      .d(source == "bvar_mix")|>
+      .d(source == "bvar_const")|>
       .d(country == ctry & target == tgt & horizon == hr) |>
       .d(target_year == yr) |>
       .d(quantile %in% c(0.1, 0.25, 0.75, 0.9)) |>
@@ -68,7 +80,7 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
       .d(, error_prediction := prediction-mean)
 
 
-    errors <- errordat2$fc_error
+    errors <- errordat2$fc_error * (-1)
     msee <- sqrt(mean(errors^2))
     abs_errors <- errors |> abs()
     val80 <- quantile(abs_errors, 0.8)
@@ -90,15 +102,18 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
       .d(, value := ifelse(type == 2, value, value + 1e-09))
 
     pos_imf <- ifelse(pos == 1, 3.2, 2.8)
-    pos_bvar <- ifelse(pos == 1, 6.2, 5.8)
+    pos_bvar <- ifelse(pos == 1, 4.2, 3.8)
     pos_ar <- ifelse(pos == 1, 5.2, 4.8)
     pos_tulip <- ifelse(pos == 1, 4.2, 3.8)
+    pos_arannual <- ifelse(pos == 1, 6.2, 5.8)
 
 
     linerangedat_imf <- getlinerangedat(qufcs_imf, pos_imf) |>
       .d(, pltcol := fancycols[1])
     linerangedat_ar <- getlinerangedat(qufcs_ar, pos_ar) |>
       .d(, pltcol := fancycols[2])
+    linerangedat_arannual <- getlinerangedat(qufcs_arannual, pos_arannual) |>
+      .d(, pltcol := "coral3")
     linerangedat_bvar <- getlinerangedat(qufcs_bvar, pos_bvar)|>
       .d(, pltcol := fancycols[4])
 
@@ -113,13 +128,13 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
       .d(, pltcol := "coral3")
 
 
-    return(list(errordat = errordat, listdatsets = list(linerangedat_imf, linerangedat_ar, linerangedat_bvar, linerangedat_tulip)))
+    return(list(errordat = errordat, listdatsets = list(linerangedat_imf, linerangedat_ar, linerangedat_bvar, linerangedat_arannual)))
   }
 
   val50 <- 0
   val80 <- 0
   ######################################NEXT YEAR#####################################
-  myres_next <- makedata(ctry = ctry, tgt = tgt, yr = yr + 1, hr = hr, rw = rw, pos = 1)
+  myres_next <- makedata(ctry = ctry, tgt = tgt, yr = yr + 2, hr = hr, rw = rw, pos = 1)
   nextyrerror <- myres_next$errordat
   nextyrdats <- myres_next$listdatsets
 
@@ -157,7 +172,8 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
   }
 
   #datasets <- list(linerangedat_imf, linerangedat_ar, linerangedat_bvar, linerangedat_tulip)
-
+  #print(datasets)
+  #print(nextyrdats)
   lrcols <- met.brewer("Hokusai2", 2)
   rects <- data.frame(xstart = seq(1,6,1), xend = seq(1.4,6.4,1), col = "grey40")
   quantvis <- ggplot() +
@@ -240,24 +256,24 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
     #  x = 3.37, y = val50, size = 2.75, colour = "grey60"
     #) +
     #geom_point(aes(x = type, y = pointval), data = pointdat, color = lrcols[2], size = 1.5, pch = 23) +
-    scale_y_continuous(limits = c(-11.5, 11.5)) +
+    scale_y_continuous(limits = c(-5, 5)) + #c(-11.5, 11.5) for horizon 1
     scale_x_continuous(breaks = c(1,2,3,4,5,6),
                        labels = labelvec,
                        limits = c(0.55, 6.8)) +
     ylab("") +
     xlab("") +
-    annotate("label", x = 0.8, y = -8, label = "I", size = 5, fill = "white", color = "black",family = "serif") +
-    annotate("label", x = 1.8, y = -8, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 2.8, y = -8, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 3.8, y = -8, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 4.8, y = -8, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 5.8, y = -8, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 1.2, y = -8, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 2.2, y = -8, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 3.2, y = -8, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 4.2, y = -8, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 5.2, y = -8, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 6.2, y = -8, label = "II", size = 5, fill = "white", color = "black",family = "serif")
+    annotate("label", x = 0.8, y = -4, label = "I", size = 5, fill = "white", color = "black",family = "serif") + #-8 for hor 1
+    annotate("label", x = 1.8, y = -4, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 2.8, y = -4, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 3.8, y = -4, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 4.8, y = -4, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 5.8, y = -4, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 1.2, y = -4, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 2.2, y = -4, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 3.2, y = -4, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 4.2, y = -4, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 5.2, y = -4, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 6.2, y = -4, label = "II", size = 5, fill = "white", color = "black",family = "serif")
   return(quantvis)
 }
 
@@ -278,6 +294,6 @@ ovrplot <- (plot_de + plot_ca) /
   (plot_fr + plot_us) /
   (plot_it + plot_uk)
 
-ggsave(here("revision_plotstables", "illustration_cov19.pdf"), ovrplot, width = 10, height = 12.5)
+ggsave(here("revision_plotstables", paste0("illustration_cov19_corr", "_hor", hr, "arann.pdf")), ovrplot, width = 10, height = 12.5)
 
 
