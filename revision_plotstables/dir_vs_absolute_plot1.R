@@ -232,7 +232,8 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
   return(quantvis)
 }
 
-plot_de <- makecovplot(ctry = "USA", tgt = "pcpi_pch", yr = 2004, hr = hr, rw = rw)
+plot_de <- makecovplot(ctry = "USA", tgt = "pcpi_pch", yr = 2004, hr = hr, rw = rw) +
+  ggtitle("US, horizon Fall Next, Inflation")
 
 if(FALSE){
 plot_fr <- makecovplot(ctry = "FRA", tgt = tgt, yr = yr, hr = hr, rw = rw)+
@@ -250,3 +251,5 @@ ovrplot <- (plot_de + plot_ca) /
   (plot_fr + plot_us) /
   (plot_it + plot_uk)
 }
+plot_de
+ggsave(here("revision_plotstables", "dirvsabs_plot1.pdf"), plot_de, width = 10, height = 7)

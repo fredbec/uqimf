@@ -25,53 +25,59 @@ qufcs_dir <- data.table::fread(here("quantile_forecasts",
 errordat2 <- fread(here("data", "weodat.csv")) |>
   .d(, fc_error := prediction - tv_1) |>
   .d(country == ctry & target == tgt & horizon == hr) |>
-  .d(target_year %in% seq(yr-(rw+floor(hr)), yr+3, 1))
+  .d(target_year %in% seq(yr-(rw+floor(hr)), yr+5, 1))
 
 qufcs_dir <- data.table::fread(here("quantile_forecasts",
                                     paste0("toscore", "", "_quantile_forecasts_directional.csv"))) |>
   .d(country == ctry & target == tgt & horizon == hr) |>
-  .d(target_year == yr) |>
+  .d(target_year %in% yr:(yr+5)) |>
   .d(source == "IMF")
 
-getlinerangedat <- function(dat, xpos){
-  val80_ur <- dat[quantile == 0.9, "prediction"] |> unname() |> unlist()
-  val50_ur <- dat[quantile == 0.75, "prediction"]|> unname() |> unlist()
-  val80_lwr <- dat[quantile == 0.1, "prediction"] |> unname() |> unlist()
-  val50_lwr <- dat[quantile == 0.25, "prediction"]|> unname() |> unlist()
-  linerangedat_lr <- data.frame(
-    type = rep(c(xpos), each = 1),
-    upper80 = c(val80_ur),
-    lower80 = c(val80_lwr),
-    upper50 = c(val50_ur),
-    lower50 = c(val50_lwr)
-  ) |>
-    setDT()
+getlinerangedat2 <- function(dat, xpos){
+
+  linerangedat_lr <- dat |>
+    .d(, c("country", "target", "target_year", "quantile", "prediction")) |>
+    .d(, quantile := paste0("qu", quantile)) |>
+    dcast(country + target + target_year ~ quantile, value.var = "prediction")
 
   return(linerangedat_lr)
+  #dat50 <- linerangedat_lr|>
+  #  .d(quantile %in% c(0.25, 0.75))
+
+  #dat80 <- linerangedat_lr|>
+  #  .d(quantile %in% c(0.1, 0.9))
+
+
+  #return(list(dat50 = dat50, dat80=dat80))
 }
 
 errordat3 <- errordat2 |> .d(target_year <= 2002)
 errordat3$fc_error |> sort() |> quantile(c(0.1, 0.25, 0.75, 0.9))
 
-lrdir <- getlinerangedat(qufcs_dir, 1)
-ggplot() +
-  geom_line(aes(x = target_year, y = prediction), color = "red", data = errordat2) +
+lrdir <- getlinerangedat2(qufcs_dir, 1)
+plot2 <- ggplot() +
+  geom_line(aes(x = target_year, y = prediction), color = "red", data = errordat2, alpha = 0.4) +
+  geom_point(aes(x = target_year, y = prediction), color = "red", data = errordat2) +
   geom_line(aes(x = target_year, y = tv_1), color = "black", data = errordat2) +
+  geom_point(aes(x = target_year, y = tv_1), color = "black", data = errordat2) +
   geom_linerange(
-    aes(x = yr,
-        ymin = lower80,
-        ymax = upper80),
+    aes(x = target_year,
+        ymin = qu0.1,
+        ymax = qu0.9),
     color = "red",
     data = lrdir,
     lwd = 5,
     alpha = 0.5
   ) +
   geom_linerange(
-    aes(x = yr,
-        ymin = lower50,
-        ymax = upper50),
+    aes(x = target_year,
+        ymin = qu0.25,
+        ymax = qu0.75),
     color = "red",
     data = lrdir,
-    lwd = 5
+    lwd = 5,
+    alpha = 0.5
   ) +
-  theme_uqimf()
+  theme_uqimf() +
+  ggtitle("US, horizon Fall Next, Inflation")
+ggsave(here("revision_plotstables", "dirvsabs_plot2.pdf"), plot2, width = 10, height = 7)
