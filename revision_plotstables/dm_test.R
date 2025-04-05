@@ -1,6 +1,7 @@
-rm(list = ls())
-
+library(here)
+library(data.table)
 library(sandwich)
+.d <- `[`
 
 # Diebold-Mariano test implementation, similar to function t_hac here:
 # https://github.com/FK83/forecastcalibration/blob/main/R/R_procs.R
@@ -9,7 +10,7 @@ dm_test <- function(loss1, loss2){
   # loss1 is for model 1, loss2 is for model 2
   # smaller loss is better
   d <- loss1 - loss2
-  # mean loss 
+  # mean loss
   m <- mean(d)
   # variance estimated via Newey-West method
   # regression of d on intercept
@@ -25,21 +26,67 @@ dm_test <- function(loss1, loss2){
   # lag length used by estimator
   k <- bwNeweyWest(fit)
   # output
-  list(t_stat = t, p_val = p, lag_length = k)
+  list(t_stat = t, p_val = p, bandwidth = k)
 }
 
-# Application example: simulate data from AR(1) model, 
-# compare true (cond. mean) forecast to random walk forecast, 
-# using SE loss
-n <- 200
-a <- .8 # ar parameter
-y <- arima.sim(model = list(ar = a), n = n)
-cm <- a*y[-n] # cond. mean forecast for obs. t = 2,...,n
-rw <- y[-n] # random walk forecast for obs. t = 2,...,n
-loss_cm <- (y[-1]-cm)^2 # loss for obs. t = 2,...,n
-loss_rw <- (y[-1]-rw)^2 # loss for obs. t = 2,...,n
-# run DM test
-# power should be high for large values of n and 
-# small values of a (such that random walk is implausible)
-dm_test(loss1 = loss_cm, loss2 = loss_rw)
+dm_dat <- vector(mode = "list", length = 8)
+i <- 0
 
+combs_methods <- data.table::CJ(hr = c(0, 0.5, 1, 1.5),
+                                tgt = c("pcpi_pch", "ngdp_rpch"),
+                                model1 = c("IMF"),
+                                model2 = c("ar", "bvar_const", "bvar_const-direct"))
+
+for(i in 1:nrow(combs_methods)){
+  curr_comb <- combs_methods[i,]
+  curr_hr <- curr_comb[,"hr"] |> unname() |> unlist()
+  curr_tgt <- curr_comb[,"tgt"] |> unname() |> unlist()
+  curr_mod1 <-  curr_comb[,"model1"] |> unname() |> unlist()
+  curr_mod2 <-  curr_comb[,"model2"] |> unname() |> unlist()
+
+
+  ####SCORE EINLESEN ÄNDERN
+  #loss_mod1 <- fread(here("scores", "extcis_crps_values_ho_byyr.csv")) |>
+  loss_mod1 <- fread(here("scores", "ci_scores_byyr_ho.csv")) |>
+    .d(horizon == curr_hr) |>
+    .d(target == curr_tgt) |>
+    .d(model == curr_mod1) |>
+    .d(, "interval_score") |>
+    #.d(, "score") |>
+    unname() |> unlist()
+
+  #loss_mod2 <- fread(here("scores", "extcis_crps_values_ho_byyr.csv"))## |>
+  if(curr_mod2 == "bvar_const-direct"){
+    filename <- "bvar_ci_scores_byyr_ho.csv"
+    curr_mod2 <- "bvar_const" #type of model (direct / not direct) is governed by file name
+    curr_mod2_new <- "bvar_const-direct"
+  } else {
+    filename <- "ci_scores_byyr_ho.csv"
+    curr_mod2_new <- "bvar_const"
+  }
+
+  loss_mod2 <- fread(here("scores", filename)) |>
+    .d(horizon == curr_hr) |>
+    .d(target == curr_tgt) |>
+    .d(model == curr_mod2)|>
+    .d(, "interval_score") |>
+    #.d(, "score") |>
+    unname() |> unlist()
+
+  if(curr_mod2_new == "bvar_const-direct"){
+    curr_mod2 <- curr_mod2_new
+  }
+
+  dm_res <- dm_test(loss1 = loss_mod1, loss2 = loss_mod2)
+
+  dm_dat[[i]] <- data.table(model1 = curr_mod1,
+                       model2 = curr_mod2,
+                       horizon = curr_hr,
+                       target = curr_tgt,
+                       tstat = dm_res$t_stat,
+                       p_val = dm_res$p_val,
+                       bandwidth = dm_res$bandwidth)
+}
+
+dm_dat <- rbindlist(dm_dat)
+data.table::fwrite(dm_dat, here("revision_plotstables", "dm_test_results_wis_3mods.csv"))

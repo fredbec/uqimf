@@ -75,6 +75,9 @@ scores_cvgshort <- scoreempQu(qufcs, cvg_rg = cis100,
 scores_cvgshort_ho <- scoreempQu(qufcs_ho, cvg_rg = cis100,
                                  by = c("model", "error_method", "method", "target"))
 
+scores_ho_byyr <- scoreempQu(qufcs_ho, cvg_rg = cis100,
+                             by = c("target_year", "target", "horizon", "method", "error_method", "model"))
+
 if(cset == "base"){
   scores_directional <- scoreempQu(qufcs_directional, cvg_rg = cis100,
                                    by = c("model", "error_method", "method", "country", "target", "horizon"))
@@ -160,6 +163,9 @@ bvar_scores_avgcountry_ho <- scoreempQu(bvar_qus_ho, cvg_rg = cis100,
                                         by = c("model", "target", "horizon"))
 bvar_scores_cvgshort_ho <- scoreempQu(bvar_qus_ho, cvg_rg = cis100,
                                    by = c("model", "target"))
+
+bvar_scores_ho_byyr <- scoreempQu(bvar_qus_ho, cvg_rg = cis100,
+                             by = c("target_year", "target", "horizon", "model"))
 
 
 #if(FALSE){
@@ -327,4 +333,8 @@ if(cset == "base"){
 data.table::fwrite(bvar_scores_ho, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_ho.csv")))
 data.table::fwrite(bvar_scores_cvgshort_ho, here("scores", prefix, paste0(global_file_prefix, "bvar_cvg_pooled_ho.csv")))
 data.table::fwrite(bvar_scores_avgcountry_ho, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_avgcnt_ho.csv")))
+
+data.table::fwrite(bvar_scores_ho_byyr, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_byyr_ho.csv")))
+data.table::fwrite(scores_ho_byyr, here("scores", prefix, paste0(global_file_prefix, "ci_scores_byyr_ho.csv")))
+
 
