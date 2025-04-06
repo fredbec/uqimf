@@ -155,10 +155,13 @@ create_latex_table2 <- function(dat, mrow){
   maxr <- nrow(singletab)
 
   singletab <- singletab[1:maxr, horizon := ""] |>
-    setnames(paste0(round_cols_newer, "_GDP"), paste0(round_cols_newer, "-g")) |>
-    setnames(paste0(round_cols_newer, "_CPI"), paste0(round_cols_newer, "-c")) |>
+    setnames(paste0(round_cols_newer, "_GDP"), paste0(round_cols_newer, "-cc")) |>
+    setnames(paste0(round_cols_newer, "_CPI"), paste0(round_cols_newer, "-gg")) |>
     setnames("horizon", "")  |>
     setnames("model", "")
+
+  #make NA's look cleaner in final table
+  singletab[is.na(singletab)] <- "--"
 
   dt_latex <- kable(singletab, format = "latex", escape = FALSE, booktabs = TRUE, linesep = c('', '', '', '','','','','','','','','', '\\addlinespace\\addlinespace'),
                     caption = "Interval Scores with Minimums Highlighted") %>%
