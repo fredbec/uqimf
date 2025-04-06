@@ -194,12 +194,16 @@ if(specs$cset == "base"){
   bvar_qufcs <- NULL
 }
 
-bvar_qufcs_ciss <- data.table::fread(
-here("benchmarks", "raw", "forecasts_March2024.csv")) |>
-  .d(method %in% c("bvar_ciss")) |> #remove Truth and IMF forecasts, and old BVAR
-  .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
-  .d(, var := NULL) |>
-  setnames("method", "source")
+if(cset == "base"){
+  bvar_qufcs_ciss <- data.table::fread(
+  here("benchmarks", "raw", "forecasts_March2024.csv")) |>
+    .d(method %in% c("bvar_ciss")) |> #remove Truth and IMF forecasts, and old BVAR
+    .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
+    .d(, var := NULL) |>
+    setnames("method", "source")
+} else {
+  bvar_qufcs_ciss <- NULL
+}
 
 ar_qufcs <- fcdat_ar
 

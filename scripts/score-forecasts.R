@@ -120,7 +120,7 @@ bvar_qus_ho <- bvar_qus_ho |>
   .d(,.(country, target, horizon, target_year, true_value, prediction, quantile, source)) |>
   setnames("source", "model")
 
-if(prefix != "_bvarspecs"){ #only score in bvarspecs setting
+if(prefix != "_bvarspecs" & cset == "base"){ #only score in bvarspecs setting
   bvar_qus <- bvar_qus |>
     .d(model != "bvar_ciss")
 
@@ -314,7 +314,9 @@ data.table::fwrite(pp_scores, here("scores", prefix, paste0(global_file_prefix, 
 
 if(prefix != "_bvarspecs"){
   data.table::fwrite(all_crps_ho, here("scores", prefix, paste0(global_file_prefix, "crps_values_ho.csv")))
-  data.table::fwrite(all_crps_ho_byyr, here("scores", prefix, paste0(global_file_prefix, "crps_values_ho_byyr.csv")))
+  if(cset == "base"){
+    data.table::fwrite(all_crps_ho_byyr, here("scores", prefix, paste0(global_file_prefix, "crps_values_ho_byyr.csv")))
+  }
 }
 
 if(cset == "base"){
