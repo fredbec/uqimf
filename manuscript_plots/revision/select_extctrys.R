@@ -12,6 +12,9 @@ weo_countries <- read_parquet(here("data", "WEOforecasts_prefilter.parquet")) |>
 
 weourl <- "https://www.imf.org/-/media/Files/Publications/WEO/WEO-Database/2024/October/WEOOct2024all.ashx"
 #mode "wb" (otherwise won't be readable)
+
+#uncomment next line to downdload data
+#then convert from xls to csv in excel, because otherwise it doesnt work....
 #download.file(weourl, "WEOeconomies.xls", mode = "wb")
 
 weo_economies <- data.table::fread(here("WEOeconomies.csv"), sep = ";") |>
