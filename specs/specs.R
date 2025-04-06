@@ -10,7 +10,7 @@ specs <- list(
 
   ciset = "base", #"extended" for more CI levels (10,20,...,90)
 
-  tv_release = 1,
+  tv_release = 1, #1 or "oecd"
   window_length = 11,
   max_year = 2023,
   min_year = 1990,
