@@ -79,14 +79,14 @@ crps_qus <- crps |>
 
 scoredat <- rbind(crps_qus, crps_base)
 
-create_latex_table2 <- function(dat){
+create_latex_table2 <- function(dat, mrow){
 
   #round_cols_new <- c("CRPS", "(Weighted) IS",  "Unweighted IS", "IS 50", "IS 80")#,
-                       #"Deviation 50","Deviation 80")
+  #"Deviation 50","Deviation 80")
 
-  round_cols_newer <- c("$\\text{CRPS}^{2)}$", "$\\text{IS}_{W}^{1)}$", "$\\text{IS}_{W,b}^{1)}$", "$\\text{IS}_{U}^{1)}$",
-                        "$\\text{IS}_{50}^{1)}$", "$\\text{IS}_{80}^{1)}$", "$\\text{IS}_{\\text{CISS}}^{1)}$")#,
-                        #"$\\text{Dev}_{50}$", "$\\text{Dev}_{80}$")
+  round_cols_newer <- c("$\\text{CRPS}^{1)}$", "$\\text{IS}_{W}^{2)}$", "$\\text{IS}_{W,b}^{2)}$", "$\\text{IS}_{U}^{2)}$",
+                        "$\\text{IS}_{50}^{2)}$", "$\\text{IS}_{80}^{2)}$", "$\\text{IS}_{\\text{CISS}}^{2)}$")#,
+  #"$\\text{Dev}_{50}$", "$\\text{Dev}_{80}$")
 
   singletab <- lapply(dat, function(dt){
 
@@ -120,7 +120,7 @@ create_latex_table2 <- function(dat){
       .d(, horizon := curr_hor) |>
       setnames(round_cols, round_cols_newer)
 
-    }
+  }
   )|>
     rbindlist() |>
     dcast(model + horizon ~ target, value.var = round_cols_newer)
@@ -132,24 +132,23 @@ create_latex_table2 <- function(dat){
     .d(model != "bvar") |> #exclude original bvar model due to stability issues
     .d(model != "bvar-qu-direct") |>
     .d(model != "bvar-ciss") |>
-    .d(, model := fifelse(model == "ar-direct", "Direct$^{3)}$: AR(1)",
-                          fifelse(model == "ar-annual-direct", "Direct$^{3)}$: AR-annual",
-                                  fifelse(model == "ar-bic-direct", "Direct$^{3)}$: AR(p)",
-                                          fifelse(model == "bvar-const-direct", "Direct$^{3)}$: BVAR-Const.",
-                                                  fifelse(model == "bvar-ciss-direct", "Direct$^{3)}$: BVAR-CISS",
+    .d(, model := fifelse(model == "ar-direct", "Direct$^{4)}$: AR(1)",
+                          fifelse(model == "ar-annual-direct", "Direct$^{4)}$: AR-annual",
+                                  fifelse(model == "ar-bic-direct", "Direct$^{4)}$: AR(p)",
+                                          fifelse(model == "bvar-const-direct", "Direct$^{4)}$: BVAR$^{3)}$",
+                                                  fifelse(model == "bvar-ciss-direct", "Direct$^{4)}$: BVAR-CISS$^{3)}$",
                                                           fifelse(model == "ar", "AR(1)",
-
-                                                                  fifelse(model == "arx-annual-direct", "Direct$^{3)}$: ARX-annual",
-                                                                  fifelse(model == "ar-bic", "AR(p)",
-                                                                          fifelse(model == "bvar-ciss", "BVAR-CISS",
-                                                                                  fifelse(model == "bvar-const", "BVAR-Const.",
-                                                                                          fifelse(model == "bvar-mix", "BVAR-Mix",
-                                                                                                  fifelse(model == "bvar-mix-direct", "Direct$^{3)}$: BVAR-Mix",
+                                                                  fifelse(model == "arx-annual-direct", "Direct$^{4)}$: ARX-annual",
+                                                                          fifelse(model == "ar-bic", "AR(p)",
+                                                                                  fifelse(model == "bvar-ciss", "BVAR-CISS",
+                                                                                          fifelse(model == "bvar-const", "BVAR$^{3)}$",
+                                                                                                  fifelse(model == "bvar-mix", "BVAR-Mix$^{3)}$",
+                                                                                                          fifelse(model == "bvar-mix-direct", "Direct$^{4)}$: BVAR-Mix$^{3)}$",
                                                                                                                   fifelse(model == "mean-ensemble", "ZEnsemble",
                                                                                                                           fifelse(model == "IMF", "AAAIMF", model))))))))))))))) |>
     .d(order(horizon, model)) |>
     .d(, model := fifelse(model == "AAAIMF", "IMF",
-                          fifelse(model == "ZEnsemble", "Simple Ensemble$^{4)}$", model))) |>
+                          fifelse(model == "ZEnsemble", "Simple Ensemble$^{5)}$", model))) |>
     .d(, horizon := as.character(horizon))
 
 
@@ -162,15 +161,17 @@ create_latex_table2 <- function(dat){
     setnames("model", "")
 
   dt_latex <- kable(singletab, format = "latex", escape = FALSE, booktabs = TRUE, linesep = c('', '', '', '','','','','','','','','', '\\addlinespace\\addlinespace'),
-              caption = "Interval Scores with Minimums Highlighted") %>%
-          kable_styling(latex_options = c("hold_position"))
-
-
+                    caption = "Interval Scores with Minimums Highlighted") %>%
+    kable_styling(latex_options = c("hold_position")) |>
+    add_header_above(
+      c(" " = 2, "{Inflation\\\\hspace*{15mm}}" = 7, "{GDP Growth}" = 7),
+      escape = FALSE
+    )
   dt_latex <- dt_latex |>
-    row_spec(1, extra_latex = "\\parbox[t]{2mm}{\\multirow{13}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Fall, Current}}}") |>
-    row_spec(14, extra_latex = "\\parbox[t]{2mm}{\\multirow{13}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Spring, Current}}}")# |>
-   # row_spec(23, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Fall, Next}}}") |>
-   # row_spec(34, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Spring, Next}}}")
+    row_spec(1, extra_latex = paste0("\\parbox[t]{2mm}{\\multirow{13}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Fall, ", mrow, "}}}")) |>
+    row_spec(14, extra_latex = paste0("\\parbox[t]{2mm}{\\multirow{13}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Spring, ", mrow, "}}}"))# |>
+  # row_spec(23, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Fall, Next}}}") |>
+  # row_spec(34, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Spring, Next}}}")
 
   highlight_rows <- c(1, 14)
   for (i in highlight_rows) {
@@ -183,26 +184,31 @@ create_latex_table2 <- function(dat){
       row_spec(i, background = "gray!15")  # Set the background color to grey (light grey)
   }
 
-
-
   return(dt_latex)
-  }
+}
 
 
 
 
-  # Generate and return the full LaTeX table with bold highlights
-  #kable(dt, format = "latex", escape = FALSE, booktabs = TRUE,
-  #      caption = "Interval Scores with Minimums Highlighted") %>%
-  #  kable_styling(latex_options = c("hold_position"))
-scoredat1 <- scoredat |>
+# Generate and return the full LaTeX table with bold highlights
+#kable(dt, format = "latex", escape = FALSE, booktabs = TRUE,
+#      caption = "Interval Scores with Minimums Highlighted") %>%
+#  kable_styling(latex_options = c("hold_position"))
+scoredat_current <- scoredat |>
   copy() |>
   .d(horizon < 1) |>
   split(by = c("horizon", "target"))
-scoredat2 <- scoredat |>
+scoredat_next <- scoredat |>
   copy() |>
   .d(horizon >= 1) |>
   split(by = c("horizon", "target"))
 
-myvals <- create_latex_table2(scoredat1)
-myvals2 <- create_latex_table2(scoredat2)
+table_current <- create_latex_table2(scoredat_current, mrow = "Current")
+table_next <- create_latex_table2(scoredat_next, mrow = "Next")
+
+writeLines(table_current, (here("manuscript_plots", "revision", "extcis_current.tex")))
+writeLines(table_current, (here("..", "uqimf-manuscript", "tables", "extcis_current.tex")))
+
+writeLines(table_next, (here("manuscript_plots", "revision", "extcis_next.tex")))
+writeLines(table_next, (here("..", "uqimf-manuscript", "tables", "extcis_next.tex")))
+
