@@ -13,8 +13,8 @@ w <- 11
 
 ctry <- "FRA"
 tgt <- "ngdp_rpch"
-yr <- 2020
-hr <- 0.5
+yr <- 2019
+hr <- 0
 rw <- 11
 
 getlinerangedat <- function(dat, xpos){
@@ -256,24 +256,24 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
     #  x = 3.37, y = val50, size = 2.75, colour = "grey60"
     #) +
     #geom_point(aes(x = type, y = pointval), data = pointdat, color = lrcols[2], size = 1.5, pch = 23) +
-    scale_y_continuous(limits = c(-5, 5)) + #c(-11.5, 11.5) for horizon 1
+    scale_y_continuous(limits = c(-3.75, 3.75)) + #c(-11.5, 11.5) for horizon 1
     scale_x_continuous(breaks = c(1,2,3,4,5,6),
                        labels = labelvec,
                        limits = c(0.55, 6.8)) +
     ylab("") +
     xlab("") +
-    annotate("label", x = 0.8, y = -4, label = "I", size = 5, fill = "white", color = "black",family = "serif") + #-8 for hor 1
-    annotate("label", x = 1.8, y = -4, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 2.8, y = -4, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 3.8, y = -4, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 4.8, y = -4, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 5.8, y = -4, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 1.2, y = -4, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 2.2, y = -4, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 3.2, y = -4, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 4.2, y = -4, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 5.2, y = -4, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 6.2, y = -4, label = "II", size = 5, fill = "white", color = "black",family = "serif")
+    annotate("label", x = 0.8, y = -3.5, label = "I", size = 5, fill = "white", color = "black",family = "serif") + #-8 for hor 1
+    annotate("label", x = 1.8, y = -3.5, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 2.8, y = -3.5, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 3.8, y = -3.5, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 4.8, y = -3.5, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 5.8, y = -3.5, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 1.2, y = -3.5, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 2.2, y = -3.5, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 3.2, y = -3.5, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 4.2, y = -3.5, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 5.2, y = -3.5, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 6.2, y = -3.5, label = "II", size = 5, fill = "white", color = "black",family = "serif")
   return(quantvis)
 }
 
@@ -292,7 +292,15 @@ plot_uk <- makecovplot(ctry = "GBR", tgt = tgt, yr = yr, hr = hr, rw = rw)+
 
 ovrplot <- (plot_de + plot_ca) /
   (plot_fr + plot_us) /
-  (plot_it + plot_uk)
+  (plot_it + plot_uk) +
+  plot_annotation(
+    title = "Forecast Interval Lengths, Target Years (I) 2019 and (II) 2021",
+    subtitle = "Horizon: Fall, Current",
+    theme = theme(
+      plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
+      plot.subtitle = element_text(hjust = 0.5, size = 16, face = "bold")
+    )
+  )
 
 ggsave(here("revision_plotstables", paste0("illustration_cov19_corr", "_hor", hr, "arann.pdf")), ovrplot, width = 10, height = 12.5)
 
