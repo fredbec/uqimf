@@ -5,6 +5,7 @@ library(ggplot2)
 library(MetBrewer)
 library(patchwork)
 library(here)
+devtools::load_all()
 
 prefix <- "extcntry_"
 
@@ -45,27 +46,34 @@ modnames <- modnames[modnames != "IMF"]
 colors_manual <- c("IMF" = imfcol, setNames(fancycols, modnames))
 
 
-
+tgt <- "pcpi_pch"
 cvgplot <- coverage_plot_aggregate(ciscores_avg,
                                    ciscores,
                                    cvg_rg = c(50,80),
-                                   "pcpi_pch",
+                                   tgt,
+                                   textsize_y = 17,
+                                   plot_title = "",
+                                   manual_scale = colors_manual,
+                                   metcolor = "Hokusai3",
+                                   minusvalpos = 2) +
+  theme(plot.margin = margin(t=0,b=0,r=plot_marg,l=plot_marg, unit = "pt"))
+
+cvgplot
+ggsave(here("manuscript_plots", "revision", "results", paste0("extctry_cvgplot_", tgt, ".pdf")), width = 8.3, height = 4.5)
+ggsave(here("..", "uqimf-manuscript", "figures", paste0("extctry_cvgplot_", tgt, ".pdf")), width = 8.3, height = 4.5)
+
+
+tgt <- "ngdp_rpch"
+cvgplot <- coverage_plot_aggregate(ciscores_avg,
+                                   ciscores,
+                                   cvg_rg = c(50,80),
+                                   tgt,
                                    textsize_y = 17,
                                    plot_title = "",
                                    manual_scale = colors_manual,
                                    metcolor = "Hokusai3") +
   theme(plot.margin = margin(t=0,b=0,r=plot_marg,l=plot_marg, unit = "pt"))
 
-ggsave(here("revision_plotstables", "extctry_coverage_CPI.pdf"), width = 8, height = 4.5)
 
-cvgplot <- coverage_plot_aggregate(ciscores_avg,
-                                   ciscores,
-                                   cvg_rg = c(50,80),
-                                   "ngdp_rpch",
-                                   textsize_y = 17,
-                                   plot_title = "",
-                                   manual_scale = colors_manual,
-                                   metcolor = "Hokusai3") +
-  theme(plot.margin = margin(t=0,b=0,r=plot_marg,l=plot_marg, unit = "pt"))
-
-ggsave(here("revision_plotstables", "extctry_coverage_GDP.pdf"), width = 8, height = 4.5)
+ggsave(here("manuscript_plots", "revision", "results", paste0("extctry_cvgplot_", tgt, ".pdf")),plot = cvgplot, width = 8.3, height = 4.5)
+ggsave(here("..", "uqimf-manuscript", "figures", paste0("extctry_cvgplot_", tgt, ".pdf")), plot = cvgplot, width = 8.3, height = 4.5)
