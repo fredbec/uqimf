@@ -163,8 +163,7 @@ create_latex_table2 <- function(dat, mrow){
   #make NA's look cleaner in final table
   singletab[is.na(singletab)] <- "--"
 
-  dt_latex <- kable(singletab, format = "latex", escape = FALSE, booktabs = TRUE, linesep = c('', '', '', '','','','','','','','','', '\\addlinespace\\addlinespace'),
-                    caption = "Interval Scores with Minimums Highlighted") %>%
+  dt_latex <- kable(singletab, format = "latex", escape = FALSE, booktabs = TRUE, linesep = c('', '', '', '','','','','','','','','', '\\addlinespace')) %>%
     kable_styling(latex_options = c("hold_position")) |>
     add_header_above(
       c(" " = 2, "{Inflation\\\\hspace*{15mm}}" = 7, "{GDP Growth}" = 7),
@@ -209,9 +208,9 @@ scoredat_next <- scoredat |>
 table_current <- create_latex_table2(scoredat_current, mrow = "Current")
 table_next <- create_latex_table2(scoredat_next, mrow = "Next")
 
-writeLines(table_current, (here("manuscript_plots", "revision", "extcis_current.tex")))
+writeLines(table_current, (here("manuscript_plots", "revision", "results", "extcis_current.tex")))
 writeLines(table_current, (here("..", "uqimf-manuscript", "tables", "extcis_current.tex")))
 
-writeLines(table_next, (here("manuscript_plots", "revision", "extcis_next.tex")))
+writeLines(table_next, (here("manuscript_plots", "revision", "results", "extcis_next.tex")))
 writeLines(table_next, (here("..", "uqimf-manuscript", "tables", "extcis_next.tex")))
 

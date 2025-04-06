@@ -1,7 +1,8 @@
 library(data.table)
 library(knitr)
 library(kableExtra)
-
+library(here)
+.d <- `[`
 prefix <- "extcntry_"
 
 
@@ -46,8 +47,8 @@ create_latex_table2 <- function(dat, tgt){
   round_cols_new <- c("CRPS", "(Weighted) IS", "Unweighted IS", "IS 50", "IS 80")#,
   #"Deviation 50","Deviation 80")
 
-  round_cols_newer <- c("$\\text{CRPS}$", "$\\text{IS}_{W}$", "$\\text{IS}_{U}$",
-                        "$\\text{IS}_{50}$", "$\\text{IS}_{80}$")#,
+  round_cols_newer <- c("$\\text{CRPS}^{1)}$", "$\\text{IS}_{W,b}^{2)}$", "$\\text{IS}_{U}^{2)}$",
+                        "$\\text{IS}_{50}^{2)}$", "$\\text{IS}_{80}^{2)}$")#,
   #"$\\text{Dev}_{50}$", "$\\text{Dev}_{80}$")
 
   singletab <- lapply(dat, function(dt){
@@ -97,16 +98,17 @@ create_latex_table2 <- function(dat, tgt){
   }
   singletab <- singletab |>
     .d(order(horizon)) |>
-    .d(, model := fifelse(model == "ar-direct", "Direct: AR",
-                          fifelse(model == "ar-annual-direct", "Direct: AR-annual",
-                                  fifelse(model == "ar-bic-direct", "Direct: AR-BIC",
-                                          fifelse(model == "bvar-const-direct", "Direct: BVAR-CP",
-                                                  fifelse(model == "bvar-qu-direct", "Direct: BVAR-SV",
+    #the following is copied over from extcis_overview_table, so some extra models are in this, but the extra ones just won't be used
+    .d(, model := fifelse(model == "ar-direct", "Direct$^{3)}$: AR",
+                          fifelse(model == "ar-annual-direct", "Direct$^{3)}$: AR-annual",
+                                  fifelse(model == "ar-bic-direct", "Direct$^{3)}$: AR-BIC",
+                                          fifelse(model == "bvar-const-direct", "Direct$^{3)}$: BVAR-CP",
+                                                  fifelse(model == "bvar-qu-direct", "Direct$^{3)}$: BVAR-SV",
                                                           fifelse(model == "ar", "AR",
                                                                   fifelse(model == "ar-bic", "AR-BIC",
                                                                           fifelse(model == "bvar", "BVAR-SV",
                                                                                   fifelse(model == "bvar-const", "BVAR-CP",
-                                                                                          fifelse(model == "arx-annual-direct", "Direct: ARX-annual",
+                                                                                          fifelse(model == "arx-annual-direct", "Direct$^{3)}$: ARX-annual",
                                                                                                   fifelse(model == "mean-ensemble", "AAEnsemble",
                                                                                                           fifelse(model == "IMF", "AAAIMF", model))))))))))))) |>
     .d(order(horizon, model)) |>
@@ -118,13 +120,12 @@ create_latex_table2 <- function(dat, tgt){
 
 
   singletab <- singletab[1:nrow(singletab), horizon := ""] |>
-    setnames(paste0(round_cols_newer, "_GDP"), paste0(round_cols_newer, "-g"), skip_absent = TRUE) |>
-    setnames(paste0(round_cols_newer, "_CPI"), paste0(round_cols_newer, "-c"), skip_absent = TRUE) |>
+    setnames(paste0(round_cols_newer, "_GDP"), paste0(round_cols_newer, "-gg"), skip_absent = TRUE) |>
+    setnames(paste0(round_cols_newer, "_CPI"), paste0(round_cols_newer, "-cc"), skip_absent = TRUE) |>
     setnames("horizon", "")  |>
     setnames("model", "")
 
-  dt_latex <- kable(singletab, format = "latex", escape = FALSE, booktabs = TRUE, linesep = c('','', '\\addlinespace', '','', '\\addlinespace','','','\\addlinespace','',''),
-                    caption = "Interval Scores with Minimums Highlighted") %>%
+  dt_latex <- kable(singletab, format = "latex", escape = FALSE, booktabs = TRUE, linesep = c('','', '\\addlinespace', '','', '\\addlinespace','','','\\addlinespace','','')) %>%
     kable_styling(latex_options = c("hold_position"))
 
 
@@ -149,10 +150,21 @@ create_latex_table2 <- function(dat, tgt){
 #      caption = "Interval Scores with Minimums Highlighted") %>%
 #  kable_styling(latex_options = c("hold_position"))
 varvar <- "CPI"
-scoredat1 <- scoredat |>
+scoredat_cpi <- scoredat |>
   copy() |>
   .d(target == varvar) |>
   split(by = c("horizon", "target"))
+table_cpi <- create_latex_table2(scoredat_cpi, varvar)
 
-myvals <- create_latex_table2(scoredat1, varvar)
-myvals
+varvar <- "GDP"
+scoredat_gdp <- scoredat |>
+  copy() |>
+  .d(target == varvar) |>
+  split(by = c("horizon", "target"))
+table_gdp <- create_latex_table2(scoredat_gdp, varvar)
+
+writeLines(table_cpi, (here("manuscript_plots", "revision", "results", "extctry_cpi.tex")))
+writeLines(table_cpi, (here("..", "uqimf-manuscript", "tables", "extctry_cpi.tex")))
+
+writeLines(table_gdp, (here("manuscript_plots", "revision", "results", "extctry_gdp.tex")))
+writeLines(table_gdp, (here("..", "uqimf-manuscript", "tables", "extctry_gdp.tex")))
