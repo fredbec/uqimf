@@ -75,10 +75,10 @@ bvar_scores_cvgshort_ho <- scoreempQu(bvar_qus_ho, cvg_rg = cis100,
 
 
 ######################################Saving#######################################################
-data.table::fwrite(scores_ho, here("revision_plotstables", "cov_19scores", prefix, paste0(global_file_prefix, "ci_scores_ho.csv")))
-data.table::fwrite(scores_avgcountry_ho, here("revision_plotstables", "cov_19scores", prefix, paste0(global_file_prefix, "ci_scores_avgcnt_ho.csv")))
-data.table::fwrite(scores_cvgshort_ho, here("revision_plotstables", "cov_19scores", prefix, paste0(global_file_prefix, "cvg_pooled_ho.csv")))
-data.table::fwrite(bvar_scores_ho, here("revision_plotstables", "cov_19scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_ho.csv")))
-data.table::fwrite(bvar_scores_cvgshort_ho, here("revision_plotstables", "cov_19scores", prefix, paste0(global_file_prefix, "bvar_cvg_pooled_ho.csv")))
-data.table::fwrite(bvar_scores_avgcountry_ho, here("revision_plotstables", "cov_19scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_avgcnt_ho.csv")))
+data.table::fwrite(scores_ho, here("manuscript_plots", "revision", "results", "cov19_scores", prefix, paste0(global_file_prefix, "ci_scores_ho.csv")))
+data.table::fwrite(scores_avgcountry_ho, here("manuscript_plots", "revision", "results", "cov19_scores", prefix, paste0(global_file_prefix, "ci_scores_avgcnt_ho.csv")))
+data.table::fwrite(scores_cvgshort_ho, here("manuscript_plots", "revision", "results", "cov19_scores", prefix, paste0(global_file_prefix, "cvg_pooled_ho.csv")))
+data.table::fwrite(bvar_scores_ho, here("manuscript_plots", "revision", "results", "cov19_scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_ho.csv")))
+data.table::fwrite(bvar_scores_cvgshort_ho, here("manuscript_plots", "revision", "results", "cov19_scores", prefix, paste0(global_file_prefix, "bvar_cvg_pooled_ho.csv")))
+data.table::fwrite(bvar_scores_avgcountry_ho, here("manuscript_plots", "revision", "results", "cov19_scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_avgcnt_ho.csv")))
 

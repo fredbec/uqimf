@@ -7,23 +7,24 @@ library(here)
 prefix <- ""
 
 
-ciscores <- fread(here("revision_plotstables", "cov_19scores", paste0(prefix, "ci_scores_avgcnt_ho.csv")))|>
+ciscores <- fread(here("manuscript_plots", "revision", "results", "cov19_scores", paste0(prefix, "ci_scores_avgcnt_ho.csv")))|>
   .d(, dev_50 := 100*coverage_50 - 50) |>
   .d(, dev_80 := 100*coverage_80 - 80) |>
   .d(, c("model", "target", "horizon", "interval_score", "unweighted_interval_score", "interval_score_50", "interval_score_80", "dev_50", "dev_80")) |>
   .d(, target := ifelse(target == "ngdp_rpch", "GDP", "CPI")) |>
-  .d(model == "IMF")
+  .d(model %in% c("IMF", "bvar_const", "ar")) |>
+  .d(, model := gsub("_", "-", model))
 
 
 
-ciscores2 <- fread(here("revision_plotstables", "cov_19scores", paste0(prefix, "bvar_ci_scores_avgcnt_ho.csv"))) |>
+ciscores2 <- fread(here("manuscript_plots", "revision", "results", "cov19_scores", paste0(prefix, "bvar_ci_scores_avgcnt_ho.csv"))) |>
   .d(, dev_50 := 100*coverage_50 - 50) |>
   .d(, dev_80 := 100*coverage_80 - 80) |>
   .d(, c("model", "target", "horizon", "interval_score", "unweighted_interval_score", "interval_score_50", "interval_score_80", "dev_50", "dev_80")) |>
   .d(, target := ifelse(target == "ngdp_rpch", "GDP", "CPI")) |>
   .d(, model := gsub("_", "-", model)) |>
   .d(, model := paste0(model, "-direct")) |>
-  .d(model %in% c("bvar-const-direct", "ar-direct"))
+  .d(model %in% c("bvar-const-direct"))#, "ar-direct"))
 
 scoredat <- rbind(ciscores, ciscores2)
 
@@ -33,9 +34,9 @@ create_latex_table2 <- function(dat, tgt){
   round_cols_new <- c("(Weighted) IS", "Unweighted IS", "IS 50", "IS 80")#,
   #"Deviation 50","Deviation 80")
 
-  round_cols_newer <- c("$\\text{IS}_{W}$", "$\\text{IS}_{U}$",
-                        "$\\text{IS}_{50}$", "$\\text{IS}_{80}$",
-                        "$\\text{Dev}_{50}$", "$\\text{Dev}_{80}$")#,
+  round_cols_newer <- c("$\\text{IS}_{W,b}^{1)}$", "$\\text{IS}_{U}^{1)}$",
+                        "$\\text{IS}_{50}^{1)}$", "$\\text{IS}_{80}^{1)}$",
+                        "$\\text{Dev}_{50}^{2)}$", "$\\text{Dev}_{80}^{2)}$")#,
   #"$\\text{Dev}_{50}$", "$\\text{Dev}_{80}$")
 
   singletab <- lapply(dat, function(dt){
@@ -106,21 +107,33 @@ create_latex_table2 <- function(dat, tgt){
 
 
   singletab <- singletab[1:nrow(singletab), horizon := ""] |>
-    setnames(paste0(round_cols_newer, "_GDP"), paste0(round_cols_newer, "-g"), skip_absent = TRUE) |>
-    setnames(paste0(round_cols_newer, "_CPI"), paste0(round_cols_newer, "-c"), skip_absent = TRUE) |>
+    setnames(paste0(round_cols_newer, "_GDP"), paste0(round_cols_newer, "-gg"), skip_absent = TRUE) |>
+    setnames(paste0(round_cols_newer, "_CPI"), paste0(round_cols_newer, "-cc"), skip_absent = TRUE) |>
     setnames("horizon", "")  |>
     setnames("model", "")
 
-  dt_latex <- kable(singletab, format = "latex", escape = FALSE, booktabs = TRUE, linesep = c('','', '\\addlinespace', '','', '\\addlinespace','','','\\addlinespace','',''),
-                    caption = "Interval Scores with Minimums Highlighted") %>%
+  cpon <- ifelse(tgt == "CPI",
+                 "Scores for Target Years 2020 - 2022 (COVID period), Inflation",
+                 "Scores for Target Years 2020 - 2022 (COVID period), GDP Growth")
+
+  dt_latex <- kable(singletab, format = "latex", escape = FALSE, booktabs = TRUE, linesep = c('','', '', '\\addlinespace', '','','',  '\\addlinespace','','','', '\\addlinespace','',''),
+                    caption = cpon) %>%
     kable_styling(latex_options = c("hold_position"))
 
 
   dt_latex <- dt_latex |>
-    row_spec(1, extra_latex = "\\multirow{3}{*}{Fall, Current}") |>
-    row_spec(4, extra_latex = "\\multirow{3}{*}{Spring, Current}") |>
-    row_spec(7, extra_latex = "\\multirow{3}{*}{Fall, Next}") |>
-    row_spec(10, extra_latex = "\\multirow{3}{*}{Spring, Next}")
+    row_spec(1, extra_latex = paste0(
+      "\\parbox[t]{2mm}{\\multirow{4}{*}{\\rotatebox[origin=c]{90}{\\parbox{2cm}{\\centering Fall,\\\\Current}}}}"
+    )) |>
+    row_spec(5, extra_latex = paste0(
+      "\\parbox[t]{2mm}{\\multirow{4}{*}{\\rotatebox[origin=c]{90}{\\parbox{2cm}{\\centering Spring,\\\\Current}}}}"
+    )) |>
+    row_spec(9, extra_latex = paste0(
+      "\\parbox[t]{2mm}{\\multirow{4}{*}{\\rotatebox[origin=c]{90}{\\parbox{2cm}{\\centering Fall,\\\\Next}}}}"
+    )) |>
+    row_spec(13, extra_latex = paste0(
+      "\\parbox[t]{2mm}{\\multirow{4}{*}{\\rotatebox[origin=c]{90}{\\parbox{2cm}{\\centering Spring,\\\\Next}}}}"
+    ))
   # row_spec(23, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Fall, Next}}}") |>
   # row_spec(34, extra_latex = "\\parbox[t]{2mm}{\\multirow{11}{*}{\\rotatebox[origin=c]{90}{\\hspace{5mm}Spring, Next}}}")
 
@@ -129,10 +142,20 @@ create_latex_table2 <- function(dat, tgt){
   return(dt_latex)
 }
 #  kable_styling(latex_options = c("hold_position"))
-scoredat1 <- scoredat |>
+scoredat_cpi <- scoredat |>
+  copy() |>
+  .d(target == "CPI") |>
+  split(by = c("horizon", "target"))
+
+table_cpi <- create_latex_table2(scoredat_cpi, "CPI")
+
+scoredat_gdp <- scoredat |>
   copy() |>
   .d(target == "GDP") |>
   split(by = c("horizon", "target"))
 
-myvals <- create_latex_table2(scoredat1, "CPI")
-myvals
+table_gdp <- create_latex_table2(scoredat_gdp, "GDP")
+
+writeLines(table_cpi, (here("manuscript_plots", "revision", "results", "sens_cov19_cpi.tex")))
+writeLines(table_gdp, (here("manuscript_plots", "revision", "results", "sens_cov19_gdp.tex")))
+
