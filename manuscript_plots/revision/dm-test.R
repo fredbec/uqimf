@@ -80,13 +80,13 @@ for(i in 1:nrow(combs_methods)){
   dm_res <- dm_test(loss1 = loss_mod1, loss2 = loss_mod2)
 
   dm_dat[[i]] <- data.table(model1 = curr_mod1,
-                       model2 = curr_mod2,
-                       horizon = curr_hr,
-                       target = curr_tgt,
-                       tstat = dm_res$t_stat,
-                       p_val = dm_res$p_val,
-                       bandwidth = dm_res$bandwidth)
+                            model2 = curr_mod2,
+                            horizon = curr_hr,
+                            target = curr_tgt,
+                            tstat = dm_res$t_stat,
+                            p_val = dm_res$p_val,
+                            bandwidth = dm_res$bandwidth)
 }
 
 dm_dat <- rbindlist(dm_dat)
-data.table::fwrite(dm_dat, here("revision_plotstables", "dm_test_results_wis_3mods.csv"))
+data.table::fwrite(dm_dat, here("manuscript_plots", "revision", "results", "dm_test_results_wis.csv"))
