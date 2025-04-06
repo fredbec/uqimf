@@ -25,20 +25,22 @@ wis_plot_paper <- function(dataset_suffix,
   wis_scores <- fread(here("scores", paste0(global_file_prefix, "ci_scores_avgcnt", dataset_suffix, ".csv"))) |>
     data.table::copy() |>
     .d(, .(model, error_method, method, target, horizon, interval_score, dispersion, underprediction, overprediction)) |>
-    setnames("model", "source")
+    setnames("model", "source") |>
+    .d(source %in% c("IMF", "ar", "bvar_const"))
 
 
   bvar_wis_scores <- fread(here("scores", paste0(global_file_prefix, "bvar_ci_scores_avgcnt", bvar_dataset_suffix, ".csv"))) |>
     data.table::copy() |>
     .d(, .(model, target, horizon, interval_score, dispersion, underprediction, overprediction)) |>
-    .d(model == "bvar_qu") |>
+    .d(model == "bvar_const") |>
+    .d(, model := "bvar_const-direct") |>
     setnames("model", "source") |>
     .d(,error_method := unique(wis_scores$error_method)) |>
     .d(,method := unique(wis_scores$method))
 
 
   wis_scores <- rbind(wis_scores, bvar_wis_scores) |>
-    .d(, source := factor(source, levels = c("IMF", "bvar", "bvar_qu", "ar"),
+    .d(, source := factor(source, levels = c("IMF", "bvar_const", "bvar_const-direct", "ar"),
                           label = c("IMF", "BVAR", "BVAR - direct", "AR")))
 
   colors_manual <- met.brewer(cscale, 4)

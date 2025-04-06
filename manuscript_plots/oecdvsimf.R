@@ -10,7 +10,8 @@ devtools::load_all()
 ### OECD actuals vs. IMF actuals
 
 oecdbv <- fread(here("scores", "oecd_bvar_ci_scores_ho.csv"))|>
-  .d(model == "bvar_qu")|>
+  .d(model == "bvar_const") |>
+  .d(, model := "bvar_const-direct") |>
   .d(,truth := "oecd") |>
   .d(, c("model", "country", "target", "horizon", "truth", "interval_score"))
 cntbv <- unique(oecdbv$country)
@@ -25,7 +26,8 @@ oecdimf <- fread(here("scores", "oecd_ci_scores_ho.csv"))|>
   dcast(country + target + horizon + truth ~ model, value.var = "interval_score")
 
 imfbv <- fread(here("scores", "bvar_ci_scores_ho.csv")) |>
-  .d(model == "bvar_qu")|>
+  .d(model == "bvar_const") |>
+  .d(, model := "bvar_const-direct") |>
   .d(,truth := "imf") |>
   .d(, c("model", "country", "target", "horizon", "truth", "interval_score"))
 imfimf <- fread(here("scores", "ci_scores_ho.csv")) |>
@@ -39,7 +41,7 @@ imfimf <- fread(here("scores", "ci_scores_ho.csv")) |>
   rbind(oecdimf)
 
 allscores <- imfimf |>
-  .d(, relwis := IMF - bvar_qu) |>
+  .d(, relwis := IMF - `bvar_const-direct`) |>
   dcast(country + target + horizon ~ truth, value.var = "relwis") |>
   .d(,horizon := factor(horizon, levels = c(0, 0.5, 1, 1.5), labels =
                           c("Fall, Current", "Spring, Current",
