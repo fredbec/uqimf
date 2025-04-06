@@ -263,6 +263,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,pcpi_pch,1.5,rolling window,absolute,ar-direct,1.11441187134668
 2022,pcpi_pch,1.5,rolling window,absolute,ar-direct,2.80363974568168
 2023,pcpi_pch,1.5,rolling window,absolute,ar-direct,1.46508162146412
+2013,ngdp_rpch,0,rolling window,absolute,ar_annual-direct,0.75926649951642
 2014,ngdp_rpch,0,rolling window,absolute,ar_annual-direct,0.711656281069907
 2015,ngdp_rpch,0,rolling window,absolute,ar_annual-direct,0.697994502117284
 2016,ngdp_rpch,0,rolling window,absolute,ar_annual-direct,0.673473875616925
@@ -273,6 +274,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,ngdp_rpch,0,rolling window,absolute,ar_annual-direct,5.49979839555673
 2022,ngdp_rpch,0,rolling window,absolute,ar_annual-direct,1.5674338798961
 2023,ngdp_rpch,0,rolling window,absolute,ar_annual-direct,0.933014539060032
+2013,ngdp_rpch,0.5,rolling window,absolute,ar_annual-direct,0.758957596662815
 2014,ngdp_rpch,0.5,rolling window,absolute,ar_annual-direct,0.711242158959135
 2015,ngdp_rpch,0.5,rolling window,absolute,ar_annual-direct,0.699357592667964
 2016,ngdp_rpch,0.5,rolling window,absolute,ar_annual-direct,0.673257793555689
@@ -283,6 +285,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,ngdp_rpch,0.5,rolling window,absolute,ar_annual-direct,5.52358285761536
 2022,ngdp_rpch,0.5,rolling window,absolute,ar_annual-direct,1.59036686132653
 2023,ngdp_rpch,0.5,rolling window,absolute,ar_annual-direct,0.93306600629102
+2013,ngdp_rpch,1,rolling window,absolute,ar_annual-direct,0.906540785390817
 2014,ngdp_rpch,1,rolling window,absolute,ar_annual-direct,0.771841704946923
 2015,ngdp_rpch,1,rolling window,absolute,ar_annual-direct,0.720306789473759
 2016,ngdp_rpch,1,rolling window,absolute,ar_annual-direct,0.708802847496403
@@ -293,6 +296,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,ngdp_rpch,1,rolling window,absolute,ar_annual-direct,3.24557538869897
 2022,ngdp_rpch,1,rolling window,absolute,ar_annual-direct,1.72809272945684
 2023,ngdp_rpch,1,rolling window,absolute,ar_annual-direct,0.949704517773075
+2013,ngdp_rpch,1.5,rolling window,absolute,ar_annual-direct,0.906807417875384
 2014,ngdp_rpch,1.5,rolling window,absolute,ar_annual-direct,0.771865660235876
 2015,ngdp_rpch,1.5,rolling window,absolute,ar_annual-direct,0.720516933046444
 2016,ngdp_rpch,1.5,rolling window,absolute,ar_annual-direct,0.707674094993097
@@ -303,6 +307,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,ngdp_rpch,1.5,rolling window,absolute,ar_annual-direct,3.24759353946
 2022,ngdp_rpch,1.5,rolling window,absolute,ar_annual-direct,1.73656120079189
 2023,ngdp_rpch,1.5,rolling window,absolute,ar_annual-direct,0.952003477528027
+2013,pcpi_pch,0,rolling window,absolute,ar_annual-direct,0.55501576577092
 2014,pcpi_pch,0,rolling window,absolute,ar_annual-direct,0.812485522101636
 2015,pcpi_pch,0,rolling window,absolute,ar_annual-direct,0.867138544280505
 2016,pcpi_pch,0,rolling window,absolute,ar_annual-direct,0.384576740941074
@@ -313,6 +318,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,pcpi_pch,0,rolling window,absolute,ar_annual-direct,1.34702207271167
 2022,pcpi_pch,0,rolling window,absolute,ar_annual-direct,5.00544211031737
 2023,pcpi_pch,0,rolling window,absolute,ar_annual-direct,0.833665306347384
+2013,pcpi_pch,0.5,rolling window,absolute,ar_annual-direct,0.548061160975507
 2014,pcpi_pch,0.5,rolling window,absolute,ar_annual-direct,0.81253836179733
 2015,pcpi_pch,0.5,rolling window,absolute,ar_annual-direct,0.867444234775236
 2016,pcpi_pch,0.5,rolling window,absolute,ar_annual-direct,0.384437360552118
@@ -323,6 +329,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,pcpi_pch,0.5,rolling window,absolute,ar_annual-direct,1.34702207271167
 2022,pcpi_pch,0.5,rolling window,absolute,ar_annual-direct,5.00544211031737
 2023,pcpi_pch,0.5,rolling window,absolute,ar_annual-direct,0.833665306347384
+2013,pcpi_pch,1,rolling window,absolute,ar_annual-direct,0.53736869168112
 2014,pcpi_pch,1,rolling window,absolute,ar_annual-direct,1.08934350429468
 2015,pcpi_pch,1,rolling window,absolute,ar_annual-direct,1.1768338861189
 2016,pcpi_pch,1,rolling window,absolute,ar_annual-direct,0.725446846940428
@@ -333,6 +340,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,pcpi_pch,1,rolling window,absolute,ar_annual-direct,0.848416914953049
 2022,pcpi_pch,1,rolling window,absolute,ar_annual-direct,5.8916761466198
 2023,pcpi_pch,1,rolling window,absolute,ar_annual-direct,2.78620694822755
+2013,pcpi_pch,1.5,rolling window,absolute,ar_annual-direct,0.538487290115348
 2014,pcpi_pch,1.5,rolling window,absolute,ar_annual-direct,1.08624101262134
 2015,pcpi_pch,1.5,rolling window,absolute,ar_annual-direct,1.17685045221376
 2016,pcpi_pch,1.5,rolling window,absolute,ar_annual-direct,0.725538198693656
@@ -519,6 +527,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,pcpi_pch,1.5,rolling window,absolute,ar_bic-direct,1.05548331529306
 2022,pcpi_pch,1.5,rolling window,absolute,ar_bic-direct,4.56859586571523
 2023,pcpi_pch,1.5,rolling window,absolute,ar_bic-direct,1.04427529996547
+2013,ngdp_rpch,0,rolling window,absolute,arx_annual-direct,0.257820690067728
 2014,ngdp_rpch,0,rolling window,absolute,arx_annual-direct,0.237766894355783
 2015,ngdp_rpch,0,rolling window,absolute,arx_annual-direct,0.191522157943675
 2016,ngdp_rpch,0,rolling window,absolute,arx_annual-direct,0.214150298583089
@@ -529,6 +538,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,ngdp_rpch,0,rolling window,absolute,arx_annual-direct,0.579398738009253
 2022,ngdp_rpch,0,rolling window,absolute,arx_annual-direct,0.43418481981834
 2023,ngdp_rpch,0,rolling window,absolute,arx_annual-direct,0.222839113146253
+2013,ngdp_rpch,0.5,rolling window,absolute,arx_annual-direct,0.412130986158881
 2014,ngdp_rpch,0.5,rolling window,absolute,arx_annual-direct,0.495601937532965
 2015,ngdp_rpch,0.5,rolling window,absolute,arx_annual-direct,0.358799507048066
 2016,ngdp_rpch,0.5,rolling window,absolute,arx_annual-direct,0.337754564926371
@@ -539,6 +549,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,ngdp_rpch,0.5,rolling window,absolute,arx_annual-direct,0.836017543080467
 2022,ngdp_rpch,0.5,rolling window,absolute,arx_annual-direct,0.809399559778025
 2023,ngdp_rpch,0.5,rolling window,absolute,arx_annual-direct,0.532137015551153
+2013,ngdp_rpch,1,rolling window,absolute,arx_annual-direct,0.726971693673437
 2014,ngdp_rpch,1,rolling window,absolute,arx_annual-direct,0.737940251613422
 2015,ngdp_rpch,1,rolling window,absolute,arx_annual-direct,0.548425204545164
 2016,ngdp_rpch,1,rolling window,absolute,arx_annual-direct,0.598802699264382
@@ -549,6 +560,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,ngdp_rpch,1,rolling window,absolute,arx_annual-direct,2.549075481125
 2022,ngdp_rpch,1,rolling window,absolute,arx_annual-direct,1.46427606333146
 2023,ngdp_rpch,1,rolling window,absolute,arx_annual-direct,1.68207732872039
+2013,ngdp_rpch,1.5,rolling window,absolute,arx_annual-direct,0.625939127410373
 2014,ngdp_rpch,1.5,rolling window,absolute,arx_annual-direct,0.73682878689529
 2015,ngdp_rpch,1.5,rolling window,absolute,arx_annual-direct,0.626726589596571
 2016,ngdp_rpch,1.5,rolling window,absolute,arx_annual-direct,0.704080055556775
@@ -559,6 +571,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,ngdp_rpch,1.5,rolling window,absolute,arx_annual-direct,2.2141740675883
 2022,ngdp_rpch,1.5,rolling window,absolute,arx_annual-direct,1.09837303982408
 2023,ngdp_rpch,1.5,rolling window,absolute,arx_annual-direct,1.29973365347142
+2013,pcpi_pch,0,rolling window,absolute,arx_annual-direct,0.153536112056458
 2014,pcpi_pch,0,rolling window,absolute,arx_annual-direct,0.139712661051994
 2015,pcpi_pch,0,rolling window,absolute,arx_annual-direct,0.122092457228495
 2016,pcpi_pch,0,rolling window,absolute,arx_annual-direct,0.0993990176573758
@@ -569,6 +582,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,pcpi_pch,0,rolling window,absolute,arx_annual-direct,0.223742597154421
 2022,pcpi_pch,0,rolling window,absolute,arx_annual-direct,0.165270428245063
 2023,pcpi_pch,0,rolling window,absolute,arx_annual-direct,0.229166303200935
+2013,pcpi_pch,0.5,rolling window,absolute,arx_annual-direct,0.331019981080737
 2014,pcpi_pch,0.5,rolling window,absolute,arx_annual-direct,0.34310914097451
 2015,pcpi_pch,0.5,rolling window,absolute,arx_annual-direct,0.223179727117832
 2016,pcpi_pch,0.5,rolling window,absolute,arx_annual-direct,0.204490656851852
@@ -579,6 +593,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,pcpi_pch,0.5,rolling window,absolute,arx_annual-direct,1.01374651550517
 2022,pcpi_pch,0.5,rolling window,absolute,arx_annual-direct,1.67538140659389
 2023,pcpi_pch,0.5,rolling window,absolute,arx_annual-direct,0.77190644400127
+2013,pcpi_pch,1,rolling window,absolute,arx_annual-direct,0.379510191185372
 2014,pcpi_pch,1,rolling window,absolute,arx_annual-direct,0.650556957434078
 2015,pcpi_pch,1,rolling window,absolute,arx_annual-direct,1.17633947156051
 2016,pcpi_pch,1,rolling window,absolute,arx_annual-direct,0.712590082566158
@@ -589,6 +604,7 @@ target_year,target,horizon,method,error_method,source,score
 2021,pcpi_pch,1,rolling window,absolute,arx_annual-direct,1.13112425413597
 2022,pcpi_pch,1,rolling window,absolute,arx_annual-direct,5.06898149535908
 2023,pcpi_pch,1,rolling window,absolute,arx_annual-direct,1.24790572662874
+2013,pcpi_pch,1.5,rolling window,absolute,arx_annual-direct,0.434949072283058
 2014,pcpi_pch,1.5,rolling window,absolute,arx_annual-direct,0.792136039969653
 2015,pcpi_pch,1.5,rolling window,absolute,arx_annual-direct,1.22550621821341
 2016,pcpi_pch,1.5,rolling window,absolute,arx_annual-direct,0.849611724686166

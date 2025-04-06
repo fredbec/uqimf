@@ -322,9 +322,9 @@ score_by_crps_quants <- function(weodat,
 
     if(unique(subdat$model %in% c("ar_annual-direct", "arx_annual-direct"))){
       if(comb[1] == "JPN" & max(target_years)>2020){
-        target_years_sub <- 2014:2020
+        target_years_sub <- 2013:2020
       } else {
-        target_years_sub <- 2014:2023
+        target_years_sub <- 2013:2023
       }
     }
 
