@@ -14,9 +14,11 @@ ciscores_base <- fread(here("scores", paste0("ci_scores_avgcnt_ho.csv")))|>
   .d(, c("model", "target", "horizon", "interval_score")) |>
   setnames("interval_score", "base_interval_score") |>
   .d(, target := ifelse(target == "ngdp_rpch", "GDP", "CPI"))
+#the following is needed for mergin later. Note that all scores are set to NA
 ciss_fakescpres <- ciscores |>
   .d(model == "IMF") |>
   .d(,model := "bvar_ciss") |>
+  #set all scores to NA
   .d(, c("interval_score", "unweighted_interval_score", "interval_score_50", "interval_score_80", "dev_50", "dev_80") := NA)
 ciscores <- rbind(ciscores, ciss_fakescpres)
 ciscores_ciss <- fread(here("scores", "_bvarspecs", paste0("ci_scores_avgcnt_ho.csv")))|>
