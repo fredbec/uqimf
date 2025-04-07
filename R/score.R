@@ -25,7 +25,8 @@ score_quants <- function(empquants,
 scoreempQu <- function(fcdat,
                        tv_release = NULL,
                        by = c("country", "target", "horizon"),
-                       cvg_rg = NULL){
+                       cvg_rg = NULL,
+                       extis = FALSE){
 
   .d <- `[`
 
@@ -60,6 +61,21 @@ scoreempQu <- function(fcdat,
     fcdat$model <- "model1"
   }
 
+  if(extis){
+
+    is_30 <- fcdat |>
+      data.table::copy() |>
+      compute_is(30, by = by)
+
+    is_90 <- fcdat |>
+      data.table::copy() |>
+      compute_is(90, by = by)
+  } else {
+
+    is_30 <- NULL
+    is_90 <- NULL
+  }
+
   is_50 <- fcdat |>
     data.table::copy() |>
     compute_is(50, by = by)
@@ -67,7 +83,6 @@ scoreempQu <- function(fcdat,
   is_80 <- fcdat |>
     data.table::copy() |>
     compute_is(80, by = by)
-
 
   cvg_rg_list <- as.list(cvg_rg)
 
@@ -129,15 +144,25 @@ scoreempQu <- function(fcdat,
   all_scores <- cvg_interval[cvg_quantile, on = by] |>
     .d(is_scores, on = by) |>
     .d(is_50, on = by) |>
-    .d(is_80, on = by) |>
+    .d(is_80, on = by) #|>
+
+  scorenames <- c("interval_score", "dispersion", "underprediction", "overprediction",
+                  "interval_score_50", "interval_score_80", "unweighted_interval_score",
+                  paste0("coverage_", cvg_rg),
+                  paste0("qucoverage_", qulvlss))
+  if(extis){
+    all_scores <- all_scores |>
+      .d(is_30, on = by) |>
+      .d(is_90, on = by)
+    scorenames <- c(scorenames, "interval_score_30","interval_score_90")
+  }
+
+
+  all_scores <- all_scores |>
     .d(is_unweighted, on = by) |>
     setnames("wis", "interval_score") |>
     .d(, .SD,
-       .SDcols = c(by,
-           "interval_score", "dispersion", "underprediction", "overprediction",
-           "interval_score_50", "interval_score_80", "unweighted_interval_score",
-           paste0("coverage_", cvg_rg),
-           paste0("qucoverage_", qulvlss))
+       .SDcols = c(by, scorenames)
        ) |>
     .d(order(model, target))
   #data.table::setnames("observed", "true_value", skip_absent = TRUE) |>

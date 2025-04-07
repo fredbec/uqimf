@@ -26,6 +26,12 @@ if(specs$ciset == "extended"){
   cis100 <- specs$ci_levels_eval_su
 }
 
+if(specs$ciset == "extended"){
+  extis_score <- TRUE #compute two extra interval scores for revision (30, 90)
+} else {
+  extis_score <- FALSE
+}
+
 #for scoring point forecasts
 fcdat <- data.table::fread(here("data", paste0(global_file_prefix, "toscore_point_forecasts.csv"))) |>
   .d(target_year <= max_year)
@@ -68,7 +74,16 @@ scores_ho <- scoreempQu(qufcs_ho, cvg_rg = cis100,
 scores_avgcountry <- scoreempQu(qufcs, cvg_rg = cis100,
                      by = c("model", "error_method", "method", "target", "horizon"))
 scores_avgcountry_ho <- scoreempQu(qufcs_ho, cvg_rg = cis100,
-                                   by = c("model", "error_method", "method", "target", "horizon"))
+                                   by = c("model", "error_method", "method", "target", "horizon"),
+                                   extis = extis_score)
+
+if(extis_score){
+  scores_avgcountry_ho_is <- scores_avgcountry_ho |> copy()
+  scores_avgcountry_ho <- scores_avgcountry_ho |>
+    copy() |>
+    .d(, !c("interval_score_30", "interval_score_90"), with = FALSE)
+}
+
 
 scores_cvgshort <- scoreempQu(qufcs, cvg_rg = cis100,
                               by = c("model", "error_method", "method", "target"))
@@ -160,7 +175,15 @@ if(cset == "base"){
 bvar_scores_ho <- scoreempQu(bvar_qus_ho, cvg_rg = cis100,
                              by = c("model", "country", "target", "horizon"))
 bvar_scores_avgcountry_ho <- scoreempQu(bvar_qus_ho, cvg_rg = cis100,
-                                        by = c("model", "target", "horizon"))
+                                        by = c("model", "target", "horizon"),
+                                        extis = extis_score)
+if(extis_score){
+  bvar_scores_avgcountry_ho_is <- bvar_scores_avgcountry_ho |> copy()
+  bvar_scores_avgcountry_ho <- bvar_scores_avgcountry_ho |>
+    copy() |>
+    .d(, !c("interval_score_30", "interval_score_90"), with = FALSE)
+}
+
 bvar_scores_cvgshort_ho <- scoreempQu(bvar_qus_ho, cvg_rg = cis100,
                                    by = c("model", "target"))
 
@@ -306,6 +329,9 @@ data.table::fwrite(scores_ho, here("scores", prefix, paste0(global_file_prefix, 
 
 data.table::fwrite(scores_avgcountry, here("scores",prefix, paste0(global_file_prefix, "ci_scores_avgcnt.csv")))
 data.table::fwrite(scores_avgcountry_ho, here("scores", prefix, paste0(global_file_prefix, "ci_scores_avgcnt_ho.csv")))
+if(extis_score){
+  data.table::fwrite(scores_avgcountry_ho_is, here("scores", prefix, paste0(global_file_prefix, "ci_scores_avgcnt_ho_is.csv")))
+}
 
 data.table::fwrite(scores_cvgshort, here("scores", prefix,paste0(global_file_prefix, "cvg_pooled.csv")))
 data.table::fwrite(scores_cvgshort_ho, here("scores", prefix, paste0(global_file_prefix, "cvg_pooled_ho.csv")))
@@ -335,6 +361,9 @@ if(cset == "base"){
 data.table::fwrite(bvar_scores_ho, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_ho.csv")))
 data.table::fwrite(bvar_scores_cvgshort_ho, here("scores", prefix, paste0(global_file_prefix, "bvar_cvg_pooled_ho.csv")))
 data.table::fwrite(bvar_scores_avgcountry_ho, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_avgcnt_ho.csv")))
+if(extis_score){
+  data.table::fwrite(bvar_scores_avgcountry_ho_is, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_avgcnt_ho_is.csv")))
+}
 
 data.table::fwrite(bvar_scores_ho_byyr, here("scores", prefix, paste0(global_file_prefix, "bvar_ci_scores_byyr_ho.csv")))
 data.table::fwrite(scores_ho_byyr, here("scores", prefix, paste0(global_file_prefix, "ci_scores_byyr_ho.csv")))
