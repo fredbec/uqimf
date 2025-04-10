@@ -134,14 +134,14 @@ create_latex_table2 <- function(dat, mrow){
     .d(model != "bvar") |> #exclude original bvar model due to stability issues
     .d(model != "bvar-qu-direct") |>
     .d(model != "bvar-ciss") |>
-    .d(, model := fifelse(model == "ar-direct", "Direct$^{4)}$: AR(1)",
+    .d(, model := fifelse(model == "ar-direct", "Direct$^{4)}$: AR",
                           fifelse(model == "ar-annual-direct", "Direct$^{4)}$: AR-annual",
-                                  fifelse(model == "ar-bic-direct", "Direct$^{4)}$: AR(p)",
+                                  fifelse(model == "ar-bic-direct", "Direct$^{4)}$: AR($p$)",
                                           fifelse(model == "bvar-const-direct", "Direct$^{4)}$: BVAR$^{3)}$",
                                                   fifelse(model == "bvar-ciss-direct", "Direct$^{4)}$: BVAR-CISS$^{3)}$",
-                                                          fifelse(model == "ar", "AR(1)",
+                                                          fifelse(model == "ar", "AR",
                                                                   fifelse(model == "arx-annual-direct", "Direct$^{4)}$: ARX-annual",
-                                                                          fifelse(model == "ar-bic", "AR(p)",
+                                                                          fifelse(model == "ar-bic", "AR($p$)",
                                                                                   fifelse(model == "bvar-ciss", "BVAR-CISS",
                                                                                           fifelse(model == "bvar-const", "BVAR$^{3)}$",
                                                                                                   fifelse(model == "bvar-mix", "BVAR-Mix$^{3)}$",
