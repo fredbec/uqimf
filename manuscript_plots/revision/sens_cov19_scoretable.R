@@ -7,7 +7,7 @@ library(here)
 prefix <- ""
 
 
-ciscores <- fread(here("manuscript_plots", "revision", "results", "cov19_scores", paste0(prefix, "ci_scores_avgcnt_ho.csv")))|>
+ciscores <- fread(here("manuscript_plots", "revision", "results", "cov19_scores", paste0(prefix, "ci_scores_avgcnt_ho.csv"))) |>
   .d(, dev_50 := 100*coverage_50 - 50) |>
   .d(, dev_80 := 100*coverage_80 - 80) |>
   .d(, c("model", "target", "horizon", "interval_score", "unweighted_interval_score", "interval_score_50", "interval_score_80", "dev_50", "dev_80")) |>

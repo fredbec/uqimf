@@ -7,7 +7,7 @@ source(here("specs", "specs.R"))
 .d <- `[`
 
 window_length <- specs$window_length
-tgt_yrs <- 2020:2022
+tgt_yrs <- 2020:2023
 
 global_file_prefix <- ""
 prefix <- ""
@@ -35,7 +35,8 @@ if(specs$ciset == "extended"){
 ####################################read in quantile forecasts########################
 
 qufcs_ho <- data.table::fread(here("quantile_forecasts",
-                                   paste0(global_file_prefix, "toscore", prefix, "_quantile_forecasts_ho.csv")))
+                                   paste0(global_file_prefix, "toscore", prefix, "_quantile_forecasts_ho.csv"))) |>
+  .d(target_year %in% tgt_yrs)
 
 
 #################score CI's####################################################
@@ -54,7 +55,8 @@ scores_cvgshort_ho <- scoreempQu(qufcs_ho, cvg_rg = cis100,
 
 bvar_qus_ho <- data.table::fread(here("benchmarks",
                                       paste0(global_file_prefix, "toscore", prefix, "_bvar_direct_quantile_forecasts_ho.csv"))) |>
-  setnames(paste0("tv_", tv_release), "true_value")
+  setnames(paste0("tv_", tv_release), "true_value") |>
+  .d(target_year %in% tgt_yrs)
 
 bvar_qus_ho <- bvar_qus_ho |>
   data.table::copy() |>
