@@ -12,9 +12,9 @@ set.seed(2922)
 w <- 11
 
 ctry <- "FRA"
-tgt <- "ngdp_rpch"
-yr <- 2019
-hr <- 0
+tgt <- "pcpi_pch"
+yr <- 2022 #2019 for horizon 0 (keeps forecast year constant)
+hr <- 0.5
 rw <- 11
 
 getlinerangedat <- function(dat, xpos){
@@ -34,7 +34,8 @@ getlinerangedat <- function(dat, xpos){
 
 makecovplot <- function(ctry, tgt, yr, hr, rw){
   labelvec <- c("raw error\nvalues", "absolute\nerror values", "IMF",
-                "BVAR-\ndirect", "AR-\ndirect", "AR-annual-\ndirect")
+                "ARX-annual-\ndirect", "AR-\ndirect",
+                "BVAR-\ndirect")
 
   fancycols <- met.brewer("Hokusai3", n = 4)
   ######################################CURRENT YEAR#####################################
@@ -59,16 +60,15 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
       .d(, error_prediction := prediction-mean)
 
     qufcs_arannual <- data.table::fread(here("benchmarks",
-                                       paste0("extcis_", "toscore", "", "_bvar_direct_quantile_forecasts_ho.csv"))) |>
+                                       paste0("toscore", "", "_bvar_direct_quantile_forecasts_ho.csv"))) |>
       setnames(paste0("tv_1"), "true_value") |>
-      .d(source == "ar_annual")|>
+      .d(source == "arx_annual")|>
       .d(country == ctry & target == tgt & horizon == hr) |>
       .d(target_year == yr) |>
       .d(quantile %in% c(0.1, 0.25, 0.75, 0.9)) |>
       .d(, mean := mean(prediction)) |>
       .d(, error_prediction := prediction-mean)
 
-    #print(qufcs_ar)
     qufcs_bvar <- data.table::fread(here("benchmarks",
                                        paste0("extcis_", "toscore", "", "_bvar_direct_quantile_forecasts_ho.csv"))) |>
       setnames(paste0("tv_1"), "true_value") |>
@@ -102,10 +102,10 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
       .d(, value := ifelse(type == 2, value, value + 1e-09))
 
     pos_imf <- ifelse(pos == 1, 3.2, 2.8)
-    pos_bvar <- ifelse(pos == 1, 4.2, 3.8)
+    pos_bvar <- ifelse(pos == 1, 6.2, 5.8)
     pos_ar <- ifelse(pos == 1, 5.2, 4.8)
     pos_tulip <- ifelse(pos == 1, 4.2, 3.8)
-    pos_arannual <- ifelse(pos == 1, 6.2, 5.8)
+    pos_arannual <- ifelse(pos == 1, 4.2, 3.8)
 
 
     linerangedat_imf <- getlinerangedat(qufcs_imf, pos_imf) |>
@@ -128,13 +128,13 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
       .d(, pltcol := "coral3")
 
 
-    return(list(errordat = errordat, listdatsets = list(linerangedat_imf, linerangedat_ar, linerangedat_bvar, linerangedat_arannual)))
+    return(list(errordat = errordat, listdatsets = list(linerangedat_imf, linerangedat_arannual, linerangedat_ar, linerangedat_bvar)))
   }
 
   val50 <- 0
   val80 <- 0
   ######################################NEXT YEAR#####################################
-  myres_next <- makedata(ctry = ctry, tgt = tgt, yr = yr + 2, hr = hr, rw = rw, pos = 1)
+  myres_next <- makedata(ctry = ctry, tgt = tgt, yr = yr + 1, hr = hr, rw = rw, pos = 1)
   nextyrerror <- myres_next$errordat
   nextyrdats <- myres_next$listdatsets
 
@@ -170,6 +170,11 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
       size = 0.5, arrow = arrow(length = unit(0.075, "inches"))
     )
   }
+
+  ypos_lab <- ifelse(hr == 0,
+                     -2.25, -8)
+  yminmax <- ifelse(hr == 0,
+                    2.75, 11.5)
 
   #datasets <- list(linerangedat_imf, linerangedat_ar, linerangedat_bvar, linerangedat_tulip)
   #print(datasets)
@@ -256,52 +261,59 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
     #  x = 3.37, y = val50, size = 2.75, colour = "grey60"
     #) +
     #geom_point(aes(x = type, y = pointval), data = pointdat, color = lrcols[2], size = 1.5, pch = 23) +
-    scale_y_continuous(limits = c(-3.75, 3.75)) + #c(-11.5, 11.5) for horizon 1
+    scale_y_continuous(limits = c(-yminmax, yminmax)) + #c(-11.5, 11.5) for horizon 1, c(-3.75, 3.75) for horizon 0
     scale_x_continuous(breaks = c(1,2,3,4,5,6),
                        labels = labelvec,
                        limits = c(0.55, 6.8)) +
     ylab("") +
     xlab("") +
-    annotate("label", x = 0.8, y = -3.5, label = "I", size = 5, fill = "white", color = "black",family = "serif") + #-8 for hor 1
-    annotate("label", x = 1.8, y = -3.5, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 2.8, y = -3.5, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 3.8, y = -3.5, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 4.8, y = -3.5, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 5.8, y = -3.5, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 1.2, y = -3.5, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 2.2, y = -3.5, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 3.2, y = -3.5, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 4.2, y = -3.5, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 5.2, y = -3.5, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 6.2, y = -3.5, label = "II", size = 5, fill = "white", color = "black",family = "serif")
+    annotate("label", x = 0.8, y = ypos_lab, label = "I", size = 5, fill = "white", color = "black",family = "serif") + #ypos_lab for hor 1
+    annotate("label", x = 1.8, y = ypos_lab, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 2.8, y = ypos_lab, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 3.8, y = ypos_lab, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 4.8, y = ypos_lab, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 5.8, y = ypos_lab, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 1.2, y = ypos_lab, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 2.2, y = ypos_lab, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 3.2, y = ypos_lab, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 4.2, y = ypos_lab, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 5.2, y = ypos_lab, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 6.2, y = ypos_lab, label = "II", size = 5, fill = "white", color = "black",family = "serif")
   return(quantvis)
 }
 
 plot_de <- makecovplot(ctry = "DEU", tgt = tgt, yr = yr, hr = hr, rw = rw) +
-  ggtitle("GDP Growth, Germany")
+  ggtitle("Inflation, Germany")
 plot_fr <- makecovplot(ctry = "FRA", tgt = tgt, yr = yr, hr = hr, rw = rw)+
-  ggtitle("GDP Growth, France")
+  ggtitle("Inflation, France")
 plot_it <- makecovplot(ctry = "ITA", tgt = tgt, yr = yr, hr = hr, rw = rw)+
-  ggtitle("GDP Growth, Italy")
+  ggtitle("Inflation, Italy")
 plot_ca <- makecovplot(ctry = "CAN", tgt = tgt, yr = yr, hr = hr, rw = rw)+
-  ggtitle("GDP Growth, Canada")
+  ggtitle("Inflation, Canada")
 plot_us <- makecovplot(ctry = "USA", tgt = tgt, yr = yr, hr = hr, rw = rw)+
-  ggtitle("GDP Growth, USA")
+  ggtitle("Inflation, USA")
 plot_uk <- makecovplot(ctry = "GBR", tgt = tgt, yr = yr, hr = hr, rw = rw)+
-  ggtitle("GDP Growth, United Kingdom")
+  ggtitle("Inflation, United Kingdom")
+
+subtit <- ifelse(hr == 0,
+                 "Horizon: Fall, Current",
+                 ifelse(hr == 1,
+                        "Horizon: Fall, Next",
+                        ifelse(hr == 0.5, "Horizon: Spring, Current",
+                               "Horizon: Fall, Next")))
 
 ovrplot <- (plot_de + plot_ca) /
   (plot_fr + plot_us) /
   (plot_it + plot_uk) +
   plot_annotation(
-    title = "Forecast Interval Lengths, Target Years (I) 2019 and (II) 2021",
-    subtitle = "Horizon: Fall, Current",
+    title = "Forecast Interval Lengths, Forecast Years (I) 2022 and (II) 2023",
+    subtitle = subtit,
     theme = theme(
       plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
       plot.subtitle = element_text(hjust = 0.5, size = 16, face = "bold")
     )
   )
 
-ggsave(here("revision_plotstables", paste0("illustration_cov19_corr", "_hor", hr, "arann.pdf")), ovrplot, width = 10, height = 12.5)
+ggsave(here("revision_plotstables", paste0("illustration_cov19_corr", "_hor", hr, "arxann_final_cpi.pdf")), ovrplot, width = 10, height = 12.5)
 
 
