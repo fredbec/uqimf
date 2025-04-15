@@ -252,4 +252,4 @@ ovrplot <- (plot_de + plot_ca) /
   (plot_it + plot_uk)
 }
 plot_de
-ggsave(here("revision_plotstables", "dirvsabs_plot1.pdf"), plot_de, width = 10, height = 7)
+ggsave(here("revision_plotstables", "dirvsabs_plot_usa.pdf"), plot_de, width = 10, height = 7)
