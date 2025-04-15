@@ -87,7 +87,8 @@ create_latex_table2 <- function(dat, mrow){
   #"Deviation 50","Deviation 80")
 
   round_cols_newer <- c("$\\text{CRPS}^{1)}$", "$\\text{IS}_{W}^{2)}$", "$\\text{IS}_{W,b}^{2)}$", "$\\text{IS}_{U}^{2)}$",
-                        "$\\text{IS}_{50}^{2)}$", "$\\text{IS}_{80}^{2)}$", "$\\text{IS}_{\\text{CISS}}^{2)}$")#,
+                        #"$\\text{IS}_{50}^{2)}$", "$\\text{IS}_{80}^{2)}$",
+                        "$\\text{IS}_{\\text{CISS}}^{2)}$")#,
   #"$\\text{Dev}_{50}$", "$\\text{Dev}_{80}$")
 
   singletab <- lapply(dat, function(dt){
@@ -95,7 +96,7 @@ create_latex_table2 <- function(dat, mrow){
     curr_hor <- dt$horizon
     curr_tgt <- dt$target
 
-    round_cols <- c("crps", "interval_score", "base_interval_score", "unweighted_interval_score", "interval_score_50", "interval_score_80", "ciss_interval_score")#, "dev_50", "dev_80")
+    round_cols <- c("crps", "interval_score", "base_interval_score", "unweighted_interval_score", "ciss_interval_score")#, "dev_50", "dev_80")
     #round_cols_extra <- c("dev_50", "dev_80")
 
     dt[, (round_cols) := lapply(.SD, round, 3), .SDcols = round_cols]
@@ -134,31 +135,31 @@ create_latex_table2 <- function(dat, mrow){
     .d(model != "bvar") |> #exclude original bvar model due to stability issues
     .d(model != "bvar-qu-direct") |>
     .d(model != "bvar-ciss") |>
-    .d(, model := fifelse(model == "ar-direct", "Direct$^{4)}$: AR",
-                          fifelse(model == "ar-annual-direct", "Direct$^{4)}$: AR-annual",
-                                  fifelse(model == "ar-bic-direct", "Direct$^{4)}$: AR($p$)",
-                                          fifelse(model == "bvar-const-direct", "Direct$^{4)}$: BVAR$^{3)}$",
-                                                  fifelse(model == "bvar-ciss-direct", "Direct$^{4)}$: BVAR-CISS$^{3)}$",
-                                                          fifelse(model == "ar", "AR",
-                                                                  fifelse(model == "arx-annual-direct", "Direct$^{4)}$: ARX-annual",
-                                                                          fifelse(model == "ar-bic", "AR($p$)",
+    .d(, model := fifelse(model == "ar-direct", "Direct$^{5)}$: AR$^{3)}$",
+                          fifelse(model == "ar-annual-direct", "Direct$^{5)}$: AR-annual$^{3)}$",
+                                  fifelse(model == "ar-bic-direct", "Direct$^{5)}$: AR($p$)$^{3)}$",
+                                          fifelse(model == "bvar-const-direct", "Direct$^{5)}$: BVAR$^{4)}$",
+                                                  fifelse(model == "bvar-ciss-direct", "Direct$^{5)}$: BVAR-CISS$^{4)}$",
+                                                          fifelse(model == "ar", "AR$^{3)}$",
+                                                                  fifelse(model == "arx-annual-direct", "Direct$^{5)}$: ARX-annual$^{3)}$",
+                                                                          fifelse(model == "ar-bic", "AR($p$)$^{3)}$",
                                                                                   fifelse(model == "bvar-ciss", "BVAR-CISS",
-                                                                                          fifelse(model == "bvar-const", "BVAR$^{3)}$",
-                                                                                                  fifelse(model == "bvar-mix", "BVAR-Mix$^{3)}$",
-                                                                                                          fifelse(model == "bvar-mix-direct", "Direct$^{4)}$: BVAR-Mix$^{3)}$",
+                                                                                          fifelse(model == "bvar-const", "BVAR$^{4)}$",
+                                                                                                  fifelse(model == "bvar-mix", "BVAR-Mix$^{4)}$",
+                                                                                                          fifelse(model == "bvar-mix-direct", "Direct$^{5)}$: BVAR-Mix$^{4)}$",
                                                                                                                   fifelse(model == "mean-ensemble", "ZEnsemble",
                                                                                                                           fifelse(model == "IMF", "AAAIMF", model))))))))))))))) |>
     .d(order(horizon, model)) |>
     .d(, model := fifelse(model == "AAAIMF", "IMF",
-                          fifelse(model == "ZEnsemble", "Simple Ensemble$^{5)}$", model))) |>
+                          fifelse(model == "ZEnsemble", "Simple Ensemble$^{6)}$", model))) |>
     .d(, horizon := as.character(horizon))
 
 
   maxr <- nrow(singletab)
 
   singletab <- singletab[1:maxr, horizon := ""] |>
-    setnames(paste0(round_cols_newer, "_GDP"), paste0(round_cols_newer, "-cc")) |>
-    setnames(paste0(round_cols_newer, "_CPI"), paste0(round_cols_newer, "-gg")) |>
+    setnames(paste0(round_cols_newer, "_GDP"), paste0(round_cols_newer, "-gg")) |>
+    setnames(paste0(round_cols_newer, "_CPI"), paste0(round_cols_newer, "-cc")) |>
     setnames("horizon", "")  |>
     setnames("model", "")
 
@@ -168,7 +169,7 @@ create_latex_table2 <- function(dat, mrow){
   dt_latex <- kable(singletab, format = "latex", escape = FALSE, booktabs = TRUE, linesep = c('', '', '', '','','','','','','','','', '\\addlinespace')) %>%
     kable_styling(latex_options = c("hold_position")) |>
     add_header_above(
-      c(" " = 2, "{Inflation\\\\hspace*{15mm}}" = 7, "{GDP Growth}" = 7),
+      c(" " = 2, "{Inflation\\\\hspace*{15mm}}" = 5, "{GDP Growth}" = 5),
       escape = FALSE
     )
   dt_latex <- dt_latex |>
