@@ -106,7 +106,7 @@ create_latex_table2 <- function(dat, mrow){
   dt_latex <- kable(singletab, format = "latex", escape = FALSE, booktabs = TRUE, linesep = c('', '', '', '\\addlinespace','', '', '', '\\addlinespace','', '', '', '\\addlinespace','', '', '')) %>%
     kable_styling(latex_options = c("hold_position")) |>
     add_header_above(
-      c(" " = 2, "{Inflation}" = 2, "{real GDP Growth}" = 2),
+      c(" " = 2, "{Inflation}" = 2, "{GDP Growth}" = 2),
       escape = FALSE
     )
   dt_latex <- dt_latex  |>

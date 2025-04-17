@@ -11,7 +11,7 @@ prefix <- "extcis_"
 ciscores <- fread(here("scores", paste0(prefix, "cvg_pooled_ho.csv"))) |>
   .d(model != "bvar") |> #filter out SV BVAR model (not used anymore)
   .d(, c("model", "target", paste0("qucoverage_", c(seq(5,45, by = 5), seq(55,95, by = 5))))) |>
-  .d(, target := ifelse(target == "ngdp_rpch", "real GDP Growth", "Inflation")) |>
+  .d(, target := ifelse(target == "ngdp_rpch", "GDP Growth", "Inflation")) |>
   .d(, model := gsub("_", "", model)) |>
   melt(id.vars = c("model", "target"), variable.name = "lvl", value.name = "cvg") |>
   .d(,lvl := as.numeric(substr(lvl, 12, 20)))
@@ -19,14 +19,14 @@ ciscores <- fread(here("scores", paste0(prefix, "cvg_pooled_ho.csv"))) |>
 ciscores2 <- fread(here("scores", paste0(prefix, "bvar_cvg_pooled_ho.csv"))) |>
   .d(model != "bvar_qu") |> #filter out SV BVAR model (not used anymore)
   .d(, c("model", "target", paste0("qucoverage_", c(seq(5,45, by = 5), seq(55,95, by = 5))))) |>
-  .d(, target := ifelse(target == "ngdp_rpch", "real GDP Growth", "Inflation")) |>
+  .d(, target := ifelse(target == "ngdp_rpch", "GDP Growth", "Inflation")) |>
   .d(, model := gsub("_", "", model)) |>
   .d(, model := paste0(model, "-direct")) |>
   melt(id.vars = c("model", "target"), variable.name = "lvl", value.name = "cvg") |>
   .d(,lvl := as.numeric(substr(lvl, 12, 20)))
 
 ciscores_perfect <- data.table(model = rep("nominal", 18),
-                               target = rep("real GDP Growth", 18),
+                               target = rep("GDP Growth", 18),
                                lvl = c(seq(5,45, by = 5), seq(55,95, by = 5)),
                                cvg = c(seq(5,45, by = 5), seq(55,95, by = 5))/100)
 
@@ -41,7 +41,7 @@ ciscores1 <- rbind(ciscores, ciscores_perfect) |>
   .d(, model := fifelse(model == "ar-direct", "Direct: AR",
                         fifelse(model == "arannual-direct", "Direct: AR-annual",
                                 fifelse(model == "arbic-direct", "Direct: AR(p)",
-                                        fifelse(model == "bvarconst-direct", "Direct: BVAR-Const.",
+                                        fifelse(model == "bvarconst-direct", "Direct: BVAR",
                                                 fifelse(model == "bvarqu-direct", "Direct: BVAR-SV",
                                                         fifelse(model == "ar", "AR",
 
@@ -50,7 +50,7 @@ ciscores1 <- rbind(ciscores, ciscores_perfect) |>
                                                                         fifelse(model == "bvarmix-direct", "Direct: BVAR-Mix",
                                                                                 fifelse(model == "arbic", "AR(p)",
                                                                                         fifelse(model == "bvar", "BVAR-SV",
-                                                                                                fifelse(model == "bvarconst", "BVAR-Const.",
+                                                                                                fifelse(model == "bvarconst", "BVAR",
                                                                                                         fifelse(model == "meanensemble", "Ensemble",
                                                                                                                 fifelse(model == "IMF", "IMF", model))))))))))))))
 
@@ -62,7 +62,7 @@ ciscores2 <- ciscores2 |>
   .d(, model := fifelse(model == "ar-direct", "Direct: AR",
                         fifelse(model == "arannual-direct", "Direct: AR-annual",
                                 fifelse(model == "arbic-direct", "Direct: AR(p)",
-                                        fifelse(model == "bvarconst-direct", "Direct: BVAR-Const.",
+                                        fifelse(model == "bvarconst-direct", "Direct: BVAR",
                                                 fifelse(model == "bvarqu-direct", "Direct: BVAR-SV",
                                                         fifelse(model == "ar", "AR",
                                                                 fifelse(model == "arxannual-direct", "Direct: ARX-annual",
@@ -72,7 +72,7 @@ ciscores2 <- ciscores2 |>
                                                                                 fifelse(model == "bvarmix-direct", "Direct: BVAR-Mix",
                                                                                         fifelse(model == "arbic", "AR(p)",
                                                                                                 fifelse(model == "bvar", "BVAR-SV",
-                                                                                                        fifelse(model == "bvarconst", "BVAR-Const.",
+                                                                                                        fifelse(model == "bvarconst", "BVAR",
                                                                                                                 fifelse(model == "meanensemble", "Ensemble",
                                                                                                                         fifelse(model == "IMF", "IMF", model)))))))))))))))
 

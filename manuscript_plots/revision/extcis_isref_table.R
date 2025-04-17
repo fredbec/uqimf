@@ -77,15 +77,15 @@ create_latex_table2 <- function(dat, mrow){
     .d(, model := fifelse(model == "ar-direct", "Direct$^{2)}$: AR",
                           fifelse(model == "ar-annual-direct", "Direct$^{2)}$: AR-annual",
                                   fifelse(model == "ar-bic-direct", "Direct$^{2)}$: AR(p)",
-                                          fifelse(model == "bvar-const-direct", "Direct$^{2)}$: BVAR$$",
-                                                  fifelse(model == "bvar-ciss-direct", "Direct$^{2)}$: BVAR-CISS$$",
+                                          fifelse(model == "bvar-const-direct", "Direct$^{2)}$: BVAR",
+                                                  fifelse(model == "bvar-ciss-direct", "Direct$^{2)}$: BVAR-CISS",
                                                           fifelse(model == "ar", "AR",
                                                                   fifelse(model == "arx-annual-direct", "Direct$^{2)}$: ARX-annual",
                                                                           fifelse(model == "ar-bic", "AR(p)",
                                                                                   fifelse(model == "bvar-ciss", "BVAR-CISS",
-                                                                                          fifelse(model == "bvar-const", "BVAR$$",
-                                                                                                  fifelse(model == "bvar-mix", "BVAR-Mix$$",
-                                                                                                          fifelse(model == "bvar-mix-direct", "Direct$^{2)}$: BVAR-Mix$$",
+                                                                                          fifelse(model == "bvar-const", "BVAR",
+                                                                                                  fifelse(model == "bvar-mix", "BVAR-Mix",
+                                                                                                          fifelse(model == "bvar-mix-direct", "Direct$^{2)}$: BVAR-Mix",
                                                                                                                   fifelse(model == "mean-ensemble", "ZEnsemble",
                                                                                                                           fifelse(model == "IMF", "AAAIMF", model))))))))))))))) |>
     .d(order(horizon, model)) |>
@@ -108,7 +108,7 @@ create_latex_table2 <- function(dat, mrow){
   dt_latex <- kable(singletab, format = "latex", escape = FALSE, booktabs = TRUE, linesep = c('', '', '', '\\addlinespace','', '', '', '\\addlinespace','', '', '', '\\addlinespace','', '', '')) %>%
     kable_styling(latex_options = c("hold_position")) |>
     add_header_above(
-      c(" " = 2, "{Inflation}" = 4, "{real GDP Growth}" = 4),
+      c(" " = 2, "{Inflation}" = 4, "{GDP Growth}" = 4),
       escape = FALSE
     )
   dt_latex <- dt_latex  |>
