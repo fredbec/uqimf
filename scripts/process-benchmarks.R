@@ -34,8 +34,7 @@ truth <- data.table::fread(
   here("data", "weodat.csv")
 ) |>
   .d(, .(country, target, target_year, tv_0.5, tv_1, tv_1.5, tv_2)) |>
-  .d(oecd_truth, on = c("country", "target", "target_year"))
-
+  merge(oecd_truth, by = c("country", "target", "target_year"), all.x = TRUE)
 
 if(flag_imputetv05as1){
   cyear <- format(Sys.Date(), "%Y") |> as.numeric()
@@ -43,7 +42,7 @@ if(flag_imputetv05as1){
   truth <- truth |>
     copy() |>
     #.d(target_year == cyear - 1) |>
-    .d(is.na(tv_1) & target_year == cyear - 1,tv_1 := tv_0.5)
+    .d(is.na(tv_1) & target_year == cyear - 2,tv_1 := tv_0.5)
 
   #truth <- truth |>
   #  .d(target_year!= cyear - 1) |>
@@ -57,34 +56,116 @@ truth <- truth |>
   unique()
 
 
+
 ################################################################################
 #point forecasts
 #read in data, rename target
-fcdat <- data.table::fread(
-  here("benchmarks", "raw", "forecasts_March2024.csv")
-) |>
-  .d(quantile_level == 0.5) |> #only point forecast for this dataset
-  .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
-  .d(, var := NULL)
+if(specs$cset == "extended"){
+  modelvec <- c("annual")
+} else {
+  modelvec <- c("p=1", "annual", "bic")
+}
 
 
-#merge with horizon data, remove and remerge with truth value
-#remove values above max_year
-benchmark_fc <- hordat[fcdat, on = c("target_year", "forecast_year", "season")] |>
-  .d(method %in% c("ar", "bvar")) |>
-  .d(!is.na(horizon)) |>
-  setnames("value", "prediction") |>
-  split(by = c("method")) |>
-  lapply(function(dt)
-    truth[dt, on = c("target", "target_year", "country")]
+ar_datext <- data.table::CJ(unique(weodat$country),
+                         c("F", "S"),
+                         modelvec)
+arx_datext <- data.table::CJ(unique(weodat$country),
+                             c("F", "S"),
+                             c("annual"))
+
+fcdat_ar <- lapply(1:nrow(ar_datext), function(idx){
+  comb <- ar_datext[idx,] |> unlist()
+
+  dat <- data.table::fread(
+    here("benchmarks", "raw", "forecasts_2025", "fcsts_ar_2025",
+         paste0("fcst_", comb[1], "_", comb[2], "_", comb[3], ".csv"))
     ) |>
-  rbindlist(idcol = "source") |>
-  .d(order(source, target, country, forecast_year, horizon)) |>
-  .d(, .(source, target, country, forecast_year, horizon, target_year,
-         prediction, get(paste0("tv_", tv_release))
-  )
+    .d(, season := comb[2]) |>
+    .d(, country := comb[1]) |>
+    .d(, source := paste0("ar_", gsub("=", "",comb[3])))
+  }
+) |>
+  rbindlist() |>
+  .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
+  .d(, var := NULL) |>
+  .d(, source := ifelse(source == "ar_p1", "ar", source))
+
+
+fcdat_arx <- lapply(1:nrow(arx_datext), function(idx){
+  comb <- arx_datext[idx,] |> unlist()
+
+  dat <- data.table::fread(
+    here("benchmarks", "raw", "forecasts_2025", "fcsts_ar_2025",
+         paste0("fcst_", comb[1], "_", comb[2], "_", "annual_x", ".csv"))
   ) |>
-  setnames("V8", paste0("tv_", tv_release))
+    .d(, season := comb[2]) |>
+    .d(, country := comb[1]) |>
+    .d(, source := paste0("arx_", gsub("=", "",comb[3])))
+}
+) |>
+  rbindlist() |>
+  .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
+  .d(, var := NULL) |>
+  .d(, source := ifelse(source == "ar_p1", "arx", source))
+
+fcdat_ar <- rbind(fcdat_ar, fcdat_arx)
+
+#only have alternative point forecasts for G7, otherwise assign NULL datatable
+if(specs$cset == "extended"){
+
+  benchmark_fc <- NULL
+} else {
+  bvar_datext <- data.table::CJ(unique(weodat$country),
+                              c("F", "S"),
+                              c("", "_const"))
+
+  fcdat_bvar <- lapply(1:nrow(bvar_datext), function(idx){
+    comb <- bvar_datext[idx,] |> unlist()
+
+    dat <- data.table::fread(
+      here("benchmarks", "raw", "forecasts_2025", "bvar_imf_2025",
+           paste0("fcst_quantiles_", comb[1], "_", comb[2], comb[3], ".csv"))
+    ) |>
+      .d(, season := comb[2]) |>
+      .d(, country := comb[1]) |>
+      .d(, source := paste0("bvar", gsub("=", "",comb[3])))
+  }
+  ) |>
+    rbindlist() |>
+    .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
+    .d(, var := NULL)
+
+  fcdat <- rbind(fcdat_ar |>
+                   data.table::copy() |>
+                   .d(source != "ar_annual") |>
+                   .d(quantile_level == 0.5),
+                 fcdat_bvar |> data.table::copy() |>
+                   .d(quantile_level == 0.5))
+
+  #fcdat <- data.table::fread(
+  #  here("benchmarks", "raw", "forecasts_March2024.csv"))
+  #merge with horizon data, remove and remerge with truth value
+  #remove values above max_year
+  benchmark_fc <- hordat[fcdat, on = c("target_year", "forecast_year", "season")] |>
+    #.d(method %in% c("ar", "bvar")) |>
+    .d(!is.na(horizon)) |>
+    setnames("value", "prediction") |>
+    split(by = c("source")) |>
+    lapply(function(dt)
+      truth[dt, on = c("target", "target_year", "country")]
+    ) |>
+    rbindlist(idcol = "source") |>
+    .d(order(source, target, country, forecast_year, horizon)) |>
+    .d(, .(source, target, country, forecast_year, horizon, target_year,
+           prediction, get(paste0("tv_", tv_release))
+    )
+    ) |>
+    setnames("V8", paste0("tv_", tv_release))
+
+}
+
+
 
 
 #read in WEO forecasts, process the same way and merge with benchmarks
@@ -104,14 +185,30 @@ weodat <- fread(here("data", "weodat.csv")) |>
 
 ################################################################################
 #quantile forecasts
-bvar_qufcs <- data.table::fread(
-  here("benchmarks", "raw", "forecasts_March2024.csv")
-  ) |>
-  .d(method %in% c("bvar", "bvar_ciss")) |> #remove Truth and IMF forecasts
-  .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
-  .d(, var := NULL) |>
-  setnames("method", "source") |>
-  .d(, source := ifelse(source == "bvar", "bvar_qu", "bvar_ciss"))
+#only have bvar forecasts for G7, otherwise assign NULL datatable
+if(specs$cset == "base"){
+  bvar_qufcs <- fcdat_bvar  |>
+    .d(, source := ifelse(source == "bvar", "bvar_qu", "bvar_const"))
+
+} else {
+  bvar_qufcs <- NULL
+}
+
+if(cset == "base"){
+  bvar_qufcs_ciss <- data.table::fread(
+  here("benchmarks", "raw", "forecasts_March2024.csv")) |>
+    .d(method %in% c("bvar_ciss")) |> #remove Truth and IMF forecasts, and old BVAR
+    .d(, target := ifelse(var == "cpi", "pcpi_pch", "ngdp_rpch")) |>
+    .d(, var := NULL) |>
+    setnames("method", "source")
+} else {
+  bvar_qufcs_ciss <- NULL
+}
+
+ar_qufcs <- fcdat_ar
+
+bvar_qufcs <- rbind(bvar_qufcs, ar_qufcs) |>
+  rbind(bvar_qufcs_ciss)
 
 bvar_fc <- hordat[bvar_qufcs, on = c("target_year", "forecast_year", "season")] |>
   .d(!is.na(horizon)) |>
@@ -135,7 +232,9 @@ bvar_fc_ho <- bvar_fc |>
 
 ################################################################################
 #save data
-data.table::fwrite(benchmark_fc, here("benchmarks", paste0(global_file_prefix, "point_benchmarks_processed.csv")))
-data.table::fwrite(bvar_fc_train, here("benchmarks", paste0(global_file_prefix, "bvar_direct_quantile_forecasts.csv")))
+if(specs$cset == "base"){
+  data.table::fwrite(benchmark_fc, here("benchmarks", paste0(global_file_prefix, "point_benchmarks_processed.csv")))
+  data.table::fwrite(bvar_fc_train, here("benchmarks", paste0(global_file_prefix, "bvar_direct_quantile_forecasts.csv")))
+}
 data.table::fwrite(bvar_fc_ho, here("benchmarks", paste0(global_file_prefix, "bvar_direct_quantile_forecasts_ho.csv")))
 data.table::fwrite(weodat, here("data", paste0(global_file_prefix, "point_forecasts.csv")))

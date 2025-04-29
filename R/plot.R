@@ -475,6 +475,7 @@ coverage_plot_wgraylines <- function(
 
 
 #'@import scales
+#'#minusvalpos is for positioning (default is for 4 different models)
 coverage_plot_aggregate <- function(
     cvgdat_bysource,
     cvgdat_byhorcnt,
@@ -486,7 +487,8 @@ coverage_plot_aggregate <- function(
     metcolor = "Hokusai1",
     plot_title = NULL,
     textsize_y = 17,
-    font_family = "serif"){
+    font_family = "serif",
+    minusvalpos = 2.5){
 
   .d <- `[`
 
@@ -514,7 +516,7 @@ coverage_plot_aggregate <- function(
     .d(target == trgt) |>
     .d(order(source)) |>
     .d(, id := .GRP, by=source) |>
-    .d(, id := pilvl + (id-2.5)*0.01) |>
+    .d(, id := pilvl + (id-minusvalpos)*0.01) |>
     .d(, id := ifelse(pilvl == 0.8, id - 0.24, id))
 
 
@@ -535,7 +537,7 @@ coverage_plot_aggregate <- function(
     .d(, horizon := NULL) |>
     .d(order(source)) |>
     .d(, id := .GRP, by=source) |>
-    .d(, id := pilvl + (id-2.5)*0.01) |>
+    .d(, id := pilvl + (id-minusvalpos)*0.01) |>
     .d(, id := ifelse(pilvl == 0.8, id - 0.24, id))
 
   #return(indiv_coverage)

@@ -12,8 +12,8 @@ source(here("manuscript_plots", "wis_plots.R"))
 source(here("manuscript_plots", "coverage_plots.R"))
 
 #oecd truth version or "normal" (imf) truth
-#global_file_prefix <- "oecd_"
-global_file_prefix <- ""
+global_file_prefix <- "oecd_"
+#global_file_prefix <- ""
 
 
 splits <- c("", "directional", "ho")

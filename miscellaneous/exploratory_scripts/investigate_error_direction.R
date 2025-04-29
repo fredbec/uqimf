@@ -15,7 +15,7 @@ mydat <- qufcs |> .d(source == "IMF" & country == "USA" & horizon == 1.0 & quant
 
 
 pldat <- mydat |>
-  .d(method %in% c("rolling window", "leave-one-out")) |>
+  .d(method %in% c("rolling window")) |>
   .d(,.(country, target, horizon, quantile,prediction, target_year, error_method, method)) |>
   .d(, quantile := paste0("quant", quantile)) |>
   data.table::dcast(country + target + horizon + target_year + error_method + method~ quantile,

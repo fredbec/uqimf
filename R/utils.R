@@ -23,7 +23,7 @@ ci_to_quantiles <- function(ci_levels,
     qus <- ci_levels
   }
 
-  return(qus)
+  return(round(qus, 2))
 }
 
 
@@ -216,4 +216,98 @@ exclude_rows <- function(dt, instexcl) {
 
   # Return the filtered data.table
   return(dt[!condition])
+}
+
+
+make_ensemble <- function(data,
+                          summary_function = median,
+                          model_name = NULL,
+                          extra_excl = NULL,
+                          incl = NULL,
+                          strat = c("country", "error_method", "method", "quantile",
+                                    "horizon", "target", "target_year"),
+                          avail_threshold = NULL,
+                          old_call = FALSE){
+
+  #extract function name to make model name
+  if(is.null(model_name)){
+    model_name <- deparse(summary_function) |>
+      paste(collapse = " ") |>
+      (\(x) gsub(".*\"(.*)\".*", "\\1", x = x))() |>
+      paste0("_ensemble")
+  }
+
+
+  truthdat <- data |>
+    .d(, .SD, .SDcols = c(strat, "true_value")) |>
+    unique()
+
+      #Input checks
+  if(model_name %in% c("weighted.mean_ensemble", "weighted.median_ensemble") & is.null(data$weights)){
+    stop("can't compute weighted mean or median without weights")
+  }
+  if(model_name %in% c("median_ensemble", "mean_ensemble") & !is.null(data$weights)){
+    warning("There are weights in the data, but an unweighted summary function was chosen. Was this intended?")
+  }
+
+  #check if weights are alright
+  if(!is.null(data$weights)){
+
+    if(any(is.na(data$weights))){
+      stop("some weights are missing")
+    }
+
+    sum_weights <- data |>
+      select(source, target_type, location, forecast_date, weights) |>
+      distinct() |>
+      group_by(target_type, location, forecast_date) |>
+      summarise(weight_sum = round(sum(weights), digits = 3),
+                .groups = "drop") |>
+      select(weight_sum) |>
+      distinct() |>
+      pull()
+
+    if(length(sum_weights) > 1){
+      print(sum_weights)
+      message("At the level of one forecast instance, not all weights sum to the same value. Is this intended?")
+    } else if (round(sum_weights,3) != 1){
+      message("At the level of one forecast instance, weights do not sum to 1. Due to automatic correction,
+              this is not necessarily a problem - but check if this is intended")
+    }
+
+  }
+
+  #######make model vector based on incl/excl arguments#####
+
+  models <- incl
+
+  #check if any ensembles in models (this should in general not be the case)
+  is_ensemble <- grepl(".*ensemble.*", models)
+
+  if(any(is_ensemble)){
+    warning(paste0("There seems to be at least one ensemble (\"" ,
+                   paste(models[is_ensemble], collapse = "\", \""),
+                   "\") that is not in the list of excluded models. Is this intended?"))
+  }
+
+
+  #############make mean/median forecast################
+
+  ensemble <- data |>
+    .d(source %in% models) |>
+    .d(, .(ensemble_prediction = summary_function(prediction)), by = strat) |>
+    .d(, .SD, .SDcols = c(strat, "ensemble_prediction")) |>
+    setnames("ensemble_prediction", "prediction") |>
+    .d(, source := model_name) |>
+    .d(, .SD, .SDcols = c("source", strat, "prediction")) |>
+    .d(truthdat, on = strat)
+
+  ensemble[truthdat, on = strat]
+
+  if(!is.null(data$weights)){
+    data <- data |>
+      select(-weights)
+  }
+
+  return(ensemble)
 }

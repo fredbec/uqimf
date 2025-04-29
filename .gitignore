@@ -74,6 +74,8 @@ scores/alt_scores
 
 #meeting notes
 meeting_notes/
+miscellaneous/presentation/send_fabian
+msmsmiscellaneous
 
 #old simulation data
 simulations/results
@@ -123,3 +125,17 @@ data/real_time_publicationweodat.csv
 Instructions_MacroPI.tex
 Instructions_MacroPI.pdf
 directory.jpg
+
+
+#Extra WEO data for economy size
+WEOOct2024all.xls
+WEOeconomies.xls
+WEOeconomies.csv
+
+#old benchmark files 
+benchmarks/raw/forecasts_2025/old
+benchmarks/raw/forecasts_2025/fcsts_ar_2025/old
+old/fcsts_ar_2025/
+
+#old revision folder
+revision_plotstables/

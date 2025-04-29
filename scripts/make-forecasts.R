@@ -12,11 +12,16 @@ holdout_split <- specs$holdout_split
 window_length <- specs$window_length
 quantype <- specs$qutype
 
-cis <- specs$ci_levels_make
+if(specs$ciset == "extended"){
+  cis <- specs$ci_levels_make_extended
+} else {
+  cis <- specs$ci_levels_make
+}
 
 #make all combinations of settings
-combs <- data.table::fread(here("quantile_forecasts", "setting_combinations.csv"))
-
+combs <- data.table::fread(here("quantile_forecasts", paste0(specs$cset, "_setting_combinations.csv")))
+#combs <- data.table(source = rep("IMF",2), target = c("ngdp_rpch", "pcpi_pch"),
+#                    error_method = rep("absolute",2), method = rep("rolling window",2))
 
 fcdat <- data.table::fread(here("data", paste0(global_file_prefix, "point_forecasts.csv")))
 
@@ -25,6 +30,7 @@ qufcs <- lapply(1:nrow(combs),
   function(idxsub){
 
     setting <- combs[idxsub]
+
 
     start_year <- min_year + window_length
 
@@ -61,7 +67,7 @@ qufcs <- qufcs |>
   split(by = c("error_method", "holdout"))
 
 
-#then save data and do pava correction
+#then save data, do pava correction and make ensemble
 emptycontainer <- lapply(qufcs, function(dat){
 
   em_suffix <- unique(dat$error_method)
@@ -75,8 +81,18 @@ emptycontainer <- lapply(qufcs, function(dat){
   if(em_suffix == "absolute"){
     #pava correction for absolute forecasts
     dat <- dat |>
-      empFC_pava()
+      empFC_pava(ci_levels = cis)
 
+    if(cset == "base"){
+      ensdat <- dat |>
+        make_ensemble(summary_function = mean,
+                      incl = c("IMF", "ar", "bvar_const")) |>
+        .d(, error_prediction := NA) |>
+        .d(, error := NA) |>
+        .d(, imf_pp := NA)
+
+      dat <- rbind(dat, ensdat)
+    }
     data.table::fwrite(dat,
                        here("quantile_forecasts",
                             paste0(global_file_prefix, "quantile_forecasts",split_suffix, ".csv")))
@@ -86,6 +102,15 @@ emptycontainer <- lapply(qufcs, function(dat){
   } else if (em_suffix == "directional"){
 
     if(split_suffix == ""){
+      ensdat <- dat |>
+        make_ensemble(summary_function = mean,
+                      incl = c("IMF", "ar", "bvar")) |>
+        .d(, error_prediction := NA) |>
+        .d(, error := NA) |>
+        .d(, imf_pp := NA)
+
+      dat <- rbind(dat, ensdat)
+
       data.table::fwrite(dat,
                          here("quantile_forecasts",
                               paste0(global_file_prefix, "quantile_forecasts",split_suffix, "_", em_suffix, ".csv")))
