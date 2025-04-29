@@ -136,3 +136,6 @@ WEOeconomies.csv
 benchmarks/raw/forecasts_2025/old
 benchmarks/raw/forecasts_2025/fcsts_ar_2025/old
 old/fcsts_ar_2025/
+
+#old revision folder
+revision_plotstables/

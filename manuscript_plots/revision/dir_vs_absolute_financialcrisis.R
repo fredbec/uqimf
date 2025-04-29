@@ -71,4 +71,4 @@ annotate("text", x = -6, y = 6.175, label = "2008", size = 3, fill = "white", co
   annotate("text", x = -6, y = 1, label = "2009", size = 3, fill = "white", color = "black",family = "serif")+
   annotate("text", x = -6, y = 0.825, label = "2010", size = 3, fill = "white", color = "black",family = "serif")
 
-ggsave(here("revision_plotstables", paste0("financialcrisis", suffix, ".pdf")), width = 5, height = 5)
+ggsave(here("manuscript_plots", "revision", "results", paste0("financialcrisis", suffix, ".pdf")), width = 5, height = 5)

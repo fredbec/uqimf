@@ -115,4 +115,4 @@ plot2 <- ggplot() +
     legend.title=element_blank(),
     plot.margin = margin(t=10,b=10,r=10,l=10, unit = "pt"))# +
   #ggtitle("US, horizon Fall Next, Inflation")
-ggsave(here("revision_plotstables", paste0("dirvsabs_plotUSA", suffix, ".pdf")), plot2, width = 10, height = 5)
+ggsave(here("manuscript_plots", "revision", "results",  paste0("dirvsabs_plotUSA", suffix, ".pdf")), plot2, width = 10, height = 5)
