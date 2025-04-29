@@ -11,10 +11,16 @@ devtools::load_all()
 set.seed(2922)
 w <- 11
 
-ctry <- "FRA"
-tgt <- "pcpi_pch"
-yr <- 2022 #2019 for horizon 0 (keeps forecast year constant)
-hr <- 0.5
+#ctry <- "FRA"
+tgt <- "ngdp_rpch"
+plttitle <- "Forecast Interval Lengths, Forecast Years (I) 2019 and (II) 2021"
+yr <- 2019 #2019 for horizon 0 (keeps forecast year constant)
+hr <- 0
+
+#tgt <- "pcpi_pch"
+#plttitle <- "Forecast Interval Lengths, Forecast Years (I) 2022 and (II) 2023"
+#yr <- 2022 #2019 for horizon 0 (keeps forecast year constant) #2022 for inflation
+#hr <- 0.5
 rw <- 11
 
 getlinerangedat <- function(dat, xpos){
@@ -33,8 +39,8 @@ getlinerangedat <- function(dat, xpos){
 }
 
 makecovplot <- function(ctry, tgt, yr, hr, rw){
-  labelvec <- c("raw error\nvalues", "absolute\nerror values", "IMF",
-                "ARX-annual-\ndirect", "AR-\ndirect",
+  labelvec <- c("raw\nerrors", "absolute\nerrors", "IMF",
+                "ARX-\nannual-\ndirect", "AR-\ndirect",
                 "BVAR-\ndirect")
 
   fancycols <- met.brewer("Hokusai3", n = 4)
@@ -102,10 +108,10 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
       .d(, value := ifelse(type == 2, value, value + 1e-09))
 
     pos_imf <- ifelse(pos == 1, 3.2, 2.8)
-    pos_bvar <- ifelse(pos == 1, 6.2, 5.8)
-    pos_ar <- ifelse(pos == 1, 5.2, 4.8)
-    pos_tulip <- ifelse(pos == 1, 4.2, 3.8)
-    pos_arannual <- ifelse(pos == 1, 4.2, 3.8)
+    pos_bvar <- ifelse(pos == 1, 6.5, 6.1)
+    pos_ar <- ifelse(pos == 1, 5.5, 5.1)
+    pos_tulip <- ifelse(pos == 1, 4.5, 4.1)
+    pos_arannual <- ifelse(pos == 1, 4.5, 4.1)
 
 
     linerangedat_imf <- getlinerangedat(qufcs_imf, pos_imf) |>
@@ -134,7 +140,7 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
   val50 <- 0
   val80 <- 0
   ######################################NEXT YEAR#####################################
-  myres_next <- makedata(ctry = ctry, tgt = tgt, yr = yr + 1, hr = hr, rw = rw, pos = 1)
+  myres_next <- makedata(ctry = ctry, tgt = tgt, yr = yr + 2, hr = hr, rw = rw, pos = 1)
   nextyrerror <- myres_next$errordat
   nextyrdats <- myres_next$listdatsets
 
@@ -172,15 +178,17 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
   }
 
   ypos_lab <- ifelse(hr == 0,
-                     -2.25, -8)
+                     -2.25,
+                     ifelse(hr == 0.5, -4, -8))
   yminmax <- ifelse(hr == 0,
-                    2.75, 11.5)
+                    2.75,
+                    ifelse(hr == 0.5, 5, 11.5))
 
   #datasets <- list(linerangedat_imf, linerangedat_ar, linerangedat_bvar, linerangedat_tulip)
   #print(datasets)
   #print(nextyrdats)
   lrcols <- met.brewer("Hokusai2", 2)
-  rects <- data.frame(xstart = seq(1,6,1), xend = seq(1.4,6.4,1), col = "grey40")
+  rects <- data.frame(xstart = c(seq(1,3,1), seq(4.3, 6.3, 1)), xend = c(seq(1.4,3.4,1), seq(4.7, 6.7, 1)), col = "grey40")
   quantvis <- ggplot() +
     geom_point(aes(x = type, y = value), color = "grey65", data = errordat, size = 4, alpha = 0.5) +
     geom_point(aes(x = type, y = value), color = "grey65", data = nextyrerror, size = 4, alpha = 0.5) +
@@ -262,7 +270,7 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
     #) +
     #geom_point(aes(x = type, y = pointval), data = pointdat, color = lrcols[2], size = 1.5, pch = 23) +
     scale_y_continuous(limits = c(-yminmax, yminmax)) + #c(-11.5, 11.5) for horizon 1, c(-3.75, 3.75) for horizon 0
-    scale_x_continuous(breaks = c(1,2,3,4,5,6),
+    scale_x_continuous(breaks = c(1,2,3,4.35,5.35,6.35),
                        labels = labelvec,
                        limits = c(0.55, 6.8)) +
     ylab("") +
@@ -270,30 +278,30 @@ makecovplot <- function(ctry, tgt, yr, hr, rw){
     annotate("label", x = 0.8, y = ypos_lab, label = "I", size = 5, fill = "white", color = "black",family = "serif") + #ypos_lab for hor 1
     annotate("label", x = 1.8, y = ypos_lab, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
     annotate("label", x = 2.8, y = ypos_lab, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 3.8, y = ypos_lab, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 4.8, y = ypos_lab, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 5.8, y = ypos_lab, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 4.1, y = ypos_lab, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 5.1, y = ypos_lab, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 6.1, y = ypos_lab, label = "I", size = 5, fill = "white", color = "black",family = "serif")+
     annotate("label", x = 1.2, y = ypos_lab, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
     annotate("label", x = 2.2, y = ypos_lab, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
     annotate("label", x = 3.2, y = ypos_lab, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 4.2, y = ypos_lab, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 5.2, y = ypos_lab, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
-    annotate("label", x = 6.2, y = ypos_lab, label = "II", size = 5, fill = "white", color = "black",family = "serif")
+    annotate("label", x = 4.5, y = ypos_lab, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 5.5, y = ypos_lab, label = "II", size = 5, fill = "white", color = "black",family = "serif")+
+    annotate("label", x = 6.5, y = ypos_lab, label = "II", size = 5, fill = "white", color = "black",family = "serif")
   return(quantvis)
 }
 
 plot_de <- makecovplot(ctry = "DEU", tgt = tgt, yr = yr, hr = hr, rw = rw) +
-  ggtitle("Inflation, Germany")
+  ggtitle("GDP growth, Germany")
 plot_fr <- makecovplot(ctry = "FRA", tgt = tgt, yr = yr, hr = hr, rw = rw)+
-  ggtitle("Inflation, France")
+  ggtitle("GDP growth, France")
 plot_it <- makecovplot(ctry = "ITA", tgt = tgt, yr = yr, hr = hr, rw = rw)+
-  ggtitle("Inflation, Italy")
+  ggtitle("GDP growth, Italy")
 plot_ca <- makecovplot(ctry = "CAN", tgt = tgt, yr = yr, hr = hr, rw = rw)+
-  ggtitle("Inflation, Canada")
+  ggtitle("GDP growth, Canada")
 plot_us <- makecovplot(ctry = "USA", tgt = tgt, yr = yr, hr = hr, rw = rw)+
-  ggtitle("Inflation, USA")
+  ggtitle("GDP growth, USA")
 plot_uk <- makecovplot(ctry = "GBR", tgt = tgt, yr = yr, hr = hr, rw = rw)+
-  ggtitle("Inflation, United Kingdom")
+  ggtitle("GDP growth, United Kingdom")
 
 subtit <- ifelse(hr == 0,
                  "Horizon: Fall, Current",
@@ -306,14 +314,14 @@ ovrplot <- (plot_de + plot_ca) /
   (plot_fr + plot_us) /
   (plot_it + plot_uk) +
   plot_annotation(
-    title = "Forecast Interval Lengths, Forecast Years (I) 2022 and (II) 2023",
+    title = plttitle,
     subtitle = subtit,
     theme = theme(
-      plot.title = element_text(hjust = 0.5, size = 18, face = "bold"),
-      plot.subtitle = element_text(hjust = 0.5, size = 16, face = "bold")
+      plot.title = element_text(hjust = 0.5, size = 18, face = "bold", family = "serif"),
+      plot.subtitle = element_text(hjust = 0.5, size = 16, face = "bold", family = "serif")
     )
   )
 
-ggsave(here("revision_plotstables", paste0("illustration_cov19_corr", "_hor", hr, "arxann_final_cpi.pdf")), ovrplot, width = 10, height = 12.5)
+ggsave(here("revision_plotstables", paste0("illustration_cov19_corr", "_hor", hr, "arxann.pdf")), ovrplot, width = 10, height = 12.5)
 
 
