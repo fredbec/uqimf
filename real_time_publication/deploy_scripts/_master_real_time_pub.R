@@ -11,7 +11,16 @@ devtools::load_all()
 ready_to_publish <- FALSE
 publish_dest <- here("..", "MacroPI")
 
-download_data <- TRUE
+download_data <- FALSE
+
+cset <- "base"
+
+#to determine current year and season
+cyear <- format(Sys.Date(), "%Y") |> as.numeric()
+cday <- format(Sys.Date(), "%j") |> as.numeric()
+#set April 10 and October 10 as first days to check for new release
+cseason <- ifelse(cday > 100 & cday < 283, "S", "F")
+cyear <- ifelse(cday < 100, cyear - 1, cyear)
 
 
 #folder to save forecasts into
@@ -23,11 +32,33 @@ tv_release <- specs$tv_release
 
 
 if(download_data){
-  source(here("scripts", "download-data.R"))
+  #source(here("scripts", "download-data.R"))
+  source(here("real_time_publication", "deploy_scripts", "download_new_weo.R"))
 }
 source(here("scripts", "process-weo.R"))
-weodat <- fread(here(location_download, "weodat.csv"))
+hist_weodat <- fread(here(location_download, "weodat.csv"))
+#write as preprocess
+data.table::fwrite(hist_weodat, here(location_download, "weodat_preprocess.csv"))
+
+#this is just quick and dirty for now, move all of this to an external script
+#and keep a proper database incl. log
+hist_weodat <- fread(here(location_download, "weodat_preprocess.csv"))
+c_weodat_truth <- fread(here(location_download, paste0("weodat_truth", cseason, cyear, ".csv"))) |>
+  setnames("tv_1", "new_tv_1") |>
+  setnames("tv_0.5", "new_tv_0.5")
+
+#update with new truth data
+hist_weodat <- c_weodat_truth[hist_weodat, on = c("country", "target", "target_year")] |>
+  .d(target_year == (cyear-1), tv_1 := ifelse(is.na(tv_1), new_tv_1)) |>
+  .d(target_year == (cyear-1), tv_0.5 := ifelse(is.na(tv_0.5), new_tv_0.5)) |>
+  .d(, new_tv_1 := NULL) |>
+  .d(, new_tv_0.5 := NULL)
+c_weodat_fcsts <- fread(here(location_download, paste0("weodat_fcsts", cseason, cyear, ".csv")))
+
+weodat <- rbind(hist_weodat, c_weodat_fcsts)
 current_yr_season <- get_current_year_season(weodat)
+
+data.table::fwrite(weodat, here(location_download, "weodat_preprocess.csv"))
 
 #process further (change row order, change some column names)
 source(here("real_time_publication", "deploy_scripts", "process_weo_real_time_pub.R"))

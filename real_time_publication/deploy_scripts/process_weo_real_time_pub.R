@@ -3,7 +3,7 @@ flag_imputetv05as1 <- specs$flag_imputetv05as1
 ###############################################################################
 #extract truth values from WEO forecasts
 truth <- data.table::fread(
-  here(location_download, "weodat.csv")
+  here(location_download, "weodat_preprocess.csv")
 ) |>
   .d(, .(country, target, target_year, tv_0.5, tv_1, tv_1.5, tv_2))
 
@@ -23,7 +23,7 @@ truth <- truth |>
 
 
 #read in WEO forecasts
-weodat <- fread(here(location_download, "weodat.csv")) |>
+weodat <- fread(here(location_download, "weodat_preprocess.csv")) |>
   .d(, source := "IMF") |>
   .d(order(source, target, country, forecast_year, horizon)) |>
   split(by = c("source")) |>
