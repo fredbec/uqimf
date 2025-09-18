@@ -16,20 +16,28 @@ dm_test <- function(loss1, loss2){
   # regression of d on intercept
   fit <- lm(d~1)
   # robust standard error
-  s <- NeweyWest(fit) |> unname() |> sqrt() |> as.numeric()
+  s <- NeweyWest(fit, prewhite = TRUE) |> unname() |> sqrt() |> as.numeric()
+  #variance for s3tilde
+  std_var <- sum(fit$residuals^2) / (length(loss1)-1)
+  s_var <- sqrt(std_var / (length(loss1)))
   # t statistic
   # t > 0 indicates that model 2 is better
   # t < 0 indicates that model 1 is better
   t <- m/s
+  t_var <- m/s_var
   # p-value (two-sided)
   p <- 2*pnorm(-abs(t))
+  p_2 <- 2*pt(-abs(t_var),10)
   # lag length used by estimator
-  k <- bwNeweyWest(fit)
+  k <- bwNeweyWest(fit, prewhite = TRUE)
   # output
-  list(t_stat = t, p_val = p, bandwidth = k)
+  list(t_stat = t, p_val = p, bandwidth = k,
+       t_stat_s3tilde = t_var, p_val_s3tilde = p_2)
 }
 
-dm_dat <- vector(mode = "list", length = 8)
+dm_dat <- vector(mode = "list", length = 24)
+
+dm_acf <- vector(mode = "list", length = 24)
 i <- 0
 
 combs_methods <- data.table::CJ(hr = c(0, 0.5, 1, 1.5),
@@ -85,8 +93,31 @@ for(i in 1:nrow(combs_methods)){
                             target = curr_tgt,
                             tstat = dm_res$t_stat,
                             p_val = dm_res$p_val,
-                            bandwidth = dm_res$bandwidth)
+                            bandwidth = dm_res$bandwidth,
+                            tstat_s3tilde = dm_res$t_stat_s3tilde,
+                            p_val_s3tilde = dm_res$p_val_s3tilde)
+
+  #for additional visual diagnostics (investigate negative/positive autocorrelation)
+  dm_acf[[i]] <- vector(mode = "list", length = 2)
+  dm_acf[[i]][[1]] <- acf((loss_mod1-loss_mod2), plot = FALSE)
+  plottgt <- ifelse(curr_tgt == "pcpi_pch", "Inf.", "GDP")
+  dm_acf[[i]][[2]] <- paste0(plottgt,", ", curr_mod2, ", hor. ", curr_hr)
 }
 
 dm_dat <- rbindlist(dm_dat)
 data.table::fwrite(dm_dat, here("manuscript_plots", "revision", "results", "dm_test_results_wis.csv"))
+
+
+#Save acf plots
+pdf(here("manuscript_plots", "revision", "results", "acf_lossdifferentials_ngdp_rpch.pdf"), width = 8, height = 6)
+par(mfrow = c(3, 4), cex.main = 0.85)
+for (k in c(1:3, 7:9, 13:15, 19:21)) {
+  plot(dm_acf[[k]][[1]], main = dm_acf[[k]][[2]])
+}
+dev.off()
+pdf(here("manuscript_plots", "revision", "results", "acf_lossdifferentials_pcpi_pch.pdf"), width = 8, height = 6)
+par(mfrow = c(3, 4), cex.main = 0.85)
+for (k in c(4:6, 10:12, 16:18, 22:24)) {
+  plot(dm_acf[[k]][[1]], main = dm_acf[[k]][[2]])
+}
+dev.off()
