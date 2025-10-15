@@ -1,5 +1,6 @@
 library(here)
 library(data.table)
+library(MetBrewer)
 devtools::load_all()
 
 source(here("specs", "specs.R"))
@@ -12,7 +13,7 @@ score_min_year <- specs$score_min_year
 tv_release <- specs$tv_release
 window_length <- specs$window_length
 
-imf_fc <- fread(here("quantile_forecasts", "quantile_forecasts_pava.csv")) |>
+imf_fc <- fread(here("quantile_forecasts", "quantile_forecasts_ho.csv")) |>
   .d(target_year == 2023) |>
   .d(source == "IMF") |>
   .d(target == "ngdp_rpch") |>
@@ -107,7 +108,8 @@ if(FALSE){
 }
 
 
-pdf(file = here("presentation", "figures", "horizon_uncc_germany2023_current.pdf"), width = 5, height = 3.35)
+#pdf(file = here("presentation", "figures", "horizon_uncc_germany2023_current.pdf"), width = 5, height = 3.35)
+pdf(file = here("horizon_uncc_germany2023_current.pdf"), width = 5, height = 3.35)
 ggplot(aes(x = target_year, group = target, color = target), data = imf_fc) +
   geom_linerange(
     aes(x = target_year,
