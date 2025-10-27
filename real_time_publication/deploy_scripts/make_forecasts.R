@@ -40,7 +40,8 @@ qufcs_pcpi <- make_qufcs(weodat,
                          current_yr_season) |>
   apply_pava_and_clean(error_method = emethod,
                        method = rmethod,
-                       current_yr_season = current_yr_season)
+                       current_yr_season = current_yr_season) |>
+  .d(, prediction := round(prediction, 3))
 
 
 qufcs_ngdp <- make_qufcs(weodat,
@@ -57,7 +58,8 @@ qufcs_ngdp <- make_qufcs(weodat,
   #add in placeholder
   apply_pava_and_clean(error_method = emethod,
                        method = rmethod,
-                       current_yr_season = current_yr_season)
+                       current_yr_season = current_yr_season) |>
+  .d(, prediction := round(prediction, 3))
 
 
 full_qufcs <- rbind(qufcs_pcpi, qufcs_ngdp)

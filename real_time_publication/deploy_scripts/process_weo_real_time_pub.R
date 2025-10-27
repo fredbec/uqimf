@@ -33,6 +33,8 @@ weodat <- fread(here(location_download, "weodat_preprocess.csv")) |>
   rbindlist(idcol = "source") |>
   .d(, .(source, target, country, forecast_year, horizon, target_year,
          prediction, get(paste0("tv_", tv_release)))) |>
-  setnames("V8", paste0("tv_", tv_release))
+  setnames("V8", paste0("tv_", tv_release)) |>
+  .d(, prediction := round(prediction, 3)) |>
+  .d(, tv_1 := round(tv_1, 3))
 
 data.table::fwrite(weodat, here(location_download, paste0("weodat.csv")))
