@@ -33,7 +33,7 @@ tv_release <- specs$tv_release
 
 if(download_data){
   #source(here("scripts", "download-data.R"))
-  source(here("real_time_publication", "deploy_scripts", "download_new_weo.R"))
+  source(here("real_time_publication", "deploy_scripts", "download_weo_postF25.R"))
 }
 source(here("scripts", "process-weo.R"))
 hist_weodat <- fread(here(location_download, "weodat.csv"))
@@ -56,7 +56,7 @@ hist_weodat <- c_weodat_truth[hist_weodat, on = c("country", "target", "target_y
 c_weodat_fcsts <- fread(here(location_download, paste0("weodat_fcsts", cseason, cyear, ".csv")))
 
 weodat <- rbind(hist_weodat, c_weodat_fcsts)
-current_yr_season <- get_current_year_season(weodat)
+current_yr_season <- get_current_year_season(weodat) #for file names
 
 data.table::fwrite(weodat, here(location_download, "weodat_preprocess.csv"))
 
