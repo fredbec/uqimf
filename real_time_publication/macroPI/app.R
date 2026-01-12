@@ -18,7 +18,7 @@ release_year <- ifelse(cmonth < 4, cyear - 1, cyear)
 release <- paste0(release_season, release_year)
 release_title <- paste(release_season, release_year)
 
-localrun <- TRUE
+localrun <- FALSE
 
 
 stepback <- tryCatch({
@@ -28,7 +28,7 @@ stepback <- tryCatch({
   }
 
   else {
-    read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/forecasts/forecasts_", release, ".csv"))
+    read.csv(paste0("https://raw.githubusercontent.com/KITmetricslab/MacroPI/main/forecasts/forecasts_", release, ".csv"))
   }
 
   FALSE
@@ -62,10 +62,10 @@ ui <- fluidPage(
 
            # Output: Tabset w/ plot, summary, and table ----
            tabsetPanel(type = "tabs",
-                       tabPanel(paste0(release_title, " Forecasts - Inflation"), plotOutput(outputId = "allcplot_inflation",
-                                                   height = 1000, width = 1000)),
-                       tabPanel(paste0(release_title, " Forecasts - GDP Growth"), plotOutput(outputId = "allcplot_gdp",
-                                                      height = 1000, width = 1000))
+                       tabPanel(paste0(release_title, " Forecast Intervals - Inflation"), plotOutput(outputId = "allcplot_inflation",
+                                                                                            height = 1000, width = 1000)),
+                       tabPanel(paste0(release_title, " Forecasts Intervals - GDP Growth"), plotOutput(outputId = "allcplot_gdp",
+                                                                                             height = 1000, width = 1000))
            )
     )
   )
@@ -206,7 +206,7 @@ server <- function(input, output) {
       ) +
 
       geom_line(
-        aes(x = target_year, y = prediction, linetype = "Projection"),
+        aes(x = target_year, y = prediction, linetype = "Forecast"),
         color = colorscale[plot_country],
         data = future_realized |> .d(country == plot_country)
       ) +
@@ -238,34 +238,33 @@ server <- function(input, output) {
                          values = c("IMF Point Forecast" = 19),
                          guide = guide_legend(override.aes = list(color = "grey30") )) +
       scale_linetype_manual(name = "LEGEND",
-                         breaks = c("Realized Series", "Projection"),
-                         values = c("Realized Series" = "solid", "Projection" = "dashed"),
-                         guide = guide_legend(override.aes = list(color = "grey30") ))
+                            breaks = c("Realized Series", "Forecast"),
+                            values = c("Realized Series" = "solid", "Forecast" = "dashed"),
+                            guide = guide_legend(override.aes = list(color = "grey30") )) +
+      guides(linetype = "none")
 
   }
 
   #######################################Global Settings####################################
 
-  patchwork_layout <-
-    "112333
-    445566
-    778899"
 
   displaytext <-  function(targetlabel){
-    return(paste(paste0("This site contains distributional forecasts for ", targetlabel, " in the"),
-                         "format of prediction intervals, for G7 countries and current and next",
-                         "year's target",
-                         "",
-                         "Our distributional forecasts are constructed around the current IMF",
-                         "point forecasts and the methodology to create them is based on past",
-                         "IMF point forecast errors.",
-                         "",
-                         "Our forecasts are publicly available and documented in the following",
-                         "Github repository: https://github.com/KITmetricslab/MacroPI/ ",
-                         "",
-                         "Please note that this project is not affiliated with or endorsed",
-                         "by the IMF.",
-                         sep = "\n"))
+    return(paste("This site contains distributional forecasts for ",
+                 paste0(targetlabel, " in the format of forecast intervals"),
+                 "for G7 countries and current and next year.",
+                 "",
+                 "Our distributional forecasts are constructed",
+                 "around the current IMF point forecasts and the",
+                 "methodology to create them is based on past",
+                 "IMF point forecast errors.",
+                 "",
+                 "Our forecasts are publicly available and docu-",
+                 "mented in the following Github repository:",
+                 "https://github.com/KITmetricslab/MacroPI/ ",
+                 "",
+                 "Please note that this project is not affiliated",
+                 "with or endorsed by the IMF.",
+                 sep = "\n"))
   }
 
   if(localrun){
@@ -277,11 +276,11 @@ server <- function(input, output) {
     point_fcs <- data.table::fread(  here("real_time_publication", "imf-data", paste0("pointforecasts_", release, ".csv"))) |>
       setDT()
   } else {
-    qufcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/forecasts/forecasts_", release, ".csv")) |>
+    qufcs <- read.csv(paste0("https://raw.githubusercontent.com/KITmetricslab/MacroPI/main/forecasts/forecasts_", release, ".csv")) |>
       setDT()
-    realized_vals <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/imf-data/historicvalues_", release, ".csv"))|>
+    realized_vals <- read.csv(paste0("https://raw.githubusercontent.com/KITmetricslab/MacroPI/main/imf-data/historicvalues_", release, ".csv"))|>
       setDT()
-    point_fcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/imf-data/pointforecasts_", release, ".csv"))|>
+    point_fcs <- read.csv(paste0("https://raw.githubusercontent.com/KITmetricslab/MacroPI/main/imf-data/pointforecasts_", release, ".csv"))|>
       setDT()
   }
 
@@ -320,7 +319,7 @@ server <- function(input, output) {
                            copy() |>
                            setnames("true_value", "prediction") |>
                            .d(target_year >= release_year - 1)
-                         )
+    )
 
     labeldat_80_cy <- linerange_dat |>
       copy() |>
@@ -330,7 +329,7 @@ server <- function(input, output) {
       dcast(country + target ~ target_year, value.var = c("quantile0.1", "quantile0.9")) |>
       .d(, x :=  release_year - 4.55) |>
       .d(, y := ylimmax - 1.85) |>
-      .d(, label := paste0("80% Prediction Interval:", "\n", release_year, ": ", get(paste0("quantile0.1_", release_year)), "% to ", get(paste0("quantile0.9_", release_year)) , "%", "\n",
+      .d(, label := paste0("80% Forecast Interval:", "\n", release_year, ": ", get(paste0("quantile0.1_", release_year)), "% to ", get(paste0("quantile0.9_", release_year)) , "%", "\n",
                            release_year+1, ": ", get(paste0("quantile0.1_", release_year+1)), "% to ", get(paste0("quantile0.9_", release_year+1)) , "%"))
     ###########################################################################
 
@@ -342,14 +341,16 @@ server <- function(input, output) {
     text3 <- grid::textGrob(label = displaytext(textlabel),
                             x = unit(0.10, "npc"),
                             hjust = 0)
-    plotlist[[7]]
+    combined_plot <-
+      (plotlist[[1]] | text2 | text3) /
+      (plotlist[[2]] | plotlist[[3]] | plotlist[[4]]) /
+      (plotlist[[5]] | plotlist[[6]] | plotlist[[7]]) +
+      plot_layout(
+        guides = "collect"
+      ) +
+      plot_annotation(theme = theme(legend.position = "none"))
 
-
-
-    plotlist[[2]] + text2 + text3 + plotlist[[1]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+
-      plot_layout(guides = "collect",
-                  design = patchwork_layout) &
-      theme(legend.position='none')
+    combined_plot
   })
 
   output$allcplot_inflation <- renderPlot(
@@ -392,7 +393,7 @@ server <- function(input, output) {
       dcast(country + target ~ target_year, value.var = c("quantile0.1", "quantile0.9")) |>
       .d(, x :=  release_year - 4.55) |>
       .d(, y := ylimmax - 7.25) |>
-      .d(, label := paste0("80% Prediction Interval:", "\n", release_year, ": ", get(paste0("quantile0.1_", release_year)), "% to ", get(paste0("quantile0.9_", release_year)) , "%", "\n",
+      .d(, label := paste0("80% Forecast Interval:", "\n", release_year, ": ", get(paste0("quantile0.1_", release_year)), "% to ", get(paste0("quantile0.9_", release_year)) , "%", "\n",
                            release_year+1, ": ", get(paste0("quantile0.1_", release_year+1)), "% to ", get(paste0("quantile0.9_", release_year+1)) , "%"))
     ###########################################################################
 
@@ -406,10 +407,17 @@ server <- function(input, output) {
     text3 <- grid::textGrob(label = displaytext(textlabel),
                             x = unit(0.10, "npc"),
                             hjust = 0)
-    plotlist[[2]] + text2 + text3 + plotlist[[1]] + plotlist[[3]] + plotlist[[4]] + plotlist[[5]] + plotlist[[6]] + plotlist[[7]]+
-      plot_layout(guides = "collect",
-                  design = patchwork_layout) &
-      theme(legend.position='none')
+    combined_plot <-
+      (plotlist[[1]] | text2 | text3) /
+      (plotlist[[2]] | plotlist[[3]] | plotlist[[4]]) /
+      (plotlist[[5]] | plotlist[[6]] | plotlist[[7]]) +
+      plot_layout(
+        guides = "collect"
+      ) +
+      plot_annotation(theme = theme(legend.position = "none"))
+
+
+    combined_plot
   })
 
 
