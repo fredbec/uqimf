@@ -51,7 +51,7 @@ if(stepback){
 ui <- fluidPage(
 
   # App title ----
-  titlePanel("Simple Macroeconomic Forecast Distributions"),
+  titlePanel("Simple Macroeconomic Forecast Distributions for the G7 Economies"),
 
 
 
