@@ -14,7 +14,7 @@ qus <- c(0.1, 0.25, 0.75, 0.9)
 ####setting current year and season. This is done by checking the currently
 ####downloaded WEO forecast data based on the repo structure used. Feel free
 ####to set these manually, as you see fit
-weodat <- fread(here(location_download, "weodat.csv"))
+weodat <- fread(here(location_save, paste0("weodat_", cseason, cyear, ".csv")))
 
 window_length <- specs$window_length
 emethod <- specs$error_method

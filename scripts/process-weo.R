@@ -24,4 +24,4 @@ weodat <- weodat |>
   setnames("ISOAlpha_3Code", "country")
 
 
-data.table::fwrite(weodat, here(location_download, "weodat.csv"))
+data.table::fwrite(weodat, here(location_save, "weodat.csv"))

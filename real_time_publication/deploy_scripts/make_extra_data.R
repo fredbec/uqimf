@@ -12,7 +12,7 @@ cis <- specs$ci_levels_eval
 qus <- specs$qu_levels
 vis_begin_yr <- current_yr_season$forecast_year - 8
 
-weodat <- fread(here(location_download, "weodat.csv")) |>
+weodat <- fread(here(location_save, paste0("weodat_", cseason, cyear, ".csv"))) |>
   data.table::setnames(paste0("tv_", tv_release), "true_value")
 
 realized_vals <- weodat |>

@@ -3,13 +3,13 @@ flag_imputetv05as1 <- specs$flag_imputetv05as1
 ###############################################################################
 #extract truth values from WEO forecasts
 truth <- data.table::fread(
-  here(location_download, "weodat_preprocess.csv")
+  here(location_save, paste0("weodat_preprocess_", cseason, cyear, ".csv"))
 ) |>
   .d(, .(country, target, target_year, tv_0.5, tv_1, tv_1.5, tv_2))
 
 
 if(flag_imputetv05as1){
-  cyear <- format(Sys.Date(), "%Y") |> as.numeric()
+  #cyear <- format(Sys.Date(), "%Y") |> as.numeric()
 
   truth <- truth |>
     copy() |>
@@ -23,7 +23,7 @@ truth <- truth |>
 
 
 #read in WEO forecasts
-weodat <- fread(here(location_download, "weodat_preprocess.csv")) |>
+weodat <- fread(here(location_save, paste0("weodat_preprocess_", cseason, cyear, ".csv"))) |>
   .d(, source := "IMF") |>
   .d(order(source, target, country, forecast_year, horizon)) |>
   split(by = c("source")) |>
@@ -37,4 +37,4 @@ weodat <- fread(here(location_download, "weodat_preprocess.csv")) |>
   .d(, prediction := round(prediction, 3)) |>
   .d(, tv_1 := round(tv_1, 3))
 
-data.table::fwrite(weodat, here(location_download, paste0("weodat.csv")))
+data.table::fwrite(weodat, here(location_save, paste0("weodat_", cseason, cyear, ".csv")))
