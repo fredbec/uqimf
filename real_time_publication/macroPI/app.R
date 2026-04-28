@@ -24,7 +24,7 @@ localrun <- TRUE
 stepback <- tryCatch({
   # Attempt to read the file from the URL
   if(localrun){
-    data.table::fread(here("real_time_publication", "forecasts", paste0("forecasts_", release, ".csv")))
+    data.table::fread(paste0("forecasts_", release, ".csv"))
   }
 
   else {
@@ -270,11 +270,11 @@ server <- function(input, output) {
 
   if(localrun){
 
-    qufcs <- data.table::fread(here("real_time_publication", "forecasts", paste0("forecasts_", release, ".csv"))) |>
+    qufcs <- data.table::fread(paste0("forecasts_", release, ".csv")) |>
       setDT()
-    realized_vals <- data.table::fread(here("real_time_publication", "imf-data", paste0("historicvalues_", release, ".csv"))) |>
+    realized_vals <- data.table::fread(paste0("historicvalues_", release, ".csv")) |>
       setDT()
-    point_fcs <- data.table::fread(  here("real_time_publication", "imf-data", paste0("pointforecasts_", release, ".csv"))) |>
+    point_fcs <- data.table::fread(paste0("pointforecasts_", release, ".csv")) |>
       setDT()
   } else {
     qufcs <- read.csv(paste0("https://raw.githubusercontent.com/MacroPrediction/MacroPI/main/forecasts/forecasts_", release, ".csv")) |>
