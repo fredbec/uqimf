@@ -31,6 +31,7 @@ for (tgt in c("ngdp_rpch", "pcpi_pch")) {
   Fall25_truth[country == "FRA" & target == tgt & target_year == 2024, tv_1 := gbr_val]
 
 }
+setorder(Fall25_truth, target, country, target_year)
 fwrite(Fall25_truth, here(location_download, paste0("weodat_truth", cseason, cyear, ".csv")))
 
 
@@ -63,6 +64,7 @@ for (tgt in c("ngdp_rpch", "pcpi_pch")) {
   Fall25_fcsts[country == "FRA" & target == tgt & target_year == 2026, prediction := gbr_val_26]
 
 }
+setorder(Fall25_fcsts, target, country, target_year)
 fwrite(Fall25_fcsts, here(location_download, paste0("weodat_fcsts", cseason, cyear, ".csv")))
 
 
@@ -87,6 +89,7 @@ for (tgt in c("ngdp_rpch", "pcpi_pch")) {
   Spring26_truth[country == "FRA" & target == tgt & target_year == 2025, tv_0.5 := gbr_val]
 
 }
+setorder(Spring26_truth, target, country, target_year)
 fwrite(Spring26_truth, here(location_download, paste0("weodat_truth", cseason, cyear, ".csv")))
 
 
@@ -119,4 +122,5 @@ for (tgt in c("ngdp_rpch", "pcpi_pch")) {
   Spring26_fcsts[country == "FRA" & target == tgt & target_year == 2027, prediction := gbr_val_27]
 
 }
+setorder(Spring26_fcsts, target, country, target_year)
 fwrite(Spring26_fcsts, here(location_download, paste0("weodat_fcsts", cseason, cyear, ".csv")))
