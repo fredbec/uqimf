@@ -6,7 +6,7 @@ library(here)
 DT <- `[`
 
 #list of countries to download (G7)
-countries <- c("CAN", "DEU", "GBR", "FRA", "ITA", "JPN", "USA")
+countries <- c("CAN", "DEU", "FRA", "GBR", "ITA", "JPN", "USA")
 #transform for URL
 cget <- paste(countries, collapse = "+")
 startyr <- 1990 #don't need this many years, but can't hurt to have the data
